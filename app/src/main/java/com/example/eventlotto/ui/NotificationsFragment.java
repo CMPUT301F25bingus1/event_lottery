@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.tabs.TabLayout;
+
 import com.example.eventlotto.R;
 import com.example.eventlotto.notifications.FollowedEvent;
 import com.example.eventlotto.notifications.NotificationsAdapter;
@@ -20,6 +22,9 @@ import java.util.List;
 
 public class NotificationsFragment extends Fragment {
 
+    private final List<FollowedEvent> allEvents = new ArrayList<>();
+    private NotificationsAdapter adapter;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -27,16 +32,44 @@ public class NotificationsFragment extends Fragment {
         RecyclerView rv= root.findViewById(R.id.notificationsRecycler);
         rv.setLayoutManager(new LinearLayoutManager(requireContext()));
 
+        allEvents.clear();
+        allEvents.addAll(createMockEvents()); //TODO: implement actual event logic here
 
-        List<FollowedEvent> all = createMockEvents(); // TODO: Following or All logic
-        List<FollowedEvent> openOnly = new ArrayList<>();
-        for (FollowedEvent e : all) {
-            if (!e.isClosed()) openOnly.add(e);
-        }
+        TabLayout tabs = root.findViewById(R.id.tabFilter);
+        tabs.addTab(tabs.newTab().setText(R.string.tab_following));
+        tabs.addTab(tabs.newTab().setText(R.string.tab_all));
 
-        NotificationsAdapter adapter = new NotificationsAdapter(openOnly);
+        adapter = new NotificationsAdapter(new ArrayList<>(), (event, position) -> {
+            applyFilter(tabs.getSelectedTabPosition());
+        });
         rv.setAdapter(adapter);
+
+        //Default tab is Following
+        tabs.selectTab(tabs.getTabAt(0));
+        applyFilter(0);
+
+        tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                applyFilter(tab.getPosition());
+            }
+
+            @Override public void onTabUnselected(TabLayout.Tab tab) { }
+            @Override public void onTabReselected(TabLayout.Tab tab) { }
+        });
         return root;
+    }
+
+    private void applyFilter(int tabPosition) {
+        List<FollowedEvent> filtered = new ArrayList<>();
+        if (tabPosition== 0) { // Following
+            for (FollowedEvent e : allEvents) {
+                if (e.isNotificationsEnabled()) filtered.add(e);
+            }
+        } else { // All
+            filtered.addAll(allEvents);
+        }
+        adapter.setItems(filtered);
     }
 
     private List<FollowedEvent> createMockEvents() { // Mockups

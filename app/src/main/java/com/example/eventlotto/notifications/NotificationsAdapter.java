@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.eventlotto.R;
@@ -15,10 +16,16 @@ import java.util.List;
 
 public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdapter.VH> {
 
-    private final List<FollowedEvent> items;
+    public interface Listener {
+        void onNotificationToggle(FollowedEvent event, int position);
+    }
 
-    public NotificationsAdapter(List<FollowedEvent> items) {
+    private final List<FollowedEvent> items;
+    @Nullable private final Listener listener;
+
+    public NotificationsAdapter(List<FollowedEvent> items, @Nullable Listener listener) {
         this.items = items;
+        this.listener = listener;
     }
 
     @NonNull
@@ -47,6 +54,20 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         }
     }
 
+    private static int statusBgRes(FollowedEvent.Status s) {
+        switch (s) {
+            case ACCEPTED: return R.drawable.bg_status_accepted;
+            case WAITING: return R.drawable.bg_status_waiting;
+            default: return R.drawable.bg_status_not_chosen;
+        }
+    }
+
+    public void setItems(List<FollowedEvent> newItems) {
+        items.clear();
+        items.addAll(newItems);
+        notifyDataSetChanged();
+    }
+
     static class VH extends RecyclerView.ViewHolder {
         final ImageView iconNotify;
         final ImageView imageEvent;
@@ -68,14 +89,26 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
             textDescription.setText(e.getDescription());
             imageEvent.setImageResource(e.getImageResId());
             textStatus.setText(statusTextRes(e.getStatus()));
-            iconNotify.setImageResource(e.isNotificationsEnabled()
+            textStatus.setBackgroundResource(statusBgRes(e.getStatus()));
+
+            iconNotify.setImageResource(e.isNotificationsEnabled() //toggle between on and off
                     ? R.drawable.notification_on
                     : R.drawable.notification_off);
+
             iconNotify.setOnClickListener(v -> {
-                e.setNotificationsEnabled(!e.isNotificationsEnabled());
-                // Update only this item
+                e.setNotificationsEnabled(!e.isNotificationsEnabled()); //flip boolean
                 RecyclerView.Adapter<?> a = getBindingAdapter();
+
                 if (a != null) a.notifyItemChanged(getBindingAdapterPosition());
+                RecyclerView.Adapter<?> adapter = getBindingAdapter();
+
+                if (adapter instanceof NotificationsAdapter) {
+                    NotificationsAdapter na = (NotificationsAdapter) adapter;
+
+                    if (na.listener != null) {
+                        na.listener.onNotificationToggle(e, getBindingAdapterPosition());
+                    }
+                }
             });
         }
     }
