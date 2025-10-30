@@ -53,6 +53,21 @@ public class HomeFragment extends Fragment {
             });
         }
 
+        View popup = view.findViewById(R.id.selection_popup);
+        View gotItButton = view.findViewById(R.id.btn_got_it);
+
+        View helpRow = view.findViewById(R.id.help_row);
+        if (helpRow != null) {
+            helpRow.setOnClickListener(v2 -> {
+                if (popup != null) popup.setVisibility(View.VISIBLE);
+            });
+        }
+
+        if (gotItButton != null) {
+            gotItButton.setOnClickListener(v3 -> {
+                if (popup != null) popup.setVisibility(View.GONE);
+            });
+        }
         return view;
     }
 }
