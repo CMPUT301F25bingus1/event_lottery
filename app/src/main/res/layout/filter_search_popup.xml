@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_bg"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filter Search"
+            android:textStyle="bold"
+            android:textSize="32sp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:textColor="@android:color/black" />
+
+        <!-- EVENT DATE FILTER -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event Date"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="4dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <EditText
+                android:id="@+id/event_date_from"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="From"
+                android:focusable="false"
+                android:inputType="none"
+                android:drawableStart="@android:drawable/ic_menu_my_calendar"
+                android:drawablePadding="6dp" />
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="match_parent"/>
+
+            <EditText
+                android:id="@+id/event_date_to"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="To"
+                android:focusable="false"
+                android:inputType="none"
+                android:drawableStart="@android:drawable/ic_menu_my_calendar"
+                android:drawablePadding="6dp" />
+        </LinearLayout>
+
+        <!-- DAYS OF WEEK FILTER -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Days of Week"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="4dp" />
+
+        <LinearLayout
+            android:id="@+id/day_buttons_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="12dp">
+
+            <ToggleButton android:id="@+id/day_mon" android:textOn="M" android:textOff="M" android:layout_height="20dp" android:layout_width="20dp"/>
+            <ToggleButton android:id="@+id/day_tue" android:textOn="T" android:textOff="T" android:layout_height="20dp" android:layout_width="20dp"/>
+            <ToggleButton android:id="@+id/day_wed" android:textOn="W" android:textOff="W" android:layout_height="20dp" android:layout_width="20dp"/>
+            <ToggleButton android:id="@+id/day_thu" android:textOn="T" android:textOff="T" android:layout_height="20dp" android:layout_width="20dp"/>
+            <ToggleButton android:id="@+id/day_fri" android:textOn="F" android:textOff="F" android:layout_height="20dp" android:layout_width="20dp"/>
+            <ToggleButton android:id="@+id/day_sat" android:textOn="S" android:textOff="S" android:layout_height="20dp" android:layout_width="20dp"/>
+            <ToggleButton android:id="@+id/day_sun" android:textOn="S" android:textOff="S" android:layout_height="20dp" android:layout_width="20dp"/>
+        </LinearLayout>
+
+        <!-- REGISTRATION STATUS -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Registration Status"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="4dp" />
+
+        <RadioGroup
+            android:id="@+id/registration_status_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <RadioButton
+                android:id="@+id/radio_registration_open"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Open" />
+
+            <RadioButton
+                android:id="@+id/radio_future_events"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Future" />
+        </RadioGroup>
+
+        <!-- REGISTRATION PERIOD -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Registration Days"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="4dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <EditText
+                android:id="@+id/registration_from"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="From"
+                android:focusable="false"
+                android:inputType="none"
+                android:drawableStart="@android:drawable/ic_menu_my_calendar"
+                android:drawablePadding="6dp" />
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="match_parent"/>
+
+            <EditText
+                android:id="@+id/registration_to"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="To"
+                android:focusable="false"
+                android:inputType="none"
+                android:drawableStart="@android:drawable/ic_menu_my_calendar"
+                android:drawablePadding="6dp" />
+        </LinearLayout>
+
+        <!-- LOCATION -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Location"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="4dp" />
+
+        <EditText
+            android:id="@+id/location_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter location"
+            android:drawableStart="@android:drawable/ic_menu_mylocation"
+            android:drawablePadding="8dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- APPLY BUTTON -->
+        <Button
+            android:id="@+id/btn_apply_filters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Apply Filters" />
+    </LinearLayout>
+
+</ScrollView>

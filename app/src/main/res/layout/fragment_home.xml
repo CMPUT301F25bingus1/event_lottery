@@ -1,16 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp">
-
+    android:orientation="vertical"
+    android:background="@drawable/bg_blue_gradient"
+    android:paddingHorizontal="16dp"
+    android:paddingTop="24dp"
+    android:paddingBottom="8dp">
+<!--
     <TextView
+        android:id="@+id/home_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/home"
-        android:textColor="@android:color/white"
+        android:text="Home"
         android:textSize="22sp"
-        android:layout_gravity="center" />
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="16dp" />
+-->
+    <!-- Search bar container -->
+    <LinearLayout
+        android:id="@+id/search_bar_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/search_bar_background"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp">
+        <!-- Filter button -->
+        <ImageButton
+            android:id="@+id/filter_button"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_filter"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/filter_icon"
+            app:tint="@android:color/darker_gray" />
 
-    </FrameLayout>
+        <!-- Search input -->
+        <EditText
+            android:id="@+id/search_edit_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Search"
+            android:background="@null"
+            android:textColor="@android:color/black"
+            android:textColorHint="@android:color/darker_gray"
+            android:paddingStart="8dp"
+            android:singleLine="true" />
+        <!-- Search icon -->
+        <ImageView
+            android:id="@+id/search_button"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_search"
+            android:contentDescription="@string/search_icon"
+            app:tint="@android:color/darker_gray" />
 
+
+    </LinearLayout>
+
+</LinearLayout>
