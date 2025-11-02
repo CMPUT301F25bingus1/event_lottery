@@ -26,4 +26,10 @@ yarn-error.log*
 
 # Environment files (local configs)
 /.env.*
+.idea/
+.gradle/
+**/.gradle/
+**/.idea/
+local.properties
+build/reports/problems/problems-report.html
 local.properties
