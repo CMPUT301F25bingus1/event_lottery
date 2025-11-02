@@ -5,4 +5,12 @@
     <string name="notification">Notification</string>
     <string name="my_events">My Events</string>
     <string name="profile">Profile</string>
+    <string name="search_icon" />
+    <string name="filter_icon" />
+    <string name="status_accepted">Accepted</string>
+    <string name="status_waiting">Waiting</string>
+    <string name="status_not_chosen">Not chosen</string>
+    <string name="notification_toggle">Notification toggle</string>
+    <string name="tab_following">Following</string>
+    <string name="tab_all">All</string>
 </resources>

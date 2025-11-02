@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="RoundedImageLarge"></style>
+    <!-- 🎨 Custom Date Picker Style (AppCompat-compatible) -->
+    <style name="CustomDatePicker" parent="@style/ThemeOverlay.AppCompat.Dialog">
+        <!-- Header bar color -->
+        <item name="colorPrimary">#67c7f3</item>
+        <!-- Accent color for OK/Cancel buttons -->
+        <item name="colorAccent">#105fa5</item>
+        <!-- Calendar text colors -->
+        <item name="android:textColorPrimary">@android:color/black</item>
+        <item name="android:textColorSecondary">@android:color/black</item>
+    </style>
+    <style name="DayToggleStyle" parent="@style/Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">14sp</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:padding">8dp</item>
+    </style>
+
+<resources>
+
+    <style name="TabTextStyle" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="textAllCaps">false</item>
+    </style>
+    <style name="RoundedImageView">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+</resources>
