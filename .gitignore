@@ -31,3 +31,4 @@ yarn-error.log*
 **/.gradle/
 **/.idea/
 local.properties
+build/reports/problems/problems-report.html
