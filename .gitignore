@@ -32,3 +32,4 @@ yarn-error.log*
 **/.idea/
 local.properties
 build/reports/problems/problems-report.html
+local.properties
