@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="day_selected">#105fa5</color>
+    <color name="day_unselected">#D9D9D9</color>
+    <color name="day_text_selected">#FFFFFF</color>
+    <color name="day_text_unselected">#000000</color>
 </resources>
