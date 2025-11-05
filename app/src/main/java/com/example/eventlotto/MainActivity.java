@@ -3,6 +3,7 @@ package com.example.eventlotto;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -11,10 +12,23 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.example.eventlotto.ui.LoginFragment;
+import com.example.eventlotto.ui.admin.AdminPlaceholderFragment;
+import com.example.eventlotto.ui.entrant.EntHomeFragment;
+import com.example.eventlotto.ui.entrant.EntLoginFragment;
+import com.example.eventlotto.ui.entrant.EntNotificationsFragment;
+import com.example.eventlotto.ui.RoleSelectionFragment;
+import com.example.eventlotto.ui.entrant.EntMyEventsFragment;
+import com.example.eventlotto.ui.entrant.EntScanFragment;
+import com.example.eventlotto.ui.organizer.OrgAddEventFragment;
+import com.example.eventlotto.ui.organizer.OrgHomeFragment;
+import com.example.eventlotto.ui.organizer.OrgFragment;
+import com.example.eventlotto.ui.organizer.OrgProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RoleSelectionFragment.RoleSelectionListener {
+
+    private BottomNavigationView bottomNavigationView;
+    private String currentRole = null; // "entrant", "organizer", "admin"
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,31 +41,64 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
         if (bottomNavigationView != null) {
             bottomNavigationView.setOnItemSelectedListener(item -> {
                 int id = item.getItemId();
-                if (id == R.id.nav_home) {
-                    loadFragment(new com.example.eventlotto.ui.HomeFragment());
-                    return true;
-                } else if (id == R.id.nav_scan) {
-                    loadFragment(new com.example.eventlotto.ui.ScanFragment());
-                    return true;
-                } else if (id == R.id.nav_notifications) {
-                    loadFragment(new com.example.eventlotto.ui.NotificationsFragment());
-                    return true;
-                } else if (id == R.id.nav_my_events) {
-                    loadFragment(new com.example.eventlotto.ui.MyEventsFragment());
-                    return true;
-                } else if (id == R.id.nav_profile) {
-                    loadFragment(new LoginFragment());
-                    return true;
+                if ("organizer".equals(currentRole)) {
+                    if (id == R.id.org_nav_home) {
+                        loadFragment(new OrgHomeFragment());
+                        return true;
+                    } else if (id == R.id.org_nav_add_event) {
+                        loadFragment(new OrgAddEventFragment());
+                        return true;
+                    } else if (id == R.id.org_nav_notifications) {
+                        loadFragment(new OrgFragment());
+                        return true;
+                    } else if (id == R.id.org_nav_profile) {
+                        loadFragment(new OrgProfileFragment());
+                        return true;
+                    }
+                } else { // entrant (default)
+                    if (id == R.id.nav_home) {
+                        loadFragment(new EntHomeFragment());
+                        return true;
+                    } else if (id == R.id.nav_scan) {
+                        loadFragment(new EntScanFragment());
+                        return true;
+                    } else if (id == R.id.nav_notifications) {
+                        loadFragment(new EntNotificationsFragment());
+                        return true;
+                    } else if (id == R.id.nav_my_events) {
+                        loadFragment(new EntMyEventsFragment());
+                        return true;
+                    } else if (id == R.id.nav_profile) {
+                        loadFragment(new EntLoginFragment());
+                        return true;
+                    }
                 }
                 return false;
             });
-            if (savedInstanceState == null) {
-                bottomNavigationView.setSelectedItemId(R.id.nav_home);
+        }
+
+        if (savedInstanceState != null) {
+            currentRole = savedInstanceState.getString("currentRole");
+            if (currentRole != null) {
+                applyRole(currentRole, false);
+                return;
             }
+        }
+
+        // Initial screen: role selection (hide bottom nav until chosen)
+        if (bottomNavigationView != null) bottomNavigationView.setVisibility(android.view.View.GONE);
+        loadFragment(new RoleSelectionFragment());
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (currentRole != null) {
+            outState.putString("currentRole", currentRole);
         }
     }
 
@@ -60,5 +107,36 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction tx = fm.beginTransaction();
         tx.replace(R.id.fragment_container, fragment);
         tx.commit();
+    }
+
+    @Override
+    public void onRoleSelected(String roleKey) {
+        applyRole(roleKey, true);
+    }
+
+    private void applyRole(String roleKey, boolean fromSelection) {
+        this.currentRole = roleKey;
+        if (bottomNavigationView == null) return;
+
+        // Ensure nav visible only for roles that use it
+        if ("admin".equals(roleKey)) {
+            bottomNavigationView.getMenu().clear();
+            bottomNavigationView.setVisibility(android.view.View.GONE);
+            // Load a blank admin fragment
+            loadFragment(new AdminPlaceholderFragment());
+            return;
+        }
+
+        bottomNavigationView.setVisibility(android.view.View.VISIBLE);
+        bottomNavigationView.getMenu().clear();
+        if ("organizer".equals(roleKey)) {
+            getMenuInflater().inflate(R.menu.organizer_bottom_nav_menu, bottomNavigationView.getMenu());
+            bottomNavigationView.setSelectedItemId(R.id.org_nav_home);
+            loadFragment(new OrgHomeFragment());
+        } else { // entrant default
+            getMenuInflater().inflate(R.menu.bottom_nav_menu, bottomNavigationView.getMenu());
+            bottomNavigationView.setSelectedItemId(R.id.nav_home);
+            loadFragment(new EntHomeFragment());
+        }
     }
 }

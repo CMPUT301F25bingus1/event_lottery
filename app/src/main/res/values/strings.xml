@@ -5,6 +5,11 @@
     <string name="notification">Notification</string>
     <string name="my_events">My Events</string>
     <string name="profile">Profile</string>
+    <string name="add_event">Add Event</string>
+    <string name="select_role">Select Role</string>
+    <string name="role_entrant">Entrant</string>
+    <string name="role_organizer">Organizer</string>
+    <string name="role_admin">Administrator</string>
     <string name="search_icon" />
     <string name="filter_icon" />
     <string name="status_accepted">Accepted</string>
@@ -13,4 +18,8 @@
     <string name="notification_toggle">Notification toggle</string>
     <string name="tab_following">Following</string>
     <string name="tab_all">All</string>
+    <string name="organizer_add_event">Organizer Add Event</string>
+    <string name="organizer_home">Organizer Home</string>
+    <string name="organizer_notifications">Organizer Notifications</string>
+    <string name="organizer_profile">Organizer Profile</string>
 </resources>
