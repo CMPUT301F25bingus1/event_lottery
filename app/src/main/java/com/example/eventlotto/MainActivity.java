@@ -10,6 +10,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+
+import com.example.eventlotto.ui.LoginFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -42,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
                     loadFragment(new com.example.eventlotto.ui.MyEventsFragment());
                     return true;
                 } else if (id == R.id.nav_profile) {
-                    loadFragment(new com.example.eventlotto.ui.ProfileFragment());
+                    loadFragment(new LoginFragment());
                     return true;
                 }
                 return false;

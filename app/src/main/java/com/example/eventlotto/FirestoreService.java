@@ -3,6 +3,7 @@ package com.example.eventlotto;
 import com.example.eventlotto.model.Event;
 import com.example.eventlotto.model.Notification;
 import com.example.eventlotto.model.User;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
@@ -10,6 +11,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
+
+import java.util.function.Consumer;
 
 public class FirestoreService {
     public static final String COLLECTION_USERS = "users";
@@ -22,6 +25,9 @@ public class FirestoreService {
         this.db = FirebaseFirestore.getInstance();
     }
 
+    // ---------------------------
+    // Collection references
+    // ---------------------------
     public CollectionReference users() {
         return db.collection(COLLECTION_USERS);
     }
@@ -47,6 +53,18 @@ public class FirestoreService {
 
     public Task<DocumentSnapshot> getUser(String uid) {
         return users().document(uid).get();
+    }
+
+    public void deleteUser(String uid, Consumer<Boolean> callback) {
+        users().document(uid).delete()
+                .addOnSuccessListener(aVoid -> callback.accept(true))
+                .addOnFailureListener(e -> callback.accept(false));
+    }
+
+    public void userExists(String uid, Consumer<Boolean> callback) {
+        users().document(uid).get()
+                .addOnSuccessListener(snapshot -> callback.accept(snapshot.exists()))
+                .addOnFailureListener(e -> callback.accept(false));
     }
 
     public Task<Void> saveEvent(Event event) {
@@ -82,4 +100,3 @@ public class FirestoreService {
         return notifications().document(nid).get();
     }
 }
-

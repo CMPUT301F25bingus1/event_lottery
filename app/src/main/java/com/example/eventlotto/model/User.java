@@ -3,10 +3,12 @@ package com.example.eventlotto.model;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.IgnoreExtraProperties;
 
+
 @IgnoreExtraProperties
 public class User {
+
     private String uid;
-    private String role;
+    private String role;                    // entrant, organizer, admin
     private String fullName;
     private String email;
     private String phone;
@@ -19,6 +21,20 @@ public class User {
     private Timestamp deletedAt;
 
     public User() {}
+
+    public User(String fullName, String email, String phone, String deviceId) {
+        this.uid = deviceId;
+        this.fullName = fullName;
+        this.email = email;
+        this.phone = phone;
+        this.deviceId = deviceId;
+        this.role = "entrant";
+        this.notifyWhenNotSelected = true;
+        this.geoConsent = false;
+        this.createdAt = Timestamp.now();
+        this.updatedAt = Timestamp.now();
+    }
+
 
     public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
@@ -55,5 +71,13 @@ public class User {
 
     public Timestamp getDeletedAt() { return deletedAt; }
     public void setDeletedAt(Timestamp deletedAt) { this.deletedAt = deletedAt; }
-}
 
+    public boolean wantsNotifications() {
+        return notifyWhenNotSelected != null && notifyWhenNotSelected;
+    }
+
+
+    public void markDeleted() {
+        this.deletedAt = Timestamp.now();
+    }
+}

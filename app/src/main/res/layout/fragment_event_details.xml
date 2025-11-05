@@ -15,7 +15,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Image at the top -->
+
         <ImageView
             android:id="@+id/eventImage"
             android:layout_width="match_parent"
@@ -24,7 +24,7 @@
             android:scaleType="centerCrop"
             android:src="@drawable/ic_launcher_foreground" />
 
-        <!-- Event Title -->
+
         <TextView
             android:id="@+id/eventTitle"
             android:layout_width="match_parent"
@@ -36,7 +36,7 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <!-- Dates and Waitlist Info -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -65,7 +65,7 @@
                 android:textColor="@android:color/darker_gray" />
         </LinearLayout>
 
-        <!-- Description -->
+
         <TextView
             android:id="@+id/eventDescription"
             android:layout_width="match_parent"
@@ -74,13 +74,13 @@
             android:text="Event text."
             android:textColor="@android:color/black" />
 
-        <!-- Formatting Spacer, Buttons at Bottom -->
+
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <!-- Buttons -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
