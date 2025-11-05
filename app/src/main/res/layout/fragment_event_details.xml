@@ -36,7 +36,6 @@
             android:textStyle="bold" />
 
 
-        <LinearLayout
 
         <TextView
             android:id="@+id/eventDescription"
@@ -94,8 +93,6 @@
             android:text="Location: N/A"
             android:textColor="@android:color/darker_gray" />
 
-
-        <View
     
         <TextView
             android:id="@+id/organizerId"
