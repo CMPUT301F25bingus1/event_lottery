@@ -1,21 +1,20 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
-    android:gravity="center">
+    android:fillViewport="true">
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="600dp"
-        android:layout_gravity="center"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
         android:background="@drawable/tab_indicator_rounded"
         android:elevation="4dp"
         android:orientation="vertical"
         android:padding="16dp">
 
 
+    
         <ImageView
             android:id="@+id/eventImage"
             android:layout_width="match_parent"
@@ -31,54 +30,79 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:gravity="center"
-            android:text="Mock Event Title"
+            android:text="Event Title"
             android:textColor="@android:color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
 
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/signupDates"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Sign-up: Oct 1 - Oct 31"
-                android:textColor="@android:color/darker_gray" />
-
-            <TextView
-                android:id="@+id/eventDates"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Event: Nov 1 - Nov 7"
-                android:textColor="@android:color/darker_gray" />
-
-            <TextView
-                android:id="@+id/waitlistCount"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Currently waitlisted: 42"
-                android:textColor="@android:color/darker_gray" />
-        </LinearLayout>
-
 
         <TextView
             android:id="@+id/eventDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Event text."
+            android:text="Event Description"
             android:textColor="@android:color/black" />
+
+ 
+        <TextView
+            android:id="@+id/signupDates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Sign-up: N/A"
+            android:textColor="@android:color/darker_gray" />
+
+        <TextView
+            android:id="@+id/eventDates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event: N/A"
+            android:textColor="@android:color/darker_gray" />
+
+  
+        <TextView
+            android:id="@+id/waitlistCount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Capacity: N/A"
+            android:textColor="@android:color/darker_gray" />
+
+
+        <TextView
+            android:id="@+id/geoConsent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Geo Consent Required: N/A"
+            android:textColor="@android:color/darker_gray" />
+
+        <TextView
+            android:id="@+id/notifyWhenNotSelected"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Notify if not selected: N/A"
+            android:textColor="@android:color/darker_gray" />
+
+  
+        <TextView
+            android:id="@+id/location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Location: N/A"
+            android:textColor="@android:color/darker_gray" />
 
 
         <View
+    
+        <TextView
+            android:id="@+id/organizerId"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content"
+            android:text="Organizer: N/A"
+            android:textColor="@android:color/darker_gray" />
 
 
         <LinearLayout
@@ -107,4 +131,4 @@
 
         </LinearLayout>
     </LinearLayout>
-</FrameLayout>
+</ScrollView>
