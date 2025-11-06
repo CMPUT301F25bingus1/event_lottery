@@ -1,5 +1,6 @@
 package com.example.eventlotto.functions.events;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +10,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.Event;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
 
@@ -44,7 +47,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         holder.title.setText(event.getEventTitle());
         holder.description.setText(event.getDescription());
         holder.status.setText("Status: TBD");
-
         // Set click listener
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
