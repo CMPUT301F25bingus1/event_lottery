@@ -10,7 +10,19 @@
     <string name="status_accepted">Accepted</string>
     <string name="status_waiting">Waiting</string>
     <string name="status_not_chosen">Not chosen</string>
+    <string name="status_selected">Selected</string>
+    <string name="status_signed_up">Signed up</string>
+    <string name="status_cancelled">Cancelled</string>
     <string name="notification_toggle">Notification toggle</string>
     <string name="tab_following">Following</string>
     <string name="tab_all">All</string>
+    <string name="status">Status</string>
+    <string name="confirm_opt_out_title">Opt out</string>
+    <string name="confirm_opt_out_message">Would you like to opt-out of receiving notifications?</string>
+    <string name="opt_out">Opt out</string>
+    <string name="tester">Tester</string>
+    <string name="seed_mock_events">Seed Mock Events</string>
+    <string name="seed_success">Mock events seeded</string>
+    <string name="seed_failure">Seed failed</string>
+    <string name="warning_icon">Warning icon</string>
 </resources>
