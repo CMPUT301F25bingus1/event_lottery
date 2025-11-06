@@ -4,6 +4,7 @@ package com.example.eventlotto;
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import com.example.eventlotto.model.Notification;
 import com.example.eventlotto.model.EventStatus;
 =======
@@ -14,17 +15,18 @@ import com.example.eventlotto.model.EventStatus;
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 import com.example.eventlotto.model.User;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
@@ -38,6 +40,9 @@ public class FirestoreService {
     public static final String COLLECTION_EVENTS = "events";
     public static final String COLLECTION_NOTIFICATIONS = "notifications";
     public static final String COLLECTION_EVENT_STATUS = "event_status";
+=======
+public class FirestoreService {
+>>>>>>> Stashed changes
 =======
 public class FirestoreService {
 >>>>>>> Stashed changes
@@ -64,6 +69,7 @@ public class FirestoreService {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     public CollectionReference events() {
         return db.collection(COLLECTION_EVENTS);
     }
@@ -80,17 +86,23 @@ public class FirestoreService {
         if (user == null || user.getUid() == null) {
             throw new IllegalArgumentException("user.uid is required");
 
+=======
+>>>>>>> Stashed changes
     public void saveUserProfile(User user, FirestoreCallback callback) {
         if (user == null || user.getDeviceId() == null) {
             callback.onCallback(false);
             return;
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
         }
 
         usersCollection.document(user.getDeviceId())
                 .set(user)
                 .addOnSuccessListener(aVoid -> callback.onCallback(true))
                 .addOnFailureListener(e -> callback.onCallback(false));
+<<<<<<< Updated upstream
 
     }
 
@@ -283,6 +295,36 @@ public class FirestoreService {
 
 
 >>>>>>> Stashed changes
+=======
+    }
+
+
+    public Task<DocumentSnapshot> getUser(String deviceId) {
+        return usersCollection.document(deviceId).get();
+    }
+
+
+    public void getUserProfile(String deviceId, FirestoreUserCallback callback) {
+        if (deviceId == null || deviceId.isEmpty()) {
+            callback.onCallback(null);
+            return;
+        }
+
+        usersCollection.document(deviceId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        User user = documentSnapshot.toObject(User.class);
+                        callback.onCallback(user);
+                    } else {
+                        callback.onCallback(null);
+                    }
+                })
+                .addOnFailureListener(e -> callback.onCallback(null));
+    }
+
+
+>>>>>>> Stashed changes
     public void updateUserProfile(User user, FirestoreCallback callback) {
         if (user == null || user.getDeviceId() == null) {
             callback.onCallback(false);
@@ -322,6 +364,9 @@ public class FirestoreService {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes

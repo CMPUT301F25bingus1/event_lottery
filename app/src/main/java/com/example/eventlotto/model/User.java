@@ -17,7 +17,11 @@ public class User {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     private String deviceId;
+=======
+    private String avatarUrl;
+>>>>>>> Stashed changes
 =======
     private String avatarUrl;
 >>>>>>> Stashed changes
