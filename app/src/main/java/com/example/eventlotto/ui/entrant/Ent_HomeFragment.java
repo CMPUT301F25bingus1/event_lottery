@@ -25,6 +25,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class Ent_HomeFragment extends Fragment {
 

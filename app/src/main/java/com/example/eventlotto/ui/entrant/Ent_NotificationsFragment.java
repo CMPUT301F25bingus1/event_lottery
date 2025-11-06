@@ -201,21 +201,5 @@ public class Ent_NotificationsFragment extends Fragment {
         adapter.setItems(filtered);
     }
 
-    /**
-     * Loads the current statuses of events for the user and updates the adapter.
-     */
-    private void loadUserEventStatuses() {
-        firestoreService.getEventStatusesForUser(deviceId)
-                .addOnSuccessListener(query -> {
-                    statusByEid.clear();
-                    for (DocumentSnapshot doc : query) {
-                        String eid = doc.getString("eid");
-                        String status = doc.getString("status");
-                        if (eid != null && status != null) statusByEid.put(eid, status);
-                    }
-                    adapter.setStatusMap(statusByEid);
-                    applyFilter(tabs.getSelectedTabPosition());
-                })
-                .addOnFailureListener(e -> { /* ignore */ });
-    }
+
 }
