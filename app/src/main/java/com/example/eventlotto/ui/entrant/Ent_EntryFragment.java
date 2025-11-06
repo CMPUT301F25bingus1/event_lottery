@@ -1,4 +1,4 @@
-package com.example.eventlotto.ui;
+package com.example.eventlotto.ui.entrant;
 
 import android.os.Bundle;
 import android.provider.Settings;
@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
+import com.example.eventlotto.ui.LoginFragment;
 
 public class EntryFragment extends Fragment {
 

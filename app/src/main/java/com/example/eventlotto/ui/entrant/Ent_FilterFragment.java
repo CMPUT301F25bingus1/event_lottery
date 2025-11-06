@@ -1,4 +1,4 @@
-package com.example.eventlotto.ui;
+package com.example.eventlotto.ui.entrant;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
