@@ -23,10 +23,8 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class Ent_NotificationsFragment extends Fragment {
@@ -36,7 +34,7 @@ public class Ent_NotificationsFragment extends Fragment {
     private FirestoreService firestoreService;
     private TabLayout tabs;
     private String deviceId;
-    private final Map<String, String> statusByEid = new HashMap<>();
+    // status is now read live per item from events/<eid>/status/<uid>
 
     @Nullable
     @Override
@@ -109,7 +107,6 @@ public class Ent_NotificationsFragment extends Fragment {
                         allEvents.add(e);
                     }
                     loadUserSubscriptions();
-                    loadUserEventStatuses();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Error fetching events: " + e.getMessage(),
@@ -161,22 +158,6 @@ public class Ent_NotificationsFragment extends Fragment {
         } else { // All
             filtered.addAll(allEvents);
         }
-        adapter.setStatusMap(statusByEid);
         adapter.setItems(filtered);
-    }
-
-    private void loadUserEventStatuses() {
-        firestoreService.getEventStatusesForUser(deviceId)
-                .addOnSuccessListener(query -> {
-                    statusByEid.clear();
-                    for (DocumentSnapshot doc : query) {
-                        String eid = doc.getString("eid");
-                        String status = doc.getString("status");
-                        if (eid != null && status != null) statusByEid.put(eid, status);
-                    }
-                    adapter.setStatusMap(statusByEid);
-                    applyFilter(tabs.getSelectedTabPosition());
-                })
-                .addOnFailureListener(e -> { /* ignore */ });
     }
 }

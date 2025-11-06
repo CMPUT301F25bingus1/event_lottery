@@ -212,7 +212,7 @@ public class EventDetailsFragment extends DialogFragment {
     private void leaveWaitlist(String eventId, String deviceId) {
         FirebaseFirestore.getInstance()
                 .collection("events").document(eventId)
-                .collection("waitlist").document(deviceId)
+                .collection("status").document(deviceId)
                 .delete()
                 .addOnSuccessListener(unused -> {
                     Toast.makeText(getContext(), "Successfully left the waitlist", Toast.LENGTH_SHORT).show();
@@ -232,7 +232,7 @@ public class EventDetailsFragment extends DialogFragment {
 
         FirebaseFirestore.getInstance()
                 .collection("events").document(eventId)
-                .collection("waitlist").document(deviceId)
+                .collection("status").document(deviceId)
                 .get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {

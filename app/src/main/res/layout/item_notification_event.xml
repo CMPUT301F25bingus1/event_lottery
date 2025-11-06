@@ -50,10 +50,22 @@
 
         <TextView
             android:id="@+id/textStatus"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/status_chip_width"
             android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:text="Waiting"
+            android:textStyle="bold"
+            android:textSize="12sp"
             android:textColor="@color/black"
-            android:text="@string/status"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:background="@drawable/bg_status_waiting"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/textName"/>
 

@@ -77,7 +77,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
         // Realtime listener: row updates immediately when you join/leave in the dialog
         holder.waitlistReg = db.collection("events").document(eid)
-                .collection("waitlist").document(deviceId)
+                .collection("status").document(deviceId)
                 .addSnapshotListener((snap, err) -> {
                     // Ignore callbacks if this holder has been rebound to another item
                     if (holder.boundEventId == null || !eid.equals(holder.boundEventId)) return;

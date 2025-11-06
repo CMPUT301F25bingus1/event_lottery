@@ -35,7 +35,7 @@
             android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@id/imageEvent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toStartOf="@id/textStatus"/>
 
         <TextView
             android:id="@+id/textDescription"
@@ -50,13 +50,17 @@
 
         <TextView
             android:id="@+id/textStatus"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/status_chip_width"
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:text="Waiting"
             android:textStyle="bold"
             android:textSize="12sp"
             android:textColor="@android:color/black"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:paddingTop="4dp"
