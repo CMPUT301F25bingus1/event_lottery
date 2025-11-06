@@ -7,8 +7,12 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import android.provider.Settings;
 
+=======
+import android.view.View;
+>>>>>>> Stashed changes
 =======
 import android.view.View;
 >>>>>>> Stashed changes
@@ -35,6 +39,7 @@ import com.example.eventlotto.ui.MyEventsFragment;
 import com.example.eventlotto.ui.NotificationsFragment;
 import com.example.eventlotto.ui.LoginFragment;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
 import com.example.eventlotto.ui.UsersFragment;
 import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
@@ -42,6 +47,10 @@ import com.example.eventlotto.ui.entrant.Ent_MyEventsFragment;
 import com.example.eventlotto.ui.entrant.Ent_NotificationsFragment;
 import com.example.eventlotto.ui.entrant.Ent_ScanFragment;
 import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
+=======
+import com.example.eventlotto.ui.ScanFragment;
+import com.example.eventlotto.ui.WelcomeFragment;
+>>>>>>> Stashed changes
 =======
 import com.example.eventlotto.ui.ScanFragment;
 import com.example.eventlotto.ui.WelcomeFragment;
@@ -57,6 +66,7 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     private FirestoreService firestoreService;
     private String deviceId;
     private static final String CHANNEL_ID = "event_status_updates";
@@ -68,6 +78,9 @@ public class MainActivity extends AppCompatActivity {
     private java.util.Map<String, Boolean> statusDocInitialized = new java.util.HashMap<>();
     private java.util.Map<String, String> lastSeenStatus = new java.util.HashMap<>();
     private static final int REQ_POST_NOTIFICATIONS = 1001;
+=======
+    private BottomNavigationView bottomNavigationView;
+>>>>>>> Stashed changes
 =======
     private BottomNavigationView bottomNavigationView;
 >>>>>>> Stashed changes
@@ -85,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         firestoreService = new FirestoreService();
 
         deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -93,6 +107,17 @@ public class MainActivity extends AppCompatActivity {
         startSubscriptionListener();
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+=======
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+
+        if (savedInstanceState == null) {
+            bottomNavigationView.setVisibility(View.GONE);
+            loadFragment(new WelcomeFragment());
+        }
+
+
+>>>>>>> Stashed changes
         if (bottomNavigationView != null) {
             firestoreService.getUser(deviceId)
                     .addOnSuccessListener(snapshot -> {
@@ -204,6 +229,9 @@ public class MainActivity extends AppCompatActivity {
         if (bottomNavigationView != null) {
             bottomNavigationView.setVisibility(View.VISIBLE);
         }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     }
 

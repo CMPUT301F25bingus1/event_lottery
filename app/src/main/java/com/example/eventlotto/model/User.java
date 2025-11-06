@@ -14,7 +14,11 @@ public class User {
     private String email;
     private String phone;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     private String deviceId;
+=======
+    private String avatarUrl;
+>>>>>>> Stashed changes
 =======
     private String avatarUrl;
 >>>>>>> Stashed changes
@@ -63,6 +67,11 @@ public class User {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
+<<<<<<< Updated upstream
+=======
+    public String getAvatarUrl() { return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+>>>>>>> Stashed changes
 
     public Boolean getNotifyWhenNotSelected() { return notifyWhenNotSelected; }
     public void setNotifyWhenNotSelected(Boolean notifyWhenNotSelected) { this.notifyWhenNotSelected = notifyWhenNotSelected; }
