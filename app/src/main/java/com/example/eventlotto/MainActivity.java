@@ -6,8 +6,12 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+<<<<<<< Updated upstream
 import android.provider.Settings;
 
+=======
+import android.view.View;
+>>>>>>> Stashed changes
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -25,7 +29,12 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.eventlotto.ui.CreateProfileFragment;
+import com.example.eventlotto.ui.HomeFragment;
+import com.example.eventlotto.ui.MyEventsFragment;
+import com.example.eventlotto.ui.NotificationsFragment;
 import com.example.eventlotto.ui.LoginFragment;
+<<<<<<< Updated upstream
 import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
 import com.example.eventlotto.ui.UsersFragment;
 import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
@@ -33,6 +42,10 @@ import com.example.eventlotto.ui.entrant.Ent_MyEventsFragment;
 import com.example.eventlotto.ui.entrant.Ent_NotificationsFragment;
 import com.example.eventlotto.ui.entrant.Ent_ScanFragment;
 import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
+=======
+import com.example.eventlotto.ui.ScanFragment;
+import com.example.eventlotto.ui.WelcomeFragment;
+>>>>>>> Stashed changes
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -43,6 +56,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
+<<<<<<< Updated upstream
     private FirestoreService firestoreService;
     private String deviceId;
     private static final String CHANNEL_ID = "event_status_updates";
@@ -54,6 +68,9 @@ public class MainActivity extends AppCompatActivity {
     private java.util.Map<String, Boolean> statusDocInitialized = new java.util.HashMap<>();
     private java.util.Map<String, String> lastSeenStatus = new java.util.HashMap<>();
     private static final int REQ_POST_NOTIFICATIONS = 1001;
+=======
+    private BottomNavigationView bottomNavigationView;
+>>>>>>> Stashed changes
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+<<<<<<< Updated upstream
         firestoreService = new FirestoreService();
 
         deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -146,6 +164,47 @@ public class MainActivity extends AppCompatActivity {
 
         // Set default selected tab
         bottomNav.setSelectedItemId(R.id.nav_home);
+=======
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+
+        if (savedInstanceState == null) {
+            bottomNavigationView.setVisibility(View.GONE);
+            loadFragment(new WelcomeFragment());
+        }
+
+
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setOnItemSelectedListener(item -> {
+                int id = item.getItemId();
+
+                if (id == R.id.nav_home) {
+                    loadFragment(new HomeFragment());
+                    return true;
+                } else if (id == R.id.nav_scan) {
+                    loadFragment(new ScanFragment());
+                    return true;
+                } else if (id == R.id.nav_notifications) {
+                    loadFragment(new NotificationsFragment());
+                    return true;
+                } else if (id == R.id.nav_my_events) {
+                    loadFragment(new MyEventsFragment());
+                    return true;
+                } else if (id == R.id.nav_profile) {
+                    loadFragment(new LoginFragment());
+                    return true;
+                }
+
+                return false;
+            });
+        }
+    }
+
+    public void showBottomNavigation() {
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setVisibility(View.VISIBLE);
+        }
+>>>>>>> Stashed changes
     }
 
 

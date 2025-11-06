@@ -1,18 +1,20 @@
 package com.example.eventlotto;
 
+<<<<<<< Updated upstream
 import com.example.eventlotto.model.Notification;
 import com.example.eventlotto.model.EventStatus;
+=======
+>>>>>>> Stashed changes
 import com.example.eventlotto.model.User;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 
+<<<<<<< Updated upstream
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -22,20 +24,20 @@ public class FirestoreService {
     public static final String COLLECTION_EVENTS = "events";
     public static final String COLLECTION_NOTIFICATIONS = "notifications";
     public static final String COLLECTION_EVENT_STATUS = "event_status";
+=======
+public class FirestoreService {
+>>>>>>> Stashed changes
 
     private final FirebaseFirestore db;
+    private final CollectionReference usersCollection;
 
     public FirestoreService() {
-        this.db = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance();
+        usersCollection = db.collection("users");
     }
 
-    // ---------------------------
-    // Collection references
-    // ---------------------------
-    public CollectionReference users() {
-        return db.collection(COLLECTION_USERS);
-    }
 
+<<<<<<< Updated upstream
     public CollectionReference events() {
         return db.collection(COLLECTION_EVENTS);
     }
@@ -51,18 +53,47 @@ public class FirestoreService {
     public Task<Void> saveUser(User user) {
         if (user == null || user.getUid() == null) {
             throw new IllegalArgumentException("user.uid is required");
+=======
+    public void saveUserProfile(User user, FirestoreCallback callback) {
+        if (user == null || user.getDeviceId() == null) {
+            callback.onCallback(false);
+            return;
+>>>>>>> Stashed changes
         }
-        if (user.getCreatedAt() == null) {
-            user.setCreatedAt(Timestamp.now());
-        }
-        user.setUpdatedAt(Timestamp.now());
-        return users().document(user.getUid()).set(user, SetOptions.merge());
+
+        usersCollection.document(user.getDeviceId())
+                .set(user)
+                .addOnSuccessListener(aVoid -> callback.onCallback(true))
+                .addOnFailureListener(e -> callback.onCallback(false));
     }
 
-    public Task<DocumentSnapshot> getUser(String uid) {
-        return users().document(uid).get();
+
+    public Task<DocumentSnapshot> getUser(String deviceId) {
+        return usersCollection.document(deviceId).get();
     }
 
+
+    public void getUserProfile(String deviceId, FirestoreUserCallback callback) {
+        if (deviceId == null || deviceId.isEmpty()) {
+            callback.onCallback(null);
+            return;
+        }
+
+        usersCollection.document(deviceId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        User user = documentSnapshot.toObject(User.class);
+                        callback.onCallback(user);
+                    } else {
+                        callback.onCallback(null);
+                    }
+                })
+                .addOnFailureListener(e -> callback.onCallback(null));
+    }
+
+
+<<<<<<< Updated upstream
     public void deleteUser(String uid, Consumer<Boolean> callback) {
         users().document(uid).delete()
                 .addOnSuccessListener(aVoid -> callback.accept(true))
@@ -134,5 +165,43 @@ public class FirestoreService {
         batch.set(statusTopRef, topStatus, SetOptions.merge());
 
         return batch.commit();
+=======
+    public void updateUserProfile(User user, FirestoreCallback callback) {
+        if (user == null || user.getDeviceId() == null) {
+            callback.onCallback(false);
+            return;
+        }
+
+
+        user.touch();
+
+        usersCollection.document(user.getDeviceId())
+                .set(user, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> callback.onCallback(true))
+                .addOnFailureListener(e -> callback.onCallback(false));
+    }
+
+
+    public void deleteUserProfile(String deviceId, FirestoreCallback callback) {
+        if (deviceId == null || deviceId.isEmpty()) {
+            callback.onCallback(false);
+            return;
+        }
+
+        usersCollection.document(deviceId)
+                .delete()
+                .addOnSuccessListener(aVoid -> callback.onCallback(true))
+                .addOnFailureListener(e -> callback.onCallback(false));
+    }
+
+
+    public interface FirestoreCallback {
+        void onCallback(boolean success);
+    }
+
+
+    public interface FirestoreUserCallback {
+        void onCallback(User user);
+>>>>>>> Stashed changes
     }
 }

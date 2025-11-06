@@ -17,7 +17,11 @@ import androidx.fragment.app.Fragment;
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
+<<<<<<< Updated upstream:app/src/main/java/com/example/eventlotto/ui/entrant/Ent_CreateProfileFragment.java
 import com.example.eventlotto.ui.LoginFragment;
+=======
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+>>>>>>> Stashed changes:app/src/main/java/com/example/eventlotto/ui/CreateProfileFragment.java
 
 /**
  * Fragment for creating a new user profile.
@@ -31,7 +35,13 @@ public class Ent_CreateProfileFragment extends Fragment {
 
     private EditText phoneInput;
 
+<<<<<<< Updated upstream:app/src/main/java/com/example/eventlotto/ui/entrant/Ent_CreateProfileFragment.java
+=======
+    private EditText inputName, inputEmail, inputPhone;
+    private Button btnCreateProfile;
+>>>>>>> Stashed changes:app/src/main/java/com/example/eventlotto/ui/CreateProfileFragment.java
     private FirestoreService firestoreService;
+    private String deviceId;
 
     @Nullable
     @Override
@@ -42,6 +52,7 @@ public class Ent_CreateProfileFragment extends Fragment {
 
         firestoreService = new FirestoreService();
 
+<<<<<<< Updated upstream:app/src/main/java/com/example/eventlotto/ui/entrant/Ent_CreateProfileFragment.java
         // Bind views
         nameInput = view.findViewById(R.id.input_name);
         emailInput = view.findViewById(R.id.input_email);
@@ -84,7 +95,52 @@ public class Ent_CreateProfileFragment extends Fragment {
                     .addOnFailureListener(e ->
                             Toast.makeText(getContext(), "Error creating profile.", Toast.LENGTH_SHORT).show());
         });
+=======
+        inputName = view.findViewById(R.id.input_name);
+        inputEmail = view.findViewById(R.id.input_email);
+        inputPhone = view.findViewById(R.id.input_phone);
+        btnCreateProfile = view.findViewById(R.id.btn_create_profile);
+
+        // Get device ID
+        deviceId = Settings.Secure.getString(
+                requireContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID
+        );
+
+        btnCreateProfile.setOnClickListener(v -> createUserProfile());
+>>>>>>> Stashed changes:app/src/main/java/com/example/eventlotto/ui/CreateProfileFragment.java
 
         return view;
+    }
+
+    private void createUserProfile() {
+        String name = inputName.getText().toString().trim();
+        String email = inputEmail.getText().toString().trim();
+        String phone = inputPhone.getText().toString().trim();
+
+        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(email) || TextUtils.isEmpty(phone)) {
+            Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
+        User user = new User(deviceId, name, email, phone);
+
+        firestoreService.saveUserProfile(user, success -> {
+            if (success) {
+                Toast.makeText(requireContext(), "Profile created successfully!", Toast.LENGTH_SHORT).show();
+
+
+                requireActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new HomeFragment())
+                        .commit();
+
+
+                BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
+                bottomNav.setVisibility(View.VISIBLE);
+            } else {
+                Toast.makeText(requireContext(), "Failed to create profile. Try again.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
