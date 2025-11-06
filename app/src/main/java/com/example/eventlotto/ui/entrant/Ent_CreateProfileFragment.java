@@ -19,46 +19,62 @@ import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
 import com.example.eventlotto.ui.LoginFragment;
 
+/**
+ * Fragment for creating a new user profile.
+ * Collects name, email, and phone number and saves it to Firestore.
+ */
 public class Ent_CreateProfileFragment extends Fragment {
 
-    private EditText nameInput, emailInput, phoneInput;
+    private EditText nameInput;
+
+    private EditText emailInput;
+
+    private EditText phoneInput;
+
     private FirestoreService firestoreService;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_create_profile, container, false);
 
         firestoreService = new FirestoreService();
 
+        // Bind views
         nameInput = view.findViewById(R.id.input_name);
         emailInput = view.findViewById(R.id.input_email);
         phoneInput = view.findViewById(R.id.input_phone);
         Button createBtn = view.findViewById(R.id.btn_create_profile);
 
+        // Set click listener to create profile
         createBtn.setOnClickListener(v -> {
             String fullName = nameInput.getText().toString().trim();
             String email = emailInput.getText().toString().trim();
             String phone = phoneInput.getText().toString().trim();
 
+            // Validate required fields
             if (TextUtils.isEmpty(fullName) || TextUtils.isEmpty(email)) {
                 Toast.makeText(getContext(), "Please enter name and email", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            // Get device ID to associate user profile with this device
             String deviceId = Settings.Secure.getString(
                     requireContext().getContentResolver(),
                     Settings.Secure.ANDROID_ID
             );
 
+            // Create user object
             User user = new User(fullName, email, phone, deviceId);
 
+            // Save user to Firestore
             firestoreService.saveUser(user)
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(getContext(), "Profile created successfully!", Toast.LENGTH_SHORT).show();
 
-                        // Navigate manually to ProfileFragment
+                        // Navigate to LoginFragment after successful creation
                         getParentFragmentManager()
                                 .beginTransaction()
                                 .replace(R.id.fragment_container, new LoginFragment())

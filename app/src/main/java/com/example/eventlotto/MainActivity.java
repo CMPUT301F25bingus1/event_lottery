@@ -78,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
             Fragment fragment = null;
             int id = item.getItemId();
 
-            // Entrant menu
             if (role.equals("entrant")) {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
                 else if (id == R.id.nav_my_events)
@@ -91,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-            // Organizer menu
             else if (role.equals("organizer")) {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
                 else if (id == R.id.nav_create_event)
@@ -101,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
             }
 
-            // Admin menu
             else if (role.equals("admin")) {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
                 else if (id == R.id.nav_users)
