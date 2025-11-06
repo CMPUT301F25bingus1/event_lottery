@@ -72,6 +72,7 @@ public class FirestoreService {
                 .addOnSuccessListener(snapshot -> callback.accept(snapshot.exists()))
                 .addOnFailureListener(e -> callback.accept(false));
     }
+
     public Task<Void> saveNotification(Notification notification) {
         if (notification == null || notification.getNid() == null) {
             throw new IllegalArgumentException("notification.nid is required");
