@@ -1,4 +1,4 @@
-package com.example.eventlotto.ui.entrant;
+package com.example.eventlotto.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -20,7 +20,7 @@ import com.example.eventlotto.notifications.NotificationsAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntNotificationsFragment extends Fragment {
+public class NotificationsFragment extends Fragment {
 
     private final List<FollowedEvent> allEvents = new ArrayList<>();
     private NotificationsAdapter adapter;
