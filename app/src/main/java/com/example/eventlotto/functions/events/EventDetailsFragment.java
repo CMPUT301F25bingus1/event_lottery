@@ -1,4 +1,4 @@
-package com.example.eventlotto.events;
+package com.example.eventlotto.functions.events;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

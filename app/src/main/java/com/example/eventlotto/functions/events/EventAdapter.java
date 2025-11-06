@@ -1,4 +1,4 @@
-package com.example.eventlotto.events;
+package com.example.eventlotto.functions.events;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,7 +7,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.eventlotto.R;
-import com.example.eventlotto.events.Event;
+import com.example.eventlotto.model.Event;
+
 import java.util.List;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {

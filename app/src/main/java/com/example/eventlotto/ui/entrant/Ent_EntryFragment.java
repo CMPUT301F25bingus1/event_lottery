@@ -1,4 +1,4 @@
-package com.example.eventlotto.ui;
+package com.example.eventlotto.ui.entrant;
 
 import android.os.Bundle;
 import android.provider.Settings;
@@ -13,8 +13,9 @@ import androidx.fragment.app.Fragment;
 
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
+import com.example.eventlotto.ui.LoginFragment;
 
-public class EntryFragment extends Fragment {
+public class Ent_EntryFragment extends Fragment {
 
     private FirestoreService firestoreService;
 
@@ -49,7 +50,7 @@ public class EntryFragment extends Fragment {
         createProfileBtn.setOnClickListener(v -> {
             getParentFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, new CreateProfileFragment())
+                    .replace(R.id.fragment_container, new Ent_CreateProfileFragment())
                     .addToBackStack(null)
                     .commit();
         });

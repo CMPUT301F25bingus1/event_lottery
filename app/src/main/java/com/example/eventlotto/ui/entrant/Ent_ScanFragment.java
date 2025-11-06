@@ -1,29 +1,26 @@
-package com.example.eventlotto.ui;
+package com.example.eventlotto.ui.entrant;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.example.eventlotto.R;
-import com.example.eventlotto.events.EventDetailsFragment;
-import com.example.eventlotto.scan.GenerateQRFragment;
+import com.example.eventlotto.functions.events.EventDetailsFragment;
+import com.example.eventlotto.functions.scan.GenerateQRFragment;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 
 // Class developed in conjunction with OpenAI, ChatGPT, "How to implement QR code reader in Android Studio"
-public class ScanFragment extends Fragment implements BarcodeCallback {
+public class Ent_ScanFragment extends Fragment implements BarcodeCallback {
 
     private DecoratedBarcodeView barcodeView;
     private boolean scanned = false;

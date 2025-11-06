@@ -1,9 +1,7 @@
 package com.example.eventlotto;
 
-import com.example.eventlotto.model.Event;
 import com.example.eventlotto.model.Notification;
 import com.example.eventlotto.model.User;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
@@ -67,16 +65,7 @@ public class FirestoreService {
                 .addOnFailureListener(e -> callback.accept(false));
     }
 
-    public Task<Void> saveEvent(Event event) {
-        if (event == null || event.getEid() == null) {
-            throw new IllegalArgumentException("event.eid is required");
-        }
-        if (event.getCreatedAt() == null) {
-            event.setCreatedAt(Timestamp.now());
-        }
-        event.setUpdatedAt(Timestamp.now());
-        return events().document(event.getEid()).set(event, SetOptions.merge());
-    }
+
 
     public Task<DocumentSnapshot> getEvent(String eid) {
         return events().document(eid).get();

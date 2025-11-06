@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
+import com.example.eventlotto.ui.entrant.Ent_EntryFragment;
 
 public class LoginFragment extends Fragment {
 
@@ -98,7 +99,7 @@ public class LoginFragment extends Fragment {
                 // Go back to WelcomeFragment
                 getParentFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.fragment_container, new EntryFragment())
+                        .replace(R.id.fragment_container, new Ent_EntryFragment())
                         .commit();
             } else {
                 Toast.makeText(getContext(), "Error deleting profile.", Toast.LENGTH_SHORT).show();
