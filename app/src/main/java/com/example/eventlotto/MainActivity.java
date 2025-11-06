@@ -27,18 +27,16 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.eventlotto.ui.LoginFragment;
 import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
-import com.example.eventlotto.ui.UsersFragment;
+import com.example.eventlotto.ui.admin.Adm_EventsFragment;
+import com.example.eventlotto.ui.admin.Adm_ProfilesFragment;
 import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
 import com.example.eventlotto.ui.entrant.Ent_MyEventsFragment;
 import com.example.eventlotto.ui.entrant.Ent_NotificationsFragment;
 import com.example.eventlotto.ui.entrant.Ent_ScanFragment;
-import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
@@ -88,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setupBottomNavMenu(BottomNavigationView bottomNav, String role) {
+    private void setupBottomNavMenu(BottomNavigationView bottomNav, String role) { // bottom navigations
         bottomNav.getMenu().clear();
 
         // Inflate menu based on role
@@ -130,10 +128,10 @@ public class MainActivity extends AppCompatActivity {
 
             else if (role.equals("admin")) {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
-                else if (id == R.id.nav_users)
-                    fragment = new UsersFragment();
-                else if (id == R.id.nav_images)
-                    fragment = new com.example.eventlotto.ui.ImagesFragment();
+                else if (id == R.id.nav_admin_events)
+                    fragment = new Adm_EventsFragment();
+                else if (id == R.id.nav_admin_profiles)
+                    fragment = new Adm_ProfilesFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
             }
 
@@ -178,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void ensureNotificationChannel() {
+    private void ensureNotificationChannel() { // channel required for notification
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             if (manager != null) {
@@ -207,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
                             if (eid != null) subscribedEventIds.add(eid);
                         }
                     }
-                    // Attach per-event document listeners that don't depend on a uid field
+                    // attach per-event listeners that don't depend on uid field
                     updatePerEventStatusListeners();
                 });
     }
@@ -220,9 +218,9 @@ public class MainActivity extends AppCompatActivity {
     private void sendLocalNotification(String eventId, String eventTitle, String status) {
         String title;
         String body;
-        if ("selected".equals(status)) {
+        if ("selected".equals(status)) { // device notification
             title = "You're selected!";
-            body = (eventTitle != null ? eventTitle : eventId) + ": You have been selected.";
+            body = (eventTitle != null ? eventTitle : eventId) + ": You have been selected!";
         } else {
             title = "Not chosen";
             body = (eventTitle != null ? eventTitle : eventId) + ": You were not chosen.";
@@ -239,11 +237,10 @@ public class MainActivity extends AppCompatActivity {
         try {
             nm.notify(Math.abs(eventId.hashCode()), builder.build());
         } catch (SecurityException se) {
-            // POST_NOTIFICATIONS may be denied on Android 13+
             Toast.makeText(this, "Enable notifications in Settings to receive updates", Toast.LENGTH_SHORT).show();
         }
 
-        // Also show an in-app banner at the top
+        // in-app banner at the top
         final String bannerMessage =
                 "selected".equals(status)
                         ? "Congratulations! You have been selected for " + (eventTitle != null ? eventTitle : eventId)
@@ -252,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(() -> showInAppBanner(bannerMessage, isPositive));
     }
 
-    private void showInAppBanner(String message, boolean isPositive) {
+    private void showInAppBanner(String message, boolean isPositive) { //in app banner for notification
         View banner = findViewById(R.id.in_app_banner);
         if (banner == null) return;
         TextView tv = findViewById(R.id.banner_text);
@@ -307,6 +304,7 @@ public class MainActivity extends AppCompatActivity {
                         if (err != null || snap == null || !snap.exists()) return;
                         String s = safeLower(snap.getString("status"));
                         String normalized = ("not_chosen".equals(s) ? "not chosen" : s);
+
                         //on first emission for this event, record and skip notifying
                         if (!statusDocInitialized.containsKey(eid)) {
                             statusDocInitialized.put(eid, true);
@@ -333,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void requestNotificationPermissionIfNeeded() {
+    private void requestNotificationPermissionIfNeeded() { // we need this for notification
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_POST_NOTIFICATIONS);

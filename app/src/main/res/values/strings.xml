@@ -41,4 +41,9 @@
     <string name="close">Close</string>
     <string name="event_description_goes_here">Event description goes here.</string>
     <string name="create_events">create events</string>
+    <string name="events">Events</string>
+    <string name="users">Users</string>
+    <string name="delete">Delete</string>
+    <string name="manage_profiles">Manage Profiles</string>
+    <string name="manage_events">Manage Events</string>
 </resources>
