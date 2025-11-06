@@ -13,7 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.example.eventlotto.R;
-import com.example.eventlotto.functions.events.EventDetailsFragment;
 import com.example.eventlotto.functions.scan.GenerateQRFragment;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
@@ -76,7 +75,7 @@ public class Ent_ScanFragment extends Fragment implements BarcodeCallback {
      * Handles the result of a scanned QR code.
      * <p>
      * If a valid QR code is detected and hasn’t been processed yet,
-     * this method opens the {@link EventDetailsFragment} to display the event information
+     * this method opens the {@link Ent_EventDetailsFragment} to display the event information
      *
      * @param result The scanned BarcodeResult result object
      */
@@ -86,7 +85,7 @@ public class Ent_ScanFragment extends Fragment implements BarcodeCallback {
             scanned = true;
             String eventId = result.getText();
 
-            EventDetailsFragment dialog = EventDetailsFragment.newInstance(eventId);
+            Ent_EventDetailsFragment dialog = Ent_EventDetailsFragment.newInstance(eventId);
             dialog.show(getParentFragmentManager(), "event_details_dialog");
         }
     }

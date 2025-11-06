@@ -3,6 +3,7 @@ package com.example.eventlotto.functions.notifications;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,9 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.eventlotto.R;
+import com.example.eventlotto.model.FollowedEvent;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.List;
 
@@ -25,7 +29,6 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     }
 
     private final List<FollowedEvent> items;
-    private static java.util.Map<String, String> statusByEid = new java.util.HashMap<>();
     @Nullable private final Listener listener;
 
     public NotificationsAdapter(List<FollowedEvent> items, @Nullable Listener listener) {
@@ -33,10 +36,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         this.listener = listener;
     }
 
-    public void setStatusMap(java.util.Map<String, String> statusByEid) {
-        this.statusByEid = statusByEid != null ? statusByEid : new java.util.HashMap<>();
-        notifyDataSetChanged();
-    }
+    // removed status map; statuses now come live from Firestore per row
 
     @NonNull
     @Override
@@ -52,25 +52,21 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     }
 
     @Override
+    public void onViewRecycled(@NonNull VH holder) {
+        super.onViewRecycled(holder);
+        if (holder.statusReg != null) {
+            holder.statusReg.remove();
+            holder.statusReg = null;
+        }
+        holder.boundEventId = null;
+        holder.textStatus.setVisibility(View.GONE);
+    }
+
+    @Override
     public int getItemCount() {
         return items.size();
     }
 
-    private static int statusTextRes(FollowedEvent.Status s) {
-        switch (s) {
-            case ACCEPTED: return R.string.status_accepted;
-            case WAITING: return R.string.status_waiting;
-            default: return R.string.status_not_chosen;
-        }
-    }
-
-    private static int statusBgRes(FollowedEvent.Status s) {
-        switch (s) {
-            case ACCEPTED: return R.drawable.bg_status_selected;
-            case WAITING: return R.drawable.bg_status_waiting;
-            default: return R.drawable.bg_status_not_chosen;
-        }
-    }
 
     public void setItems(List<FollowedEvent> newItems) {
         items.clear();
@@ -84,6 +80,8 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         final TextView textName;
         final TextView textStatus;
         final TextView textDescription;
+        @Nullable ListenerRegistration statusReg;
+        @Nullable String boundEventId;
 
         VH(@NonNull View itemView) {
             super(itemView);
@@ -99,17 +97,39 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
             textDescription.setText(e.getDescription());
             imageEvent.setImageResource(e.getImageResId());
 
-            String status = statusByEid.get(e.getId());
-            if (status != null && !status.isEmpty()) {
-                textStatus.setVisibility(View.VISIBLE);
-                textStatus.setText(formatStatus(status));
-                Integer bg = statusBgFromString(status);
-                if (bg != null) textStatus.setBackgroundResource(bg);
-                else textStatus.setBackground(null);
-            } else {
-                textStatus.setText("");
-                textStatus.setVisibility(View.GONE);
+            // Clear previous status state and listener
+            textStatus.setVisibility(View.GONE);
+            if (statusReg != null) {
+                statusReg.remove();
+                statusReg = null;
             }
+
+            String eid = e.getId();
+            boundEventId = eid;
+
+            String deviceId = Settings.Secure.getString(
+                    itemView.getContext().getContentResolver(),
+                    Settings.Secure.ANDROID_ID
+            );
+
+            // Listen for this user's status under events/<eid>/status/<uid>
+            statusReg = FirebaseFirestore.getInstance()
+                    .collection("events").document(eid)
+                    .collection("status").document(deviceId)
+                    .addSnapshotListener((snap, err) -> {
+                        if (boundEventId == null || !eid.equals(boundEventId)) return;
+                        if (err != null || snap == null) {
+                            textStatus.setVisibility(View.GONE);
+                            return;
+                        }
+                        if (snap.exists()) {
+                            String raw = snap.getString("status");
+                            applyStatusChip(textStatus, raw);
+                            textStatus.setVisibility(View.VISIBLE);
+                        } else {
+                            textStatus.setVisibility(View.GONE);
+                        }
+                    });
 
             iconNotify.setImageResource(e.isNotificationsEnabled() //toggle between on and off
                     ? R.drawable.notification_on
@@ -169,31 +189,26 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         }
     }
 
-    private static CharSequence formatStatus(String s) {
-        String[] parts = s.split(" ");
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < parts.length; i++) {
-            if (parts[i].length() > 0) {
-                sb.append(Character.toUpperCase(parts[i].charAt(0))).append(parts[i].substring(1));
-            }
-            if (i < parts.length - 1) sb.append(' ');
-        }
-        return sb.toString();
-    }
-
-    private static Integer statusBgFromString(String s) {
-        String k = s.toLowerCase();
-        switch (k) {
+    private static void applyStatusChip(TextView tv, @Nullable String rawStatus) {
+        String s = (rawStatus == null ? "waiting" : rawStatus).trim().toLowerCase();
+        int bg;
+        String label;
+        switch (s) {
             case "selected":
+                bg = R.drawable.bg_status_selected; label = "Selected"; break;
             case "signed up":
-                return R.drawable.bg_status_selected;
-            case "waiting":
-                return R.drawable.bg_status_waiting;
-            case "not chosen":
+            case "signed_up":
+                bg = R.drawable.bg_status_signed_up; label = "Signed Up"; break;
             case "cancelled":
-                return R.drawable.bg_status_not_chosen;
-            default:
-                return null;
+            case "canceled":
+                bg = R.drawable.bg_status_cancelled; label = "Cancelled"; break;
+            case "not chosen":
+            case "not_chosen":
+                bg = R.drawable.bg_status_not_chosen; label = "Not Chosen"; break;
+            default: // waiting
+                bg = R.drawable.bg_status_waiting; label = "Waiting";
         }
+        tv.setBackgroundResource(bg);
+        tv.setText(label);
     }
 }

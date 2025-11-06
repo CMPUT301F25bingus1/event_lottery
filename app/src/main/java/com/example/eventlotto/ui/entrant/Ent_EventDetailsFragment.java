@@ -1,4 +1,4 @@
-package com.example.eventlotto.functions.events;
+package com.example.eventlotto.ui.entrant;
 
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -26,10 +26,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DateFormat;
 
-/**
- * DialogFragment that displays details of an event and allows the user to join or leave the waitlist.
- */
-public class EventDetailsFragment extends DialogFragment {
+public class Ent_EventDetailsFragment extends DialogFragment {
 
     /** The ID of the event to display. */
     private String eventId;
@@ -37,10 +34,6 @@ public class EventDetailsFragment extends DialogFragment {
     /** Firestore service helper for interacting with the database. */
     private FirestoreService firestoreService;
 
-    /** TextView to display the user's current waitlist status. */
-    private TextView textStatus;
-
-    /** ImageView displaying the event image. */
     private ImageView eventImage;
 
     /** TextView displaying status text. */
@@ -52,14 +45,8 @@ public class EventDetailsFragment extends DialogFragment {
     /** Buttons for cancelling the dialog or joining/leaving the waitlist. */
     private Button cancelButton, joinWaitlistButton;
 
-    /**
-     * Factory method to create a new instance of EventDetailsFragment with an event ID.
-     *
-     * @param eventId The ID of the event to display.
-     * @return A new instance of EventDetailsFragment.
-     */
-    public static EventDetailsFragment newInstance(String eventId) {
-        EventDetailsFragment fragment = new EventDetailsFragment();
+    public static Ent_EventDetailsFragment newInstance(String eventId) {
+        Ent_EventDetailsFragment fragment = new Ent_EventDetailsFragment();
         Bundle args = new Bundle();
         args.putString("eventId", eventId);
         fragment.setArguments(args);
@@ -91,6 +78,7 @@ public class EventDetailsFragment extends DialogFragment {
 
         if (eventId != null) {
             fetchEventData(eventId);
+            loadWaitingCount(eventId);
         }
 
         joinWaitlistButton.setOnClickListener(v -> joinWaitlist());
@@ -138,23 +126,19 @@ public class EventDetailsFragment extends DialogFragment {
         Timestamp eventEnd = doc.getTimestamp("eventEndAt");
         eventDates.setText("Event: " + formatTimestampRange(eventStart, eventEnd));
 
-        // Capacity
-        Long capacity = doc.getLong("capacity");
-        waitlistCount.setText("Capacity: " + (capacity != null ? capacity : "N/A"));
+        // Initialize waiting count label; actual count loaded separately
+        if (waitlistCount != null) {
+            waitlistCount.setText("Waiting: 0");
+        }
 
         // Boolean fields
         TextView geoConsentText = getView().findViewById(R.id.geoConsent);
-        TextView notifyText = getView().findViewById(R.id.notifyWhenNotSelected);
 
         if (geoConsentText != null) {
             Boolean geoConsent = doc.getBoolean("geoConsent");
             geoConsentText.setText("Geo Consent Required: " + (geoConsent != null && geoConsent ? "Yes" : "No"));
         }
 
-        if (notifyText != null) {
-            Boolean notify = doc.getBoolean("notifyWhenNotSelected");
-            notifyText.setText("Notify if not selected: " + (notify != null && notify ? "Yes" : "No"));
-        }
 
         // Location
         TextView locationText = getView().findViewById(R.id.location);
@@ -214,6 +198,7 @@ public class EventDetailsFragment extends DialogFragment {
                     Toast.makeText(getContext(), "Successfully joined waitlist", Toast.LENGTH_SHORT).show();
                     if (statusText != null) applyStatusText(statusText, "waiting");
                     showJoinedUI(eventId, deviceId);
+                    loadWaitingCount(eventId);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
@@ -251,12 +236,13 @@ public class EventDetailsFragment extends DialogFragment {
     private void leaveWaitlist(String eventId, String deviceId) {
         FirebaseFirestore.getInstance()
                 .collection("events").document(eventId)
-                .collection("waitlist").document(deviceId)
+                .collection("status").document(deviceId)
                 .delete()
                 .addOnSuccessListener(unused -> {
                     Toast.makeText(getContext(), "Successfully left the waitlist", Toast.LENGTH_SHORT).show();
                     if (statusText != null) statusText.setVisibility(View.GONE);
                     showNotJoinedUI();
+                    loadWaitingCount(eventId);
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to leave waitlist: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
@@ -274,18 +260,33 @@ public class EventDetailsFragment extends DialogFragment {
 
         FirebaseFirestore.getInstance()
                 .collection("events").document(eventId)
-                .collection("waitlist").document(deviceId)
+                .collection("status").document(deviceId)
                 .get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
                         String raw = doc.getString("status");
                         if (statusText != null) applyStatusText(statusText, raw);
                         showJoinedUI(eventId, deviceId);
+                        loadWaitingCount(eventId);
                     } else {
                         if (statusText != null) statusText.setVisibility(View.GONE);
                         showNotJoinedUI();
+                        loadWaitingCount(eventId);
                     }
                 });
+    }
+    private void loadWaitingCount(String eventId) {
+        if (waitlistCount == null) return;
+        FirebaseFirestore.getInstance()
+                .collection("events").document(eventId)
+                .collection("status")
+                .whereEqualTo("status", "waiting")
+                .get()
+                .addOnSuccessListener(query -> {
+                    int c = (query != null) ? query.size() : 0;
+                    waitlistCount.setText(c+ "is on the waiting list.");
+                })
+                .addOnFailureListener(e -> waitlistCount.setText("Waiting: 0"));
     }
 
     /**
