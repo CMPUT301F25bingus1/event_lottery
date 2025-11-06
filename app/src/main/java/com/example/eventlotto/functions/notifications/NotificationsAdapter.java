@@ -66,7 +66,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
 
     private static int statusBgRes(FollowedEvent.Status s) {
         switch (s) {
-            case ACCEPTED: return R.drawable.bg_status_accepted;
+            case ACCEPTED: return R.drawable.bg_status_selected;
             case WAITING: return R.drawable.bg_status_waiting;
             default: return R.drawable.bg_status_not_chosen;
         }
@@ -186,7 +186,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         switch (k) {
             case "selected":
             case "signed up":
-                return R.drawable.bg_status_accepted;
+                return R.drawable.bg_status_selected;
             case "waiting":
                 return R.drawable.bg_status_waiting;
             case "not chosen":

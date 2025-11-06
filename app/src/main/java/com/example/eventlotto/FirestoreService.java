@@ -6,18 +6,14 @@ import com.example.eventlotto.model.User;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
-import com.google.firebase.firestore.WriteBatch;
 
-import java.util.function.Consumer;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class FirestoreService {
     public static final String COLLECTION_USERS = "users";
@@ -31,6 +27,9 @@ public class FirestoreService {
         this.db = FirebaseFirestore.getInstance();
     }
 
+    // ---------------------------
+    // Collection references
+    // ---------------------------
     public CollectionReference users() {
         return db.collection(COLLECTION_USERS);
     }
@@ -68,7 +67,11 @@ public class FirestoreService {
                 .addOnFailureListener(e -> callback.accept(false));
     }
 
-
+    public void userExists(String uid, Consumer<Boolean> callback) {
+        users().document(uid).get()
+                .addOnSuccessListener(snapshot -> callback.accept(snapshot.exists()))
+                .addOnFailureListener(e -> callback.accept(false));
+    }
 
     public Task<Void> saveNotification(Notification notification) {
         if (notification == null || notification.getNid() == null) {
@@ -91,5 +94,14 @@ public class FirestoreService {
             status.setSid(status.getUid() + "_" + status.getEid());
         }
         return eventStatus().document(status.getSid()).set(status, SetOptions.merge());
+    }
+
+    public Task<Void> joinWaitlist(String eventId, String uid) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("uid", uid);
+        return events().document(eventId)
+                .collection("waitlist")
+                .document(uid)
+                .set(data);
     }
 }
