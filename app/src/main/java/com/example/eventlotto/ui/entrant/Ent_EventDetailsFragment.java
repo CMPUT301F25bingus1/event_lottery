@@ -70,6 +70,7 @@ public class EventDetailsFragment extends DialogFragment {
 
         if (eventId != null) {
             fetchEventData(eventId);
+            loadWaitingCount(eventId);
         }
 
         joinWaitlistButton.setOnClickListener(v -> joinWaitlist());
@@ -108,23 +109,19 @@ public class EventDetailsFragment extends DialogFragment {
         Timestamp eventEnd = doc.getTimestamp("eventEndAt");
         eventDates.setText("Event: " + formatTimestampRange(eventStart, eventEnd));
 
-        // Capacity
-        Long capacity = doc.getLong("capacity");
-        waitlistCount.setText("Capacity: " + (capacity != null ? capacity : "N/A"));
+        // Initialize waiting count label; actual count loaded separately
+        if (waitlistCount != null) {
+            waitlistCount.setText("Waiting: 0");
+        }
 
         // Boolean fields
         TextView geoConsentText = getView().findViewById(R.id.geoConsent);
-        TextView notifyText = getView().findViewById(R.id.notifyWhenNotSelected);
 
         if (geoConsentText != null) {
             Boolean geoConsent = doc.getBoolean("geoConsent");
             geoConsentText.setText("Geo Consent Required: " + (geoConsent != null && geoConsent ? "Yes" : "No"));
         }
 
-        if (notifyText != null) {
-            Boolean notify = doc.getBoolean("notifyWhenNotSelected");
-            notifyText.setText("Notify if not selected: " + (notify != null && notify ? "Yes" : "No"));
-        }
 
         // Location
         TextView locationText = getView().findViewById(R.id.location);
@@ -187,6 +184,7 @@ public class EventDetailsFragment extends DialogFragment {
                     if (statusText != null) applyStatusText(statusText, /* rawStatus */ "waiting");
 
                     showJoinedUI(eventId, deviceId);
+                    loadWaitingCount(eventId);
                 })
 
                 .addOnFailureListener(e ->
@@ -218,6 +216,7 @@ public class EventDetailsFragment extends DialogFragment {
                     Toast.makeText(getContext(), "Successfully left the waitlist", Toast.LENGTH_SHORT).show();
                     if (statusText != null) statusText.setVisibility(View.GONE);
                     showNotJoinedUI();
+                    loadWaitingCount(eventId);
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Failed to leave waitlist: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -239,11 +238,26 @@ public class EventDetailsFragment extends DialogFragment {
                         String raw = doc.getString("status"); // may be null
                         if (statusText != null) applyStatusText(statusText, raw); // null -> waiting
                         showJoinedUI(eventId, deviceId);
+                        loadWaitingCount(eventId);
                     } else {
                         if (statusText != null) statusText.setVisibility(View.GONE);
                         showNotJoinedUI();
+                        loadWaitingCount(eventId);
                     }
                 });
+    }
+    private void loadWaitingCount(String eventId) {
+        if (waitlistCount == null) return;
+        FirebaseFirestore.getInstance()
+                .collection("events").document(eventId)
+                .collection("status")
+                .whereEqualTo("status", "waiting")
+                .get()
+                .addOnSuccessListener(query -> {
+                    int c = (query != null) ? query.size() : 0;
+                    waitlistCount.setText(c+ "is on the waiting list" + c);
+                })
+                .addOnFailureListener(e -> waitlistCount.setText("Waiting: 0"));
     }
 
     private void applyStatusText(@NonNull TextView tv, @Nullable String rawStatus) {
