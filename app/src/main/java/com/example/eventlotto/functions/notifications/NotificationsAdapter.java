@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.eventlotto.R;
+import com.example.eventlotto.model.FollowedEvent;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
@@ -188,7 +189,6 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         }
     }
 
-    // Align with EventAdapter's status chip mapping
     private static void applyStatusChip(TextView tv, @Nullable String rawStatus) {
         String s = (rawStatus == null ? "waiting" : rawStatus).trim().toLowerCase();
         int bg;

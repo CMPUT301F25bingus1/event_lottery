@@ -1,16 +1,11 @@
-package com.example.eventlotto.functions.notifications;
+package com.example.eventlotto.model;
 
 public class FollowedEvent {
-
-
     private final String id;
     private final String name;
     private final String description;
-
     private final int imageResId;
     private boolean notificationsEnabled;
-
-
     public FollowedEvent(String id, String name, String description, int imageResId, boolean notificationsEnabled, boolean closed) {
         this.id = id;
         this.name = name;

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="status_chip_width">80dp</dimen>
+    <dimen name="banner_icon_size">32dp</dimen>
+    <dimen name="banner_close_size">32dp</dimen>
 </resources>

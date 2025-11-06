@@ -7,7 +7,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="create events"
+        android:text="@string/create_events"
         android:textColor="@android:color/white"
         android:textSize="22sp"
         android:layout_gravity="center" />

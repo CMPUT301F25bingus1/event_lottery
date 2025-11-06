@@ -73,11 +73,12 @@
             android:id="@+id/iconNotify"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginBottom="36dp"
             android:contentDescription="@string/notification_toggle"
             android:src="@drawable/notification_off"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/imageEvent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

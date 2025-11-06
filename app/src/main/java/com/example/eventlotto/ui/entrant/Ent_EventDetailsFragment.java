@@ -1,6 +1,5 @@
-package com.example.eventlotto.functions.events;
+package com.example.eventlotto.ui.entrant;
 
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -27,18 +26,18 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DateFormat;
 
-public class EventDetailsFragment extends DialogFragment {
+public class Ent_EventDetailsFragment extends DialogFragment {
 
     private String eventId;
     private FirestoreService firestoreService;
-    private TextView textStatus;
+
     private ImageView eventImage;
     private TextView statusText;
     private TextView eventTitle, eventDescription, signupDates, eventDates, waitlistCount;
     private Button cancelButton, joinWaitlistButton;
 
-    public static EventDetailsFragment newInstance(String eventId) {
-        EventDetailsFragment fragment = new EventDetailsFragment();
+    public static Ent_EventDetailsFragment newInstance(String eventId) {
+        Ent_EventDetailsFragment fragment = new Ent_EventDetailsFragment();
         Bundle args = new Bundle();
         args.putString("eventId", eventId);
         fragment.setArguments(args);
@@ -255,7 +254,7 @@ public class EventDetailsFragment extends DialogFragment {
                 .get()
                 .addOnSuccessListener(query -> {
                     int c = (query != null) ? query.size() : 0;
-                    waitlistCount.setText(c+ "is on the waiting list" + c);
+                    waitlistCount.setText(c+ "is on the waiting list.");
                 })
                 .addOnFailureListener(e -> waitlistCount.setText("Waiting: 0"));
     }

@@ -15,12 +15,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
-import com.example.eventlotto.functions.events.EventDetailsFragment;
-import com.example.eventlotto.functions.notifications.FollowedEvent;
+import com.example.eventlotto.model.FollowedEvent;
 import com.example.eventlotto.functions.notifications.NotificationsAdapter;
 import com.example.eventlotto.model.Notification;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,7 +34,7 @@ public class Ent_NotificationsFragment extends Fragment {
     private FirestoreService firestoreService;
     private TabLayout tabs;
     private String deviceId;
-    // status is now read live per item from events/<eid>/status/<uid>
+    @Nullable private ListenerRegistration subscriptionsReg;
 
     @Nullable
     @Override
@@ -63,7 +63,7 @@ public class Ent_NotificationsFragment extends Fragment {
 
             @Override
             public void onEventClick(FollowedEvent event) {
-                EventDetailsFragment fragment = EventDetailsFragment.newInstance(event.getId());
+                Ent_EventDetailsFragment fragment = Ent_EventDetailsFragment.newInstance(event.getId());
                 fragment.show(getParentFragmentManager(), "event_details");
             }
         });
@@ -99,7 +99,6 @@ public class Ent_NotificationsFragment extends Fragment {
                                 id,
                                 name != null ? name : "Untitled",
                                 description != null ? description : "",
-                                FollowedEvent.Status.WAITING,
                                 R.drawable.event1,
                                 false,
                                 false
@@ -115,21 +114,34 @@ public class Ent_NotificationsFragment extends Fragment {
     }
 
     private void loadUserSubscriptions() {
-        firestoreService.notifications()
+        if (subscriptionsReg != null) {
+            subscriptionsReg.remove();
+            subscriptionsReg = null;
+        }
+        subscriptionsReg = firestoreService.notifications()
                 .whereEqualTo("uid", deviceId)
-                .get()
-                .addOnSuccessListener(query -> {
+                .addSnapshotListener((query, error) -> {
                     Set<String> subscribedIds = new HashSet<>();
-                    for (DocumentSnapshot doc : query) {
-                        String eid = doc.getString("eid");
-                        if (eid != null) subscribedIds.add(eid);
+                    if (query != null) {
+                        for (DocumentSnapshot doc : query) {
+                            String eid = doc.getString("eid");
+                            if (eid != null) subscribedIds.add(eid);
+                        }
                     }
                     for (FollowedEvent e : allEvents) {
                         e.setNotificationsEnabled(subscribedIds.contains(e.getId()));
                     }
                     applyFilter(tabs.getSelectedTabPosition());
-                })
-                .addOnFailureListener(e -> applyFilter(tabs.getSelectedTabPosition()));
+                });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (subscriptionsReg != null) {
+            subscriptionsReg.remove();
+            subscriptionsReg = null;
+        }
     }
 
     private void handleSubscriptionToggle(FollowedEvent event) {
