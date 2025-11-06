@@ -42,16 +42,6 @@ public class Ent_ScanFragment extends Fragment implements BarcodeCallback {
         View view = inflater.inflate(R.layout.fragment_scan, container, false);
         barcodeView = view.findViewById(R.id.barcode_scanner);
 
-        // temp QR display button
-        Button showQrButton = view.findViewById(R.id.showQrButton);
-        showQrButton.setOnClickListener(v -> {
-            // replace id later
-            String eventId = "test_event_001";
-
-            GenerateQRFragment qrFragment = GenerateQRFragment.newInstance(eventId);
-            qrFragment.show(getParentFragmentManager(), "generate_qr_dialog");
-        });
-
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startScanner();
         } else {

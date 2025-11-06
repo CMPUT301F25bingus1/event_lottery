@@ -1,11 +1,18 @@
 package com.example.eventlotto.functions.scan;
 
+import android.content.ContentValues;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,17 +23,20 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
-// This class was developed in conjunction with OpenAI, ChatGPT, "How to generate a QR Code based on an id number in Android Studio"
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+
+/**
+ * This class was developed in conjunction with OpenAI, ChatGPT.
+ * It generates and displays a QR code based on an event ID,
+ * and allows the user to download it to the device gallery.
+ */
 public class GenerateQRFragment extends DialogFragment {
 
     private String eventId;
+    private Bitmap qrBitmap;
 
-    /**
-     * Creates a new instance of GenerateQRFragment with the given event ID.
-     *
-     * @param eventId The unique ID of the event to encode in the QR code
-     * @return A new GenerateQRFragment with the event ID set as an argument
-     */
     public static GenerateQRFragment newInstance(String eventId) {
         GenerateQRFragment fragment = new GenerateQRFragment();
         Bundle args = new Bundle();
@@ -35,15 +45,6 @@ public class GenerateQRFragment extends DialogFragment {
         return fragment;
     }
 
-    /**
-     * Creates the QR code generation layout and displays a QR code
-     * based on the provided event ID.
-     *
-     * @param inflater The LayoutInflater used to create the fragment layout
-     * @param container The parent view that the fragment’s UI is attached to
-     * @param savedInstanceState The previously saved instance state, if any
-     * @return The root view for the fragment’s layout
-     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -52,22 +53,70 @@ public class GenerateQRFragment extends DialogFragment {
 
         View view = inflater.inflate(R.layout.fragment_generate_qr, container, false);
         ImageView qrImage = view.findViewById(R.id.qrImage);
+        Button downloadButton = view.findViewById(R.id.download_qr_button);
 
         if (getArguments() != null) {
             eventId = getArguments().getString("event_id");
 
             try {
-                String qrData = eventId;
-
                 BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-                Bitmap bitmap = barcodeEncoder.encodeBitmap(qrData, BarcodeFormat.QR_CODE, 600, 600);
-                qrImage.setImageBitmap(bitmap);
+                qrBitmap = barcodeEncoder.encodeBitmap(eventId, BarcodeFormat.QR_CODE, 600, 600);
+                qrImage.setImageBitmap(qrBitmap);
 
             } catch (WriterException e) {
                 e.printStackTrace();
+                Toast.makeText(getContext(), "Error generating QR: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
 
+        // Handle QR download
+        downloadButton.setOnClickListener(v -> saveQRCodeToGallery(qrBitmap));
+
         return view;
+    }
+
+    /**
+     * Saves the generated QR code to the device’s gallery.
+     */
+    private void saveQRCodeToGallery(Bitmap bitmap) {
+        if (bitmap == null) {
+            Toast.makeText(getContext(), "No QR code to save!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String filename = "event_qr_" + System.currentTimeMillis() + ".png";
+
+        try {
+            OutputStream fos;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Android 10+ uses MediaStore
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Images.Media.DISPLAY_NAME, filename);
+                values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+                values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/EventLotto");
+
+                Uri imageUri = requireContext().getContentResolver()
+                        .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                fos = requireContext().getContentResolver().openOutputStream(imageUri);
+            } else {
+                // Older devices: write to external storage
+                File dir = new File(Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES), "EventLotto");
+                if (!dir.exists()) dir.mkdirs();
+
+                File image = new File(dir, filename);
+                fos = new FileOutputStream(image);
+            }
+
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.close();
+
+            Toast.makeText(getContext(), "QR saved to gallery!", Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getContext(), "Error saving QR: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }
