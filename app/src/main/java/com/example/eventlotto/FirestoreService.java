@@ -16,10 +16,12 @@ import com.example.eventlotto.model.EventStatus;
 >>>>>>> Stashed changes
 import com.example.eventlotto.model.User;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 
@@ -77,36 +79,19 @@ public class FirestoreService {
     public Task<Void> saveUser(User user) {
         if (user == null || user.getUid() == null) {
             throw new IllegalArgumentException("user.uid is required");
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
     public void saveUserProfile(User user, FirestoreCallback callback) {
         if (user == null || user.getDeviceId() == null) {
             callback.onCallback(false);
             return;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
         }
 
         usersCollection.document(user.getDeviceId())
                 .set(user)
                 .addOnSuccessListener(aVoid -> callback.onCallback(true))
                 .addOnFailureListener(e -> callback.onCallback(false));
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
+
     }
 
 

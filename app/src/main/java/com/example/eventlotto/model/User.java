@@ -75,17 +75,9 @@ public class User {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
-<<<<<<< Updated upstream
-=======
+
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
     public Boolean getNotifyWhenNotSelected() { return notifyWhenNotSelected; }
     public void setNotifyWhenNotSelected(Boolean notifyWhenNotSelected) { this.notifyWhenNotSelected = notifyWhenNotSelected; }
