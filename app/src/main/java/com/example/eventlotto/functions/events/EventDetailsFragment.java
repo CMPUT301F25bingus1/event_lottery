@@ -1,6 +1,5 @@
 package com.example.eventlotto.functions.events;
 
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -15,8 +14,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.DialogFragment;
 
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
@@ -27,16 +26,38 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DateFormat;
 
+/**
+ * DialogFragment that displays details of an event and allows the user to join or leave the waitlist.
+ */
 public class EventDetailsFragment extends DialogFragment {
 
+    /** The ID of the event to display. */
     private String eventId;
+
+    /** Firestore service helper for interacting with the database. */
     private FirestoreService firestoreService;
+
+    /** TextView to display the user's current waitlist status. */
     private TextView textStatus;
+
+    /** ImageView displaying the event image. */
     private ImageView eventImage;
+
+    /** TextView displaying status text. */
     private TextView statusText;
+
+    /** TextViews for event title, description, signup dates, event dates, and capacity. */
     private TextView eventTitle, eventDescription, signupDates, eventDates, waitlistCount;
+
+    /** Buttons for cancelling the dialog or joining/leaving the waitlist. */
     private Button cancelButton, joinWaitlistButton;
 
+    /**
+     * Factory method to create a new instance of EventDetailsFragment with an event ID.
+     *
+     * @param eventId The ID of the event to display.
+     * @return A new instance of EventDetailsFragment.
+     */
     public static EventDetailsFragment newInstance(String eventId) {
         EventDetailsFragment fragment = new EventDetailsFragment();
         Bundle args = new Bundle();
@@ -77,6 +98,11 @@ public class EventDetailsFragment extends DialogFragment {
         return view;
     }
 
+    /**
+     * Fetches event data from Firestore and populates the UI.
+     *
+     * @param eventId The ID of the event to fetch.
+     */
     private void fetchEventData(String eventId) {
         firestoreService.events()
                 .document(eventId)
@@ -93,17 +119,21 @@ public class EventDetailsFragment extends DialogFragment {
                         Toast.makeText(getContext(), "Failed to load event: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
+    /**
+     * Populates the fragment UI with data from the Firestore document.
+     *
+     * @param doc Firestore document containing event data.
+     */
     private void populateEvent(DocumentSnapshot doc) {
         // Basic fields
         eventTitle.setText(doc.getString("eventTitle") != null ? doc.getString("eventTitle") : "No Title");
         eventDescription.setText(doc.getString("description") != null ? doc.getString("description") : "No Description");
 
-        // Registration dates
+        // Registration and event dates
         Timestamp regOpen = doc.getTimestamp("registrationOpensAt");
         Timestamp regClose = doc.getTimestamp("registrationClosesAt");
         signupDates.setText("Sign-up: " + formatTimestampRange(regOpen, regClose));
 
-        // Event dates
         Timestamp eventStart = doc.getTimestamp("eventStartAt");
         Timestamp eventEnd = doc.getTimestamp("eventEndAt");
         eventDates.setText("Event: " + formatTimestampRange(eventStart, eventEnd));
@@ -130,11 +160,9 @@ public class EventDetailsFragment extends DialogFragment {
         TextView locationText = getView().findViewById(R.id.location);
         if (locationText != null) {
             com.google.firebase.firestore.GeoPoint location = doc.getGeoPoint("location");
-            if (location != null) {
-                locationText.setText("Location: " + location.getLatitude() + ", " + location.getLongitude());
-            } else {
-                locationText.setText("Location: N/A");
-            }
+            locationText.setText(location != null
+                    ? "Location: " + location.getLatitude() + ", " + location.getLongitude()
+                    : "Location: N/A");
         }
 
         // Organizer
@@ -145,7 +173,7 @@ public class EventDetailsFragment extends DialogFragment {
                 organizerRef.get()
                         .addOnSuccessListener(organizerDoc -> {
                             if (organizerDoc.exists()) {
-                                String organizerName = organizerDoc.getString("name"); // adjust to your Firestore structure
+                                String organizerName = organizerDoc.getString("name");
                                 organizerText.setText("Organizer: " + (organizerName != null ? organizerName : "N/A"));
                             } else {
                                 organizerText.setText("Organizer: N/A");
@@ -157,8 +185,8 @@ public class EventDetailsFragment extends DialogFragment {
             }
         }
 
-        // Image
-        String imageUrl = doc.getString("imageUrl"); // or replace with actual image field if different
+        // Load event image
+        String imageUrl = doc.getString("imageUrl");
         if (imageUrl != null && !imageUrl.isEmpty()) {
             new Thread(() -> {
                 try {
@@ -174,6 +202,7 @@ public class EventDetailsFragment extends DialogFragment {
         }
     }
 
+    /** Joins the current device to the event's waitlist in Firestore. */
     private void joinWaitlist() {
         String deviceId = Settings.Secure.getString(
                 requireContext().getContentResolver(),
@@ -183,16 +212,19 @@ public class EventDetailsFragment extends DialogFragment {
         firestoreService.joinWaitlist(eventId, deviceId)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(getContext(), "Successfully joined waitlist", Toast.LENGTH_SHORT).show();
-                    // show colored text (if you don't store a status yet, default to "waiting")
-                    if (statusText != null) applyStatusText(statusText, /* rawStatus */ "waiting");
-
+                    if (statusText != null) applyStatusText(statusText, "waiting");
                     showJoinedUI(eventId, deviceId);
                 })
-
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
+    /**
+     * Updates the UI to show that the user has joined the waitlist.
+     *
+     * @param eventId  The event ID.
+     * @param deviceId The current device ID.
+     */
     private void showJoinedUI(String eventId, String deviceId) {
         joinWaitlistButton.setText("Leave Waitlist");
         joinWaitlistButton.setBackgroundTintList(
@@ -201,6 +233,7 @@ public class EventDetailsFragment extends DialogFragment {
         joinWaitlistButton.setOnClickListener(v -> leaveWaitlist(eventId, deviceId));
     }
 
+    /** Updates the UI to show that the user has not joined the waitlist. */
     private void showNotJoinedUI() {
         joinWaitlistButton.setText("Join Waitlist");
         joinWaitlistButton.setBackgroundTintList(
@@ -209,6 +242,12 @@ public class EventDetailsFragment extends DialogFragment {
         joinWaitlistButton.setOnClickListener(v -> joinWaitlist());
     }
 
+    /**
+     * Removes the device from the event's waitlist.
+     *
+     * @param eventId  The event ID.
+     * @param deviceId The current device ID.
+     */
     private void leaveWaitlist(String eventId, String deviceId) {
         FirebaseFirestore.getInstance()
                 .collection("events").document(eventId)
@@ -219,11 +258,14 @@ public class EventDetailsFragment extends DialogFragment {
                     if (statusText != null) statusText.setVisibility(View.GONE);
                     showNotJoinedUI();
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Failed to leave waitlist: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to leave waitlist: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
+    /**
+     * Checks if the current device is already on the waitlist and updates the UI accordingly.
+     *
+     * @param eventId The event ID.
+     */
     private void checkIfOnWaitlist(String eventId) {
         String deviceId = Settings.Secure.getString(
                 requireContext().getContentResolver(),
@@ -236,8 +278,8 @@ public class EventDetailsFragment extends DialogFragment {
                 .get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
-                        String raw = doc.getString("status"); // may be null
-                        if (statusText != null) applyStatusText(statusText, raw); // null -> waiting
+                        String raw = doc.getString("status");
+                        if (statusText != null) applyStatusText(statusText, raw);
                         showJoinedUI(eventId, deviceId);
                     } else {
                         if (statusText != null) statusText.setVisibility(View.GONE);
@@ -246,6 +288,12 @@ public class EventDetailsFragment extends DialogFragment {
                 });
     }
 
+    /**
+     * Applies a status label and background to a TextView.
+     *
+     * @param tv        The TextView to update.
+     * @param rawStatus The status string, may be null.
+     */
     private void applyStatusText(@NonNull TextView tv, @Nullable String rawStatus) {
         String s = (rawStatus == null ? "waiting" : rawStatus).trim().toLowerCase();
         int drawableRes;
@@ -273,7 +321,6 @@ public class EventDetailsFragment extends DialogFragment {
                     ? ((GradientDrawable) d).getColor().getDefaultColor()
                     : ContextCompat.getColor(requireContext(), android.R.color.black);
             tv.setTextColor(color);
-
         } catch (Exception e) {
             e.printStackTrace();
             tv.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black));
@@ -283,6 +330,13 @@ public class EventDetailsFragment extends DialogFragment {
         tv.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Formats a start and end timestamp as a human-readable date range.
+     *
+     * @param start Start timestamp.
+     * @param end   End timestamp.
+     * @return Formatted date range or "N/A" if either timestamp is null.
+     */
     private String formatTimestampRange(Timestamp start, Timestamp end) {
         if (start == null || end == null) return "N/A";
         DateFormat df = DateFormat.getDateInstance();

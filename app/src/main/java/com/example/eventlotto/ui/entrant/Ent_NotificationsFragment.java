@@ -29,6 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Fragment that displays notifications and followed events for an entrant.
+ * Users can view all events or only the ones they are following,
+ * subscribe/unsubscribe to notifications, and view event details.
+ */
 public class Ent_NotificationsFragment extends Fragment {
 
     private final List<FollowedEvent> allEvents = new ArrayList<>();
@@ -36,6 +41,8 @@ public class Ent_NotificationsFragment extends Fragment {
     private FirestoreService firestoreService;
     private TabLayout tabs;
     private String deviceId;
+
+    /** Map of event IDs to user-specific statuses. */
     private final Map<String, String> statusByEid = new HashMap<>();
 
     @Nullable
@@ -49,13 +56,16 @@ public class Ent_NotificationsFragment extends Fragment {
                 Settings.Secure.ANDROID_ID
         );
 
+        // Setup RecyclerView
         RecyclerView rv = root.findViewById(R.id.notificationsRecycler);
         rv.setLayoutManager(new LinearLayoutManager(requireContext()));
 
+        // Setup Tabs
         tabs = root.findViewById(R.id.tabFilter);
         tabs.addTab(tabs.newTab().setText(R.string.tab_following));
         tabs.addTab(tabs.newTab().setText(R.string.tab_all));
 
+        // Setup adapter with listener for event clicks and toggle
         adapter = new NotificationsAdapter(new ArrayList<>(), new NotificationsAdapter.Listener() {
             @Override
             public void onNotificationToggle(FollowedEvent event, int position) {
@@ -71,9 +81,11 @@ public class Ent_NotificationsFragment extends Fragment {
         });
         rv.setAdapter(adapter);
 
+        // Default select "Following" tab
         tabs.selectTab(tabs.getTabAt(0));
         applyFilter(0);
 
+        // Listen for tab changes to update displayed events
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -84,10 +96,15 @@ public class Ent_NotificationsFragment extends Fragment {
             @Override public void onTabReselected(TabLayout.Tab tab) { }
         });
 
+        // Fetch events and user-specific data
         fetchAllEvents();
         return root;
     }
 
+    /**
+     * Fetches all events from Firestore and populates the local list.
+     * Afterwards, it loads the user's subscriptions and event statuses.
+     */
     private void fetchAllEvents() {
         firestoreService.events()
                 .get()
@@ -117,6 +134,9 @@ public class Ent_NotificationsFragment extends Fragment {
                 });
     }
 
+    /**
+     * Loads the user's current notification subscriptions and updates the events accordingly.
+     */
     private void loadUserSubscriptions() {
         firestoreService.notifications()
                 .whereEqualTo("uid", deviceId)
@@ -135,6 +155,11 @@ public class Ent_NotificationsFragment extends Fragment {
                 .addOnFailureListener(e -> applyFilter(tabs.getSelectedTabPosition()));
     }
 
+    /**
+     * Handles subscribing or unsubscribing the user to notifications for a given event.
+     *
+     * @param event The event being toggled.
+     */
     private void handleSubscriptionToggle(FollowedEvent event) {
         String nid = deviceId + "_" + event.getId();
         if (event.isNotificationsEnabled()) {
@@ -152,9 +177,14 @@ public class Ent_NotificationsFragment extends Fragment {
         }
     }
 
+    /**
+     * Filters the events to display based on the currently selected tab.
+     *
+     * @param tabPosition Index of the selected tab (0 = Following, 1 = All)
+     */
     private void applyFilter(int tabPosition) {
         List<FollowedEvent> filtered = new ArrayList<>();
-        if (tabPosition== 0) { // Following
+        if (tabPosition == 0) { // Following
             for (FollowedEvent e : allEvents) {
                 if (e.isNotificationsEnabled()) filtered.add(e);
             }
@@ -165,6 +195,9 @@ public class Ent_NotificationsFragment extends Fragment {
         adapter.setItems(filtered);
     }
 
+    /**
+     * Loads the current statuses of events for the user and updates the adapter.
+     */
     private void loadUserEventStatuses() {
         firestoreService.getEventStatusesForUser(deviceId)
                 .addOnSuccessListener(query -> {
