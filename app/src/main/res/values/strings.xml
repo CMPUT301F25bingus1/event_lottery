@@ -18,6 +18,7 @@
     <string name="tab_all">All</string>
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     <string name="status">Status</string>
     <string name="confirm_opt_out_title">Opt out</string>
     <string name="confirm_opt_out_message">Would you like to opt-out of receiving notifications?</string>
@@ -44,6 +45,10 @@
     <string name="event_description_goes_here">Event description goes here.</string>
     <string name="create_events">create events</string>
 </resources>
+=======
+    <string name="warning_icon">Warning icon</string>
+</resources>
+>>>>>>> Stashed changes
 =======
     <string name="warning_icon">Warning icon</string>
 </resources>

@@ -8,8 +8,12 @@ import android.os.Build;
 import android.os.Bundle;
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import android.provider.Settings;
 
+=======
+import android.view.View;
+>>>>>>> Stashed changes
 =======
 import android.view.View;
 >>>>>>> Stashed changes
@@ -40,6 +44,7 @@ import com.example.eventlotto.ui.NotificationsFragment;
 import com.example.eventlotto.ui.LoginFragment;
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
 import com.example.eventlotto.ui.UsersFragment;
 import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
@@ -47,6 +52,10 @@ import com.example.eventlotto.ui.entrant.Ent_MyEventsFragment;
 import com.example.eventlotto.ui.entrant.Ent_NotificationsFragment;
 import com.example.eventlotto.ui.entrant.Ent_ScanFragment;
 import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
+=======
+import com.example.eventlotto.ui.ScanFragment;
+import com.example.eventlotto.ui.WelcomeFragment;
+>>>>>>> Stashed changes
 =======
 import com.example.eventlotto.ui.ScanFragment;
 import com.example.eventlotto.ui.WelcomeFragment;
@@ -67,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     private FirestoreService firestoreService;
     private String deviceId;
     private static final String CHANNEL_ID = "event_status_updates";
@@ -78,6 +88,9 @@ public class MainActivity extends AppCompatActivity {
     private java.util.Map<String, Boolean> statusDocInitialized = new java.util.HashMap<>();
     private java.util.Map<String, String> lastSeenStatus = new java.util.HashMap<>();
     private static final int REQ_POST_NOTIFICATIONS = 1001;
+=======
+    private BottomNavigationView bottomNavigationView;
+>>>>>>> Stashed changes
 =======
     private BottomNavigationView bottomNavigationView;
 >>>>>>> Stashed changes
@@ -97,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
         firestoreService = new FirestoreService();
@@ -190,6 +204,8 @@ public class MainActivity extends AppCompatActivity {
         // Set default selected tab
         bottomNav.setSelectedItemId(R.id.nav_home);
 =======
+=======
+>>>>>>> Stashed changes
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
 
@@ -230,6 +246,9 @@ public class MainActivity extends AppCompatActivity {
             bottomNavigationView.setVisibility(View.VISIBLE);
         }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
