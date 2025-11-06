@@ -120,6 +120,8 @@
                 android:id="@+id/cancelButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#D9D9D9"
+                android:textColor="@android:color/black"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 android:text="Cancel" />
@@ -128,6 +130,8 @@
                 android:id="@+id/joinWaitlistButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#5DBD70"
+                android:textColor="@android:color/white"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:text="Join Waitlist" />

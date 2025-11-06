@@ -5,11 +5,21 @@ import com.example.eventlotto.model.User;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.Transaction;
+import androidx.annotation.Nullable;
+import com.example.eventlotto.model.Event;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class FirestoreService {
@@ -65,8 +75,6 @@ public class FirestoreService {
                 .addOnFailureListener(e -> callback.accept(false));
     }
 
-
-
     public Task<DocumentSnapshot> getEvent(String eid) {
         return events().document(eid).get();
     }
@@ -88,4 +96,14 @@ public class FirestoreService {
     public Task<DocumentSnapshot> getNotification(String nid) {
         return notifications().document(nid).get();
     }
+
+    public Task<Void> joinWaitlist(String eventId, String uid) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("uid", uid);
+        return events().document(eventId)
+                .collection("waitlist")
+                .document(uid)
+                .set(data);
+    }
 }
+

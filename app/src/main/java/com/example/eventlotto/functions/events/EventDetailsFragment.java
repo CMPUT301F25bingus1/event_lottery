@@ -1,6 +1,7 @@
 package com.example.eventlotto.functions.events;
 
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.example.eventlotto.R;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DateFormat;
 
@@ -65,6 +67,9 @@ public class EventDetailsFragment extends DialogFragment {
             fetchEventData(eventId);
         }
 
+        joinWaitlistButton.setOnClickListener(v -> joinWaitlist());
+
+
         return view;
     }
 
@@ -75,6 +80,7 @@ public class EventDetailsFragment extends DialogFragment {
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
                         populateEvent(doc);
+                        checkIfOnWaitlist(eventId);
                     } else {
                         Toast.makeText(getContext(), "Event not found", Toast.LENGTH_SHORT).show();
                     }
@@ -164,6 +170,86 @@ public class EventDetailsFragment extends DialogFragment {
         }
     }
 
+    private void joinWaitlist() {
+        String deviceId = Settings.Secure.getString(
+                requireContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID
+        );
+
+        firestoreService.joinWaitlist(eventId, deviceId)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getContext(), "Successfully joined waitlist", Toast.LENGTH_SHORT).show();
+                    // flip UI immediately !
+                    joinWaitlistButton.setText("Leave Waitlist");
+                    joinWaitlistButton.setBackgroundTintList(
+                            getResources().getColorStateList(android.R.color.holo_red_light)
+                    );
+                    joinWaitlistButton.setOnClickListener(v -> leaveWaitlist(eventId, deviceId));
+
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    private void showJoinedUI(String eventId, String deviceId) {
+        joinWaitlistButton.setText("Leave Waitlist");
+        joinWaitlistButton.setBackgroundTintList(
+                getResources().getColorStateList(android.R.color.holo_red_light)
+        );
+        joinWaitlistButton.setOnClickListener(v -> leaveWaitlist(eventId, deviceId));
+    }
+
+    private void showNotJoinedUI() {
+        joinWaitlistButton.setText("Join Waitlist");
+        joinWaitlistButton.setBackgroundTintList(
+                getResources().getColorStateList(android.R.color.holo_green_dark)
+        );
+        joinWaitlistButton.setOnClickListener(v -> joinWaitlist());
+    }
+
+    private void leaveWaitlist(String eventId, String deviceId) {
+
+        FirebaseFirestore.getInstance()
+                .collection("events").document(eventId)
+                .collection("waitlist").document(deviceId)
+                .delete()
+                .addOnSuccessListener(unused -> {
+                    Toast.makeText(getContext(), "Successfully left the waitlist", Toast.LENGTH_SHORT).show();
+                    showNotJoinedUI();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Failed to leave waitlist: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void checkIfOnWaitlist(String eventId) {
+        String deviceId = Settings.Secure.getString(
+                requireContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID
+        );
+
+        FirebaseFirestore.getInstance()
+                .collection("events").document(eventId)
+                .collection("waitlist").document(deviceId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        // Device already on waitlist
+                        joinWaitlistButton.setText("Leave Waitlist");
+                        joinWaitlistButton.setBackgroundTintList(
+                                getResources().getColorStateList(android.R.color.holo_red_light)
+                        );
+                        joinWaitlistButton.setOnClickListener(v -> leaveWaitlist(eventId, deviceId));
+                    } else {
+                        // Not on waitlist yet
+                        joinWaitlistButton.setText("Join Waitlist");
+                        joinWaitlistButton.setBackgroundTintList(
+                                getResources().getColorStateList(android.R.color.holo_green_dark)
+                        );
+                        joinWaitlistButton.setOnClickListener(v -> joinWaitlist());
+                    }
+                });
+    }
 
     private String formatTimestampRange(Timestamp start, Timestamp end) {
         if (start == null || end == null) return "N/A";
