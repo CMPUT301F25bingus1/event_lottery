@@ -1,4 +1,4 @@
-package com.example.eventlotto.ui;
+package com.example.eventlotto.ui.entrant;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,12 +11,12 @@ import androidx.fragment.app.Fragment;
 
 import com.example.eventlotto.R;
 
-public class CreateEventFragment extends Fragment {
+public class Ent_UsersFragment extends Fragment {
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_create_events, container, false);
+        return inflater.inflate(R.layout.fragment_users, container, false);
     }
 }
 

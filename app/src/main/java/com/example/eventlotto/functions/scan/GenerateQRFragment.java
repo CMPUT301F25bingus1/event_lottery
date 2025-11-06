@@ -1,4 +1,4 @@
-package com.example.eventlotto.scan;
+package com.example.eventlotto.functions.scan;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;

@@ -13,8 +13,13 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.eventlotto.ui.LoginFragment;
+import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
+import com.example.eventlotto.ui.entrant.Ent_MyEventsFragment;
+import com.example.eventlotto.ui.entrant.Ent_NotificationsFragment;
+import com.example.eventlotto.ui.entrant.Ent_ScanFragment;
+import com.example.eventlotto.ui.entrant.Ent_UsersFragment;
+import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -65,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                 bottomNav.inflateMenu(R.menu.bottom_nav_menu_organizer);
                 break;
             default:
-                bottomNav.inflateMenu(R.menu.bottom_nav_menu);
+                bottomNav.inflateMenu(R.menu.bottom_nav_menu_entrant);
         }
 
         bottomNav.setOnItemSelectedListener(item -> {
@@ -74,32 +79,32 @@ public class MainActivity extends AppCompatActivity {
 
             // Entrant menu
             if (role.equals("entrant")) {
-                if (id == R.id.nav_home) fragment = new com.example.eventlotto.ui.HomeFragment();
+                if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
                 else if (id == R.id.nav_my_events)
-                    fragment = new com.example.eventlotto.ui.MyEventsFragment();
+                    fragment = new Ent_MyEventsFragment();
                 else if (id == R.id.nav_scan)
-                    fragment = new com.example.eventlotto.ui.ScanFragment();
+                    fragment = new Ent_ScanFragment();
                 else if (id == R.id.nav_notifications)
-                    fragment = new com.example.eventlotto.ui.NotificationsFragment();
+                    fragment = new Ent_NotificationsFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
             }
 
 
             // Organizer menu
             else if (role.equals("organizer")) {
-                if (id == R.id.nav_home) fragment = new com.example.eventlotto.ui.HomeFragment();
+                if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
                 else if (id == R.id.nav_create_event)
-                    fragment = new com.example.eventlotto.ui.CreateEventFragment();
+                    fragment = new Org_CreateEventFragment();
                 else if (id == R.id.nav_notifications)
-                    fragment = new com.example.eventlotto.ui.NotificationsFragment();
+                    fragment = new Ent_NotificationsFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
             }
 
             // Admin menu
             else if (role.equals("admin")) {
-                if (id == R.id.nav_home) fragment = new com.example.eventlotto.ui.HomeFragment();
+                if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
                 else if (id == R.id.nav_users)
-                    fragment = new com.example.eventlotto.ui.UsersFragment();
+                    fragment = new Ent_UsersFragment();
                 else if (id == R.id.nav_images)
                     fragment = new com.example.eventlotto.ui.ImagesFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
