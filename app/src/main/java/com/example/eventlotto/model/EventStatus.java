@@ -1,10 +1,6 @@
 package com.example.eventlotto.model;
-
-import com.google.firebase.firestore.IgnoreExtraProperties;
-
-@IgnoreExtraProperties
 public class EventStatus {
-    private String sid; // status document id
+    private String sid; // status id
     private String eid; // event id
     private String uid; // user id (device id for now)
     // one of: waiting, selected, signed up, cancelled, not chosen

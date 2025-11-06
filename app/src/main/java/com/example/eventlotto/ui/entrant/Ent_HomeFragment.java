@@ -23,7 +23,9 @@ import com.example.eventlotto.functions.events.EventDetailsFragment;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Ent_HomeFragment extends Fragment {
 
@@ -31,6 +33,7 @@ public class Ent_HomeFragment extends Fragment {
     private EventAdapter adapter;
     private List<Event> eventList;
     private FirestoreService firestoreService;
+    private final Map<String, String> statusByEid = new HashMap<>();
 
     @Nullable
     @Override

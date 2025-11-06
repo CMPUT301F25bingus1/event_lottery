@@ -98,7 +98,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
             textName.setText(e.getName());
             textDescription.setText(e.getDescription());
             imageEvent.setImageResource(e.getImageResId());
-            // Prefer EventStatus from Firestore if available; otherwise, hide
+
             String status = statusByEid.get(e.getId());
             if (status != null && !status.isEmpty()) {
                 textStatus.setVisibility(View.VISIBLE);
