@@ -42,7 +42,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         Event event = events.get(position);
         holder.title.setText(event.getEventTitle());
         holder.description.setText(event.getDescription());
-        holder.status.setText("Status: TBD");
+        holder.status.setText("TBD");
 
         // Set click listener
         holder.itemView.setOnClickListener(v -> {
