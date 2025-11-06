@@ -1,16 +1,193 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/create_event_scroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp">
+    android:fitsSystemWindows="true"
+    android:fillViewport="true"
+    android:background="@android:color/transparent"
+    android:padding="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="create events"
-        android:textColor="@android:color/white"
-        android:textSize="22sp"
-        android:layout_gravity="center" />
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
 
-</FrameLayout>
+        <androidx.cardview.widget.CardView
+            android:id="@+id/create_event_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="8dp"
+            android:backgroundTint="@android:color/white"
+            android:padding="24dp">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Title -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Create New Event"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:layout_gravity="center_horizontal"
+                    android:paddingBottom="20dp" />
+
+                <!-- Event Title -->
+                <EditText
+                    android:id="@+id/input_event_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Event Title"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#808080"
+                    android:backgroundTint="#9E9E9E"
+                    android:inputType="text" />
+
+                <!-- Description -->
+                <EditText
+                    android:id="@+id/input_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Description"
+                    android:inputType="textMultiLine"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#808080"
+                    android:backgroundTint="#9E9E9E" />
+
+                <!-- Capacity -->
+                <EditText
+                    android:id="@+id/input_capacity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Capacity"
+                    android:inputType="number"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#808080"
+                    android:backgroundTint="#9E9E9E" />
+
+                <!-- Latitude -->
+                <EditText
+                    android:id="@+id/input_latitude"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Latitude"
+                    android:inputType="numberDecimal"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#808080"
+                    android:backgroundTint="#9E9E9E" />
+
+                <!-- Longitude -->
+                <EditText
+                    android:id="@+id/input_longitude"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Longitude"
+                    android:inputType="numberDecimal"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#808080"
+                    android:backgroundTint="#9E9E9E" />
+
+                <!-- Event Dates -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Event Dates"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold"
+                    android:paddingTop="16dp" />
+
+                <EditText
+                    android:id="@+id/input_event_start"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Event Start Date"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#808080"
+                    android:backgroundTint="#9E9E9E" />
+
+                <EditText
+                    android:id="@+id/input_event_end"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Event End Date"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#808080"
+                    android:backgroundTint="#9E9E9E" />
+
+                <!-- Registration Dates -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Registration Period"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold"
+                    android:paddingTop="16dp" />
+
+                <EditText
+                    android:id="@+id/input_reg_open"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Registration Opens At"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#808080"
+                    android:backgroundTint="#9E9E9E" />
+
+                <EditText
+                    android:id="@+id/input_reg_close"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Registration Closes At"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#808080"
+                    android:backgroundTint="#9E9E9E" />
+
+                <!-- Checkboxes -->
+                <CheckBox
+                    android:id="@+id/check_geo_consent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Require Geo Consent?"
+                    android:textColor="@android:color/black"
+                    android:paddingTop="8dp" />
+
+                <CheckBox
+                    android:id="@+id/check_notify"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Notify when not selected?"
+                    android:textColor="@android:color/black"
+                    android:paddingBottom="8dp" />
+
+                <!-- Create Button -->
+                <Button
+                    android:id="@+id/btn_create_event"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Create Event"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="#2196F3"
+                    android:layout_marginTop="16dp"
+                    android:padding="12dp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+</ScrollView>
