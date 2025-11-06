@@ -17,21 +17,41 @@ import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.List;
 
+/**
+ * RecyclerView adapter for displaying a list of Event objects.
+ * Handles real-time updates of the user's waitlist status for each event.
+ */
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
 
     private List<Event> events;
+
     private final OnItemClickListener listener;
+
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    /**
+     * Interface definition for a callback to be invoked when an item is clicked.
+     */
     public interface OnItemClickListener {
         void onItemClick(Event event);
     }
 
+    /**
+     * Constructor for EventAdapter.
+     *
+     * @param events   List of Event objects to display.
+     * @param listener Listener for handling item clicks.
+     */
     public EventAdapter(List<Event> events, OnItemClickListener listener) {
         this.events = events;
         this.listener = listener;
     }
 
+    /**
+     * Updates the list of events and refreshes the RecyclerView.
+     *
+     * @param events New list of Event objects.
+     */
     public void setEvents(List<Event> events) {
         this.events = events;
         notifyDataSetChanged();
@@ -118,10 +138,21 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         return events != null ? events.size() : 0;
     }
 
+    /**
+     * ViewHolder class for holding references to the views of each event item.
+     */
     static class EventViewHolder extends RecyclerView.ViewHolder {
-        TextView title, description, status;
-        @Nullable ListenerRegistration waitlistReg;
-        @Nullable String boundEventId;
+        TextView title;
+
+        TextView description;
+
+        TextView status;
+
+        @Nullable
+        ListenerRegistration waitlistReg;
+
+        @Nullable
+        String boundEventId;
 
         EventViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -131,7 +162,12 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         }
     }
 
-    // Map your 5 statuses to chip background + label; default to "Waiting"
+    /**
+     * Applies the appropriate status chip background and label to a TextView.
+     *
+     * @param tv        The TextView to update.
+     * @param rawStatus The raw status string from Firestore, may be null.
+     */
     private void applyStatusChip(TextView tv, @Nullable String rawStatus) {
         String s = (rawStatus == null ? "waiting" : rawStatus).trim().toLowerCase();
         int bg;

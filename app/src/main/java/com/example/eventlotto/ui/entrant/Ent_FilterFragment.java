@@ -22,6 +22,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+/**
+ * A Fragment that allows the user to filter events in Home search.
+ * Users can select event date ranges and specific days of the week for filtering.
+ */
 public class Ent_FilterFragment extends DialogFragment {
 
     private MaterialButtonToggleGroup daysToggleGroup;
@@ -38,6 +42,7 @@ public class Ent_FilterFragment extends DialogFragment {
         EditText registrationFrom = view.findViewById(R.id.registration_from);
         EditText registrationTo = view.findViewById(R.id.registration_to);
 
+        // Set click listener to show date picker
         View.OnClickListener dateClickListener = v -> showDatePicker((EditText) v);
         eventDateFrom.setOnClickListener(dateClickListener);
         eventDateTo.setOnClickListener(dateClickListener);
@@ -60,6 +65,11 @@ public class Ent_FilterFragment extends DialogFragment {
         return view;
     }
 
+    /**
+     * Sets up the day selection toggle buttons, including highlighting selected days
+     * and maintaining the selectedDays list.
+     * @param root The root view containing the toggle group.
+     */
     private void setupDaySelection(View root) {
         daysToggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             MaterialButton button = group.findViewById(checkedId);
@@ -94,6 +104,11 @@ public class Ent_FilterFragment extends DialogFragment {
         }
     }
 
+    /**
+     * Shows a date picker dialog when a date field is clicked
+     * and sets the selected date in the target EditText.
+     * @param target The EditText where the selected date will be displayed.
+     */
     private void showDatePicker(EditText target) {
         Calendar c = Calendar.getInstance();
         int year = c.get(Calendar.YEAR);
@@ -115,6 +130,7 @@ public class Ent_FilterFragment extends DialogFragment {
         super.onStart();
         Dialog dialog = getDialog();
         if (dialog != null && dialog.getWindow() != null) {
+            // Make dialog full width with transparent background
             dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         }

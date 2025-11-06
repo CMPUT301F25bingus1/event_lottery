@@ -15,38 +15,44 @@ import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
 import com.example.eventlotto.ui.LoginFragment;
 
+/**
+ * Fragment that is the entry point for an entrant.
+ * Checks if the user already exists in Firestore then continues.
+ * If the user doesn't exist, provides a button to create a profile.
+ */
 public class Ent_EntryFragment extends Fragment {
 
+    /** Firestore service helper for interacting with user data. */
     private FirestoreService firestoreService;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_login, container, false);
 
         firestoreService = new FirestoreService();
         Button createProfileBtn = view.findViewById(R.id.btn_create_profile);
 
-        String deviceId = Settings.Secure.getString(
-                requireContext().getContentResolver(),
-                Settings.Secure.ANDROID_ID
-        );
+        // Gets the current device ID
+        String deviceId = Settings.Secure.getString(requireContext().getContentResolver(),Settings.Secure.ANDROID_ID);
 
-        // Check if the entrant already exists in FireStone
+        // Checks if the entrant already exists in Firestore
         firestoreService.getUser(deviceId).addOnSuccessListener(snapshot -> {
             if (snapshot.exists()) {
-                // If entrant exists : go to Profile screen
+                // If yes, navigate to Profile screen
                 getParentFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fragment_container, new LoginFragment())
                         .commit();
             } else {
-                // If the Entrant doesn't exist, go create profile
+                // If doesn't exist, show create profile button
                 createProfileBtn.setVisibility(View.VISIBLE);
             }
         });
 
+        // Set click listener for creating a new profile
         createProfileBtn.setOnClickListener(v -> {
             getParentFragmentManager()
                     .beginTransaction()
