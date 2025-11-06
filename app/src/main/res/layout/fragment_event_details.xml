@@ -35,17 +35,15 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-
-
         <TextView
-            android:id="@+id/eventDescription"
+            android:id="@+id/textStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Event Description"
-            android:textColor="@android:color/black" />
+            android:textColor="@color/black"
+            android:gravity="center"
+            android:text="Status: N/A"
+            android:textSize="18sp"/>
 
- 
         <TextView
             android:id="@+id/signupDates"
             android:layout_width="match_parent"
@@ -100,6 +98,14 @@
             android:layout_height="wrap_content"
             android:text="Organizer: N/A"
             android:textColor="@android:color/darker_gray" />
+
+        <TextView
+            android:id="@+id/eventDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Event Description"
+            android:textColor="@android:color/black" />
 
 
         <LinearLayout
