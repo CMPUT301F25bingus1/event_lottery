@@ -65,3 +65,13 @@ build/reports/problems/problems-report.html
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Environment files (local configs)
+/.env.*
+.idea/
+.gradle/
+**/.gradle/
+**/.idea/
+local.properties
+build/
+**/build/

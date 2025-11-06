@@ -17,7 +17,7 @@
             android:id="@+id/eventImage"
             android:layout_width="match_parent"
             android:layout_height="250dp"
-            android:contentDescription="Event Image"
+            android:contentDescription="@string/event_image"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_launcher_foreground" />
 
@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:gravity="center"
-            android:text="Event Title"
+            android:text="@string/event_title"
             android:textColor="@android:color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -38,7 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:text="Waiting"
+            android:text="@string/waiting"
             android:textStyle="bold"
             android:textSize="17sp"
             android:layout_marginTop="10dp"
@@ -49,14 +49,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Sign-up: N/A"
+            android:text="@string/sign_up_n_a"
             android:textColor="@android:color/darker_gray" />
 
         <TextView
             android:id="@+id/eventDates"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Event: N/A"
+            android:text="@string/event_n_a"
             android:textColor="@android:color/darker_gray" />
   
         <TextView
@@ -64,7 +64,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Capacity: N/A"
+            android:text="@string/waiting_0"
             android:textColor="@android:color/darker_gray" />
 
 
@@ -72,28 +72,22 @@
             android:id="@+id/geoConsent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Geo Consent Required: N/A"
+            android:text="@string/geo_consent_required_n_a"
             android:textColor="@android:color/darker_gray" />
 
-        <TextView
-            android:id="@+id/notifyWhenNotSelected"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Notify if not selected: N/A"
-            android:textColor="@android:color/darker_gray" />
   
         <TextView
             android:id="@+id/location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Location: N/A"
+            android:text="@string/location_n_a"
             android:textColor="@android:color/darker_gray" />
     
         <TextView
             android:id="@+id/organizerId"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Organizer: N/A"
+            android:text="@string/organizer_n_a"
             android:textColor="@android:color/darker_gray" />
 
         <TextView
@@ -101,7 +95,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Event Description"
+            android:text="@string/event_description"
             android:textColor="@android:color/black" />
 
         <LinearLayout
@@ -120,7 +114,7 @@
                 android:textColor="@android:color/black"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:text="Cancel" />
+                android:text="@string/cancel" />
 
             <Button
                 android:id="@+id/joinWaitlistButton"
@@ -130,7 +124,7 @@
                 android:textColor="@android:color/white"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:text="Join Waitlist" />
+                android:text="@string/join_waitlist" />
 
         </LinearLayout>
     </LinearLayout>

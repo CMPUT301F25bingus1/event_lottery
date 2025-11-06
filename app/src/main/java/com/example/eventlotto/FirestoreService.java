@@ -6,10 +6,12 @@ import com.example.eventlotto.model.User;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -97,11 +99,40 @@ public class FirestoreService {
     }
 
     public Task<Void> joinWaitlist(String eventId, String uid) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("uid", uid);
-        return events().document(eventId)
-                .collection("waitlist")
-                .document(uid)
-                .set(data);
+        // Create/merge the status doc and a notification subscription in a single batch
+        WriteBatch batch = db.batch();
+
+        // Status document under the event
+        DocumentReference statusRef = events().document(eventId)
+                .collection("status")
+                .document(uid);
+        Map<String, Object> statusData = new HashMap<>();
+        statusData.put("uid", uid);
+        statusData.put("status", "waiting");
+        batch.set(statusRef, statusData, SetOptions.merge());
+
+        // Notification subscription document
+        String nid = uid + "_" + eventId;
+        DocumentReference notifRef = notifications().document(nid);
+        Map<String, Object> notifData = new HashMap<>();
+        notifData.put("nid", nid);
+        notifData.put("uid", uid);
+        notifData.put("eid", eventId);
+        if (Timestamp.now() != null) {
+            notifData.put("createdAt", Timestamp.now());
+        }
+        batch.set(notifRef, notifData, SetOptions.merge());
+
+        // Top-level event_status document to power Notifications screen status chips
+        String sid = uid + "_" + eventId;
+        DocumentReference statusTopRef = eventStatus().document(sid);
+        Map<String, Object> topStatus = new HashMap<>();
+        topStatus.put("sid", sid);
+        topStatus.put("uid", uid);
+        topStatus.put("eid", eventId);
+        topStatus.put("status", "waiting");
+        batch.set(statusTopRef, topStatus, SetOptions.merge());
+
+        return batch.commit();
     }
 }
