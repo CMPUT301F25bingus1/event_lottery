@@ -1,4 +1,4 @@
-package com.example.eventlotto.ui.entrant;
+package com.example.eventlotto.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -25,7 +25,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntHomeFragment extends Fragment {
+public class HomeFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private EventAdapter adapter;
@@ -73,8 +73,8 @@ public class EntHomeFragment extends Fragment {
         // --- Handle Filter button click: show FilterFragment popup ---
         if (filterButton != null) {
             filterButton.setOnClickListener(v -> {
-                EntFilterFragment entFilterFragment = new EntFilterFragment();
-                entFilterFragment.show(getParentFragmentManager(), "filter_fragment");
+                FilterFragment filterFragment = new FilterFragment();
+                filterFragment.show(getParentFragmentManager(), "filter_fragment");
             });
         }
 

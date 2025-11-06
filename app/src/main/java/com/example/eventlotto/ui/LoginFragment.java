@@ -1,4 +1,4 @@
-package com.example.eventlotto.ui.entrant;
+package com.example.eventlotto.ui;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
@@ -19,7 +19,7 @@ import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
 
-public class EntLoginFragment extends Fragment {
+public class LoginFragment extends Fragment {
 
     private EditText nameField, emailField, phoneField;
     private Button updateBtn, deleteBtn;
@@ -98,7 +98,7 @@ public class EntLoginFragment extends Fragment {
                 // Go back to WelcomeFragment
                 getParentFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.fragment_container, new EntEntryFragment())
+                        .replace(R.id.fragment_container, new EntryFragment())
                         .commit();
             } else {
                 Toast.makeText(getContext(), "Error deleting profile.", Toast.LENGTH_SHORT).show();

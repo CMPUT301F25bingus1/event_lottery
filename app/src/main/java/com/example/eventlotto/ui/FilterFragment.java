@@ -1,4 +1,4 @@
-package com.example.eventlotto.ui.entrant;
+package com.example.eventlotto.ui;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class EntFilterFragment extends DialogFragment {
+public class FilterFragment extends DialogFragment {
 
     private MaterialButtonToggleGroup daysToggleGroup;
     private final List<String> selectedDays = new ArrayList<>();
