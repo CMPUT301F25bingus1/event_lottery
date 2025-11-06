@@ -16,9 +16,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.eventlotto.FirestoreService;
+import com.example.eventlotto.MainActivity;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
-import com.example.eventlotto.ui.entrant.Ent_EntryFragment;
 
 public class LoginFragment extends Fragment {
 
@@ -83,33 +83,7 @@ public class LoginFragment extends Fragment {
 
         firestoreService.updateUserProfile(updatedUser, success -> {
             if (success) {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-                Toast.makeText(getContext(), "Profile deleted.", Toast.LENGTH_LONG).show();
-
-                // Go back to WelcomeFragment
-                getParentFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, new Ent_EntryFragment())
-                        .commit();
-=======
                 Toast.makeText(requireContext(), "Profile updated successfully.", Toast.LENGTH_SHORT).show();
->>>>>>> Stashed changes
-=======
-                Toast.makeText(requireContext(), "Profile updated successfully.", Toast.LENGTH_SHORT).show();
->>>>>>> Stashed changes
-=======
-                Toast.makeText(requireContext(), "Profile updated successfully.", Toast.LENGTH_SHORT).show();
->>>>>>> Stashed changes
-=======
-                Toast.makeText(requireContext(), "Profile updated successfully.", Toast.LENGTH_SHORT).show();
->>>>>>> Stashed changes
-=======
-                Toast.makeText(requireContext(), "Profile updated successfully.", Toast.LENGTH_SHORT).show();
->>>>>>> Stashed changes
             } else {
                 Toast.makeText(requireContext(), "Failed to update profile.", Toast.LENGTH_SHORT).show();
             }
@@ -147,10 +121,9 @@ public class LoginFragment extends Fragment {
                 btnGotIt.setOnClickListener(v -> {
                     deletedDialog.dismiss();
 
-                    View navBar = requireActivity().findViewById(R.id.bottom_navigation);
-                    if (navBar != null) {
-                        navBar.setVisibility(View.GONE);
-                    }
+
+                    ((MainActivity) requireActivity()).hideBottomNavigation();
+
 
                     requireActivity().getSupportFragmentManager()
                             .beginTransaction()
@@ -164,5 +137,4 @@ public class LoginFragment extends Fragment {
             }
         });
     }
-
 }

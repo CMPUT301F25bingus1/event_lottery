@@ -6,45 +6,22 @@ import com.google.firebase.firestore.IgnoreExtraProperties;
 @IgnoreExtraProperties
 public class User {
 
-
     private String uid;
-    private String deviceId;
-    private String role;                    // entrant, organizer, admin
+    private String role; // entrant, organizer, admin
     private String fullName;
     private String email;
     private String phone;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
+    private String avatarUrl;
     private String deviceId;
-=======
-    private String avatarUrl;
->>>>>>> Stashed changes
-=======
-    private String avatarUrl;
->>>>>>> Stashed changes
-=======
-    private String avatarUrl;
->>>>>>> Stashed changes
-=======
-    private String avatarUrl;
->>>>>>> Stashed changes
-=======
-    private String avatarUrl;
->>>>>>> Stashed changes
     private Boolean notifyWhenNotSelected;
     private Boolean geoConsent;
     private Timestamp createdAt;
     private Timestamp updatedAt;
     private Timestamp deletedAt;
 
-
-
     public User() {}
 
-
+    // Main constructor using deviceId
     public User(String deviceId, String fullName, String email, String phone) {
         this.uid = deviceId;
         this.deviceId = deviceId;
@@ -60,12 +37,8 @@ public class User {
         this.avatarUrl = null;
     }
 
-
     public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
-
-    public String getDeviceId() { return deviceId; }
-    public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
@@ -79,9 +52,11 @@ public class User {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
-
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+
+    public String getDeviceId() { return deviceId; }
+    public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
 
     public Boolean getNotifyWhenNotSelected() { return notifyWhenNotSelected; }
     public void setNotifyWhenNotSelected(Boolean notifyWhenNotSelected) { this.notifyWhenNotSelected = notifyWhenNotSelected; }
@@ -98,19 +73,5 @@ public class User {
     public Timestamp getDeletedAt() { return deletedAt; }
     public void setDeletedAt(Timestamp deletedAt) { this.deletedAt = deletedAt; }
 
-
-
-    public boolean wantsNotifications() {
-        return notifyWhenNotSelected != null && notifyWhenNotSelected;
-    }
-
-
-    public void markDeleted() {
-        this.deletedAt = Timestamp.now();
-    }
-
-
-    public void touch() {
-        this.updatedAt = Timestamp.now();
-    }
+    public void touch() { this.updatedAt = Timestamp.now(); }
 }
