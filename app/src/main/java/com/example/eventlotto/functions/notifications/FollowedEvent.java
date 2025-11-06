@@ -1,4 +1,4 @@
-package com.example.eventlotto.notifications;
+package com.example.eventlotto.functions.notifications;
 
 public class FollowedEvent {
     public enum Status { ACCEPTED, WAITING, NOT_CHOSEN }

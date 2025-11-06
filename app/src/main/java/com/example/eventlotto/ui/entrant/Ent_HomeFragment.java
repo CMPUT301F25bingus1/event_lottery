@@ -17,15 +17,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
-import com.example.eventlotto.events.EventAdapter;
-import com.example.eventlotto.events.Event;
-import com.example.eventlotto.events.EventDetailsFragment;
+import com.example.eventlotto.functions.events.EventAdapter;
+import com.example.eventlotto.model.Event;
+import com.example.eventlotto.functions.events.EventDetailsFragment;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomeFragment extends Fragment {
+public class Ent_HomeFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private EventAdapter adapter;
@@ -73,8 +73,8 @@ public class HomeFragment extends Fragment {
         // --- Handle Filter button click: show FilterFragment popup ---
         if (filterButton != null) {
             filterButton.setOnClickListener(v -> {
-                FilterFragment filterFragment = new FilterFragment();
-                filterFragment.show(getParentFragmentManager(), "filter_fragment");
+                Ent_FilterFragment entFilterFragment = new Ent_FilterFragment();
+                entFilterFragment.show(getParentFragmentManager(), "filter_fragment");
             });
         }
 

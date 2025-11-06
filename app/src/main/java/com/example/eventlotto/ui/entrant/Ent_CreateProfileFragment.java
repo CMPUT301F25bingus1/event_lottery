@@ -19,7 +19,7 @@ import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
 import com.example.eventlotto.ui.LoginFragment;
 
-public class CreateProfileFragment extends Fragment {
+public class Ent_CreateProfileFragment extends Fragment {
 
     private EditText nameInput, emailInput, phoneInput;
     private FirestoreService firestoreService;

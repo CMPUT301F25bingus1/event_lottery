@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class FilterFragment extends DialogFragment {
+public class Ent_FilterFragment extends DialogFragment {
 
     private MaterialButtonToggleGroup daysToggleGroup;
     private final List<String> selectedDays = new ArrayList<>();

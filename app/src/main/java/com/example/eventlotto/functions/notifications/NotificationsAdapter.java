@@ -1,4 +1,4 @@
-package com.example.eventlotto.notifications;
+package com.example.eventlotto.functions.notifications;
 
 import android.view.LayoutInflater;
 import android.view.View;

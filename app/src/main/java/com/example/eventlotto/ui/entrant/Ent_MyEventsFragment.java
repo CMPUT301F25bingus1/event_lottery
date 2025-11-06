@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.eventlotto.R;
 
-public class MyEventsFragment extends Fragment {
+public class Ent_MyEventsFragment extends Fragment {
 
     @Nullable
     @Override

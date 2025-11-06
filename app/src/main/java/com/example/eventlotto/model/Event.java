@@ -1,4 +1,4 @@
-package com.example.eventlotto.functions.events;
+package com.example.eventlotto.model;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.GeoPoint;

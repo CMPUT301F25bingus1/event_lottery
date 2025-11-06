@@ -14,13 +14,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.tabs.TabLayout;
 
 import com.example.eventlotto.R;
-import com.example.eventlotto.notifications.FollowedEvent;
-import com.example.eventlotto.notifications.NotificationsAdapter;
+import com.example.eventlotto.functions.notifications.FollowedEvent;
+import com.example.eventlotto.functions.notifications.NotificationsAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotificationsFragment extends Fragment {
+public class Ent_NotificationsFragment extends Fragment {
 
     private final List<FollowedEvent> allEvents = new ArrayList<>();
     private NotificationsAdapter adapter;
