@@ -12,7 +12,6 @@ public class User {
     private String fullName;
     private String email;
     private String phone;
-    private String avatarUrl;
     private String deviceId;
     private Boolean notifyWhenNotSelected;
     private Boolean geoConsent;
@@ -51,8 +50,6 @@ public class User {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
-    public String getAvatarUrl() { return avatarUrl; }
-    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
 
     public String getDeviceId() { return deviceId; }
     public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
