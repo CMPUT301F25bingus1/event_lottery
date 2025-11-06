@@ -86,6 +86,7 @@ public class LoginFragment extends Fragment {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 Toast.makeText(getContext(), "Profile deleted.", Toast.LENGTH_LONG).show();
 
                 // Go back to WelcomeFragment
@@ -93,6 +94,9 @@ public class LoginFragment extends Fragment {
                         .beginTransaction()
                         .replace(R.id.fragment_container, new Ent_EntryFragment())
                         .commit();
+=======
+                Toast.makeText(requireContext(), "Profile updated successfully.", Toast.LENGTH_SHORT).show();
+>>>>>>> Stashed changes
 =======
                 Toast.makeText(requireContext(), "Profile updated successfully.", Toast.LENGTH_SHORT).show();
 >>>>>>> Stashed changes

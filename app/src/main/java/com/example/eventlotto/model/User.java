@@ -16,7 +16,11 @@ public class User {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     private String deviceId;
+=======
+    private String avatarUrl;
+>>>>>>> Stashed changes
 =======
     private String avatarUrl;
 >>>>>>> Stashed changes
@@ -76,6 +80,9 @@ public class User {
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
