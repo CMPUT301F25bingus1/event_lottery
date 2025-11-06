@@ -49,13 +49,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
 
-    <Button
-        android:id="@+id/btn_update_profile"
+    <Button android:id="@+id/btn_update_profile"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Update Profile"
         app:layout_constraintTop_toBottomOf="@id/input_phone"
         app:layout_constraintStart_toStartOf="parent"
+        android:backgroundTint="#429ED9"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="32dp" />
 
@@ -64,8 +64,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Delete Profile"
-        android:backgroundTint="#F44336"
-        android:textColor="@android:color/white"
+        android:backgroundTint="#BDD5E7"
+        android:textColor="@android:color/holo_red_light"
         app:layout_constraintTop_toBottomOf="@id/btn_update_profile"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

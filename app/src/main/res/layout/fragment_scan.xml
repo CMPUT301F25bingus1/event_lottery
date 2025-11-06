@@ -14,5 +14,6 @@
         android:id="@+id/showQrButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:backgroundTint="#429ED9"
         android:text="Test QR Function" />
 </LinearLayout>
