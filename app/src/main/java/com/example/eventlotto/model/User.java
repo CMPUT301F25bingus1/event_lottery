@@ -3,15 +3,15 @@ package com.example.eventlotto.model;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.IgnoreExtraProperties;
 
-
 @IgnoreExtraProperties
 public class User {
 
     private String uid;
-    private String role;                    // entrant, organizer, admin
+    private String role; // entrant, organizer, admin
     private String fullName;
     private String email;
     private String phone;
+    private String avatarUrl;
     private String deviceId;
     private Boolean notifyWhenNotSelected;
     private Boolean geoConsent;
@@ -21,19 +21,21 @@ public class User {
 
     public User() {}
 
-    public User(String fullName, String email, String phone, String deviceId) {
+    // Main constructor using deviceId
+    public User(String deviceId, String fullName, String email, String phone) {
         this.uid = deviceId;
+        this.deviceId = deviceId;
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
-        this.deviceId = deviceId;
         this.role = "entrant";
         this.notifyWhenNotSelected = true;
         this.geoConsent = false;
         this.createdAt = Timestamp.now();
         this.updatedAt = Timestamp.now();
+        this.deletedAt = null;
+        this.avatarUrl = null;
     }
-
 
     public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
@@ -50,6 +52,8 @@ public class User {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
+    public String getAvatarUrl() { return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
 
     public String getDeviceId() { return deviceId; }
     public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
@@ -69,12 +73,5 @@ public class User {
     public Timestamp getDeletedAt() { return deletedAt; }
     public void setDeletedAt(Timestamp deletedAt) { this.deletedAt = deletedAt; }
 
-    public boolean wantsNotifications() {
-        return notifyWhenNotSelected != null && notifyWhenNotSelected;
-    }
-
-
-    public void markDeleted() {
-        this.deletedAt = Timestamp.now();
-    }
+    public void touch() { this.updatedAt = Timestamp.now(); }
 }

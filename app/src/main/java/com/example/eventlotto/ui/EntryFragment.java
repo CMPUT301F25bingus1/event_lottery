@@ -1,4 +1,4 @@
-package com.example.eventlotto.ui.entrant;
+package com.example.eventlotto.ui;
 
 import android.os.Bundle;
 import android.provider.Settings;
@@ -13,10 +13,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.eventlotto.FirestoreService;
-import com.example.eventlotto.MainActivity;
 import com.example.eventlotto.R;
+import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
+import com.example.eventlotto.MainActivity;
 
-public class Ent_EntryFragment extends Fragment {
+public class EntryFragment extends Fragment {
 
     private FirestoreService firestoreService;
     private Button createProfileBtn;
@@ -26,10 +27,12 @@ public class Ent_EntryFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_welcome, container, false);
 
         firestoreService = new FirestoreService();
         createProfileBtn = view.findViewById(R.id.btn_go_to_create_profile);
+
 
         String deviceId = Settings.Secure.getString(
                 requireContext().getContentResolver(),
@@ -37,33 +40,32 @@ public class Ent_EntryFragment extends Fragment {
         );
 
 
-        ((MainActivity) requireActivity()).hideBottomNavigation();
-
-        createProfileBtn.setVisibility(View.GONE);
-        if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
-
-
         firestoreService.getUser(deviceId).addOnSuccessListener(snapshot -> {
             if (snapshot.exists()) {
 
-                requireActivity().getSupportFragmentManager().beginTransaction()
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
                         .replace(R.id.fragment_container, new Ent_HomeFragment())
                         .commit();
 
-                ((MainActivity) requireActivity()).showBottomNavigation();
-            } else {
+                //initialize and show bottom navigation for the new user
+                ((MainActivity) requireActivity()).initBottomNavForRole("entrant");
 
-                if (progressBar != null) progressBar.setVisibility(View.GONE);
+            } else {
                 createProfileBtn.setVisibility(View.VISIBLE);
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
             }
         }).addOnFailureListener(e -> {
-            if (progressBar != null) progressBar.setVisibility(View.GONE);
+
             createProfileBtn.setVisibility(View.VISIBLE);
+            if (progressBar != null) progressBar.setVisibility(View.GONE);
         });
 
+
         createProfileBtn.setOnClickListener(v -> {
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new Ent_CreateProfileFragment())
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, new CreateProfileFragment())
                     .addToBackStack(null)
                     .commit();
         });

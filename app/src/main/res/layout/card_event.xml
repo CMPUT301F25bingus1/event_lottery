@@ -30,19 +30,19 @@
             android:textColor="@color/black"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Event Title"
+            android:text="@string/event_title"
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@id/imageEvent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toStartOf="@id/textStatus"/>
 
         <TextView
             android:id="@+id/textDescription"
             android:layout_width="0dp"
             android:textColor="@color/black"
             android:layout_height="wrap_content"
-            android:text="Event description goes here."
+            android:text="@string/event_description_goes_here"
             android:textSize="14sp"
             app:layout_constraintStart_toEndOf="@id/imageEvent"
             app:layout_constraintTop_toBottomOf="@id/textName"
@@ -50,13 +50,17 @@
 
         <TextView
             android:id="@+id/textStatus"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/status_chip_width"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:text="Waiting"
+            android:text="@string/waiting"
             android:textStyle="bold"
             android:textSize="12sp"
             android:textColor="@android:color/black"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:paddingTop="4dp"
