@@ -44,12 +44,18 @@ public class Ent_CreateProfileFragment extends Fragment {
                 Settings.Secure.ANDROID_ID
         );
 
-
         ((MainActivity) requireActivity()).hideBottomNavigation();
 
         btnCreateProfile.setOnClickListener(v -> createUserProfile());
 
         return view;
+    }
+
+    /**
+     * Allows tests (or other classes) to inject a mock FirestoreService.
+     */
+    public void setFirestoreService(FirestoreService firestoreService) {
+        this.firestoreService = firestoreService;
     }
 
     private void createUserProfile() {
@@ -62,20 +68,16 @@ public class Ent_CreateProfileFragment extends Fragment {
             return;
         }
 
-
         User user = new User(deviceId, name, email, phone);
 
         firestoreService.saveUserProfile(user, success -> {
             if (success) {
                 Toast.makeText(requireContext(), "Profile created successfully!", Toast.LENGTH_SHORT).show();
 
-
                 requireActivity().getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, new Ent_HomeFragment())
                         .commit();
-                ((MainActivity) requireActivity()).initBottomNavForRole("entrant");
 
-                //initialize and show bottom navigation for the new user
                 ((MainActivity) requireActivity()).initBottomNavForRole("entrant");
             } else {
                 Toast.makeText(requireContext(), "Failed to create profile. Try again.", Toast.LENGTH_SHORT).show();
