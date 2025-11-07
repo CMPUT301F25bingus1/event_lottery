@@ -20,75 +20,138 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment for admin users to view and manage all events.
+ * <p>
+ * Displays events in a RecyclerView with the option to delete each event.
+ * </p>
+ */
 public class Adm_EventsFragment extends Fragment {
 
+    /** List of all events retrieved from Firestore. */
     private final List<Event> events = new ArrayList<>();
-    private Adm_EventsFragment.EventsAdapter adapter;
+
+    /** RecyclerView adapter for displaying events. */
+    private EventsAdapter adapter;
+
+    /** Service class for interacting with Firestore. */
     private FirestoreService firestoreService;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_admin_events, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_admin_events, container, false);
+
         firestoreService = new FirestoreService();
 
-        RecyclerView rv = v.findViewById(R.id.recycler_admin_events);
-        rv.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new EventsAdapter(events, eid -> deleteEvent(eid));
-        rv.setAdapter(adapter);
+        RecyclerView recyclerView = root.findViewById(R.id.recycler_admin_events);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        adapter = new EventsAdapter(events, this::deleteEvent);
+        recyclerView.setAdapter(adapter);
 
         loadEvents();
-        return v;
+
+        return root;
     }
 
+    /**
+     * Fetches all events from Firestore and updates the RecyclerView.
+     */
     private void loadEvents() {
         firestoreService.events().get()
-                .addOnSuccessListener(snaps -> {
+                .addOnSuccessListener(snapshots -> {
                     events.clear();
-                    for (DocumentSnapshot d : snaps) {
-                        Event e = d.toObject(Event.class);
-                        if (e != null) {
-                            e.setEid(d.getId());
-                            events.add(e);
+                    for (DocumentSnapshot doc : snapshots) {
+                        Event event = doc.toObject(Event.class);
+                        if (event != null) {
+                            event.setEid(doc.getId());
+                            events.add(event);
                         }
                     }
                     adapter.notifyDataSetChanged();
                 })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to load events", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Failed to load events", Toast.LENGTH_SHORT).show()
+                );
     }
 
+    /**
+     * Deletes an event by its ID and refreshes the list.
+     *
+     * @param eid Event ID
+     */
     private void deleteEvent(String eid) {
         firestoreService.events().document(eid).delete()
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(getContext(), "Event deleted", Toast.LENGTH_SHORT).show();
                     loadEvents();
                 })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Delete failed", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Delete failed", Toast.LENGTH_SHORT).show()
+                );
     }
 
+    /**
+     * RecyclerView adapter for displaying admin events.
+     */
     private static class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.VH> {
-        interface Listener { void onDelete(String eid); }
-        private final List<Event> items; private final Listener listener;
-        EventsAdapter(List<Event> items, Listener listener) { this.items = items; this.listener = listener; }
 
-        @NonNull @Override public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_admin_event, parent, false);
+        /** Listener interface for delete actions. */
+        interface Listener {
+            void onDelete(String eid);
+        }
+
+        private final List<Event> items;
+        private final Listener listener;
+
+        EventsAdapter(List<Event> items, Listener listener) {
+            this.items = items;
+            this.listener = listener;
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_admin_event, parent, false);
             return new VH(v);
         }
-        @Override public void onBindViewHolder(@NonNull VH h, int pos) { h.bind(items.get(pos), listener); }
-        @Override public int getItemCount() { return items.size(); }
 
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+            holder.bind(items.get(position), listener);
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size();
+        }
+
+        /**
+         * ViewHolder for individual event items.
+         */
         static class VH extends RecyclerView.ViewHolder {
-            VH(@NonNull View itemView) { super(itemView); }
-            void bind(Event e, Listener listener) {
+            VH(@NonNull View itemView) {
+                super(itemView);
+            }
+
+            void bind(Event event, Listener listener) {
                 android.widget.TextView title = itemView.findViewById(R.id.text_event_title);
                 android.widget.TextView desc = itemView.findViewById(R.id.text_event_desc);
-                View btn = itemView.findViewById(R.id.btn_delete_event);
-                title.setText(e.getEventTitle());
-                desc.setText(e.getDescription());
-                btn.setOnClickListener(v -> { if (listener != null && e.getEid() != null) listener.onDelete(e.getEid()); });
+                View deleteBtn = itemView.findViewById(R.id.btn_delete_event);
+
+                title.setText(event.getEventTitle());
+                desc.setText(event.getDescription());
+
+                deleteBtn.setOnClickListener(v -> {
+                    if (listener != null && event.getEid() != null) {
+                        listener.onDelete(event.getEid());
+                    }
+                });
             }
         }
     }
 }
-

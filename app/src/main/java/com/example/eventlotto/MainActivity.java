@@ -48,7 +48,13 @@ import java.util.Set;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-
+/**
+ * Main activity for EventLotto.
+ * <p>
+ * Handles navigation through fragments, bottom nav setup, and event status notifications.
+ * Implements in - app banners and local notifications for event status updates.
+ * </p>
+ */
 public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigationView;
@@ -109,6 +115,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sets up the bottom navigation menu based on the user's role.
+     *
+     * @param bottomNav BottomNavigationView to configure.
+     * @param role User role (can be 'admin', 'organizer', or 'entrant').
+     */
     private void setupBottomNavMenu(BottomNavigationView bottomNav, String role) {
         if (bottomNav == null) return;
         bottomNav.getMenu().clear();
@@ -157,6 +169,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Replaces the current fragment with the specified fragment.
+     *
+     * @param fragment Fragment to display.
+     */
     public void loadFragment(Fragment fragment) {
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction tx = fm.beginTransaction();
@@ -164,16 +181,22 @@ public class MainActivity extends AppCompatActivity {
         tx.commit();
     }
 
+    /** For bottom navigation visibility. */
     public void showBottomNavigation() {
         if (bottomNavigationView != null)
             bottomNavigationView.setVisibility(View.VISIBLE);
     }
-
+    /** For hiding bottom navigation visibility. */
     public void hideBottomNavigation() {
         if (bottomNavigationView != null)
             bottomNavigationView.setVisibility(View.GONE);
     }
 
+    /**
+     * Initializes the bottom navigation menu after creating a profile or switching roles.
+     *
+     * @param role User role to set up ("admin", "organizer", or "entrant").
+     */
     // Call this after creating a new profile so the bottom
     // navigation is fully initialized for the user's role.
     public void initBottomNavForRole(String role) {
@@ -184,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /** Ensures the notification channel is created for version O and above. */
     void ensureNotificationChannel() { // channel required for notification
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -202,8 +226,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-
+    /** Starts listening for the user’s subscribed event status updates in Firestore. */
     private void startSubscriptionListener() {
         if (subscriptionsReg != null) {
             subscriptionsReg.remove();
@@ -224,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    /** Updates per-event listeners for status changes. */
     private void updatePerEventStatusListeners() {
         Iterator<Map.Entry<String, ListenerRegistration>> it = statusDocRegs.entrySet().iterator();
         while (it.hasNext()) {
@@ -275,6 +299,13 @@ public class MainActivity extends AppCompatActivity {
         return s == null ? null : s.trim().toLowerCase();
     }
 
+    /**
+     * Sends a local notification and in-app banner for a status change.
+     *
+     * @param eventId Event ID
+     * @param eventTitle Event title (optional)
+     * @param status New event status ("selected" or "not chosen")
+     */
     private void sendLocalNotification(String eventId, String eventTitle, String status) {
         String title;
         String body;
@@ -309,6 +340,12 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(() -> showInAppBanner(bannerMessage, isPositive));
     }
 
+    /**
+     * Displays an in-app banner notification.
+     *
+     * @param message Banner text
+     * @param isPositive True if positive (green/happy), false if negative (red/sad)
+     */
     void showInAppBanner(String message, boolean isPositive) { //in app banner for notification
         View banner = findViewById(R.id.in_app_banner);
         if (banner == null) return;
@@ -391,7 +428,7 @@ public class MainActivity extends AppCompatActivity {
             statusDocRegs.put(eid, reg);
         }
     }
-
+    /** Requests notification permission on devices if not granted. */
     private void requestNotificationPermissionIfNeeded() { // we need this for notification
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
