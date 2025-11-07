@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -19,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
 import com.example.eventlotto.functions.events.EventAdapter;
-import com.example.eventlotto.functions.events.EventDetailsFragment;
 import com.example.eventlotto.model.Event;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -32,65 +32,60 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Entrant Home Fragment.
- * <p>
- * Displays all available events, allows searching by title/description,
- * and supports filtering by date range, day of week, and other criteria
- * via {@link Ent_FilterFragment}.
+ * Fragment displaying the home screen with a list of events and filter/search functionality.
  */
-public class Ent_HomeFragment extends Fragment implements Ent_FilterFragment.OnFilterAppliedListener {
+public class Ent_HomeFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private EventAdapter adapter;
-    private List<Event> fullEventList = new ArrayList<>();
+    private List<Event> eventList;
+    private List<Event> fullEventList;
     private FirestoreService firestoreService;
 
-    /**
-     * Called to create the view hierarchy for this fragment.
-     *
-     * @param inflater           LayoutInflater to inflate views
-     * @param container          Optional parent view
-     * @param savedInstanceState Saved instance data
-     * @return The root view for this fragment
-     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         firestoreService = new FirestoreService();
         recyclerView = view.findViewById(R.id.recycler_view_events);
+        eventList = new ArrayList<>();
+        fullEventList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Initialize adapter and click listener
-        adapter = new EventAdapter(new ArrayList<>(), event -> {
-            EventDetailsFragment fragment = EventDetailsFragment.newInstance(event.getEid());
+        adapter = new EventAdapter(eventList, event -> {
+            Ent_EventDetailsFragment fragment = Ent_EventDetailsFragment.newInstance(event.getEid());
             fragment.show(getParentFragmentManager(), "event_details");
         });
         recyclerView.setAdapter(adapter);
 
         fetchEvents();
 
-        // Filter button opens the filter popup
         ImageButton filterButton = view.findViewById(R.id.filter_button);
+        EditText searchEditText = view.findViewById(R.id.search_edit_text);
+        ImageView searchIcon = view.findViewById(R.id.search_button);
+
+        // --- Filter button opens filter fragment ---
         if (filterButton != null) {
             filterButton.setOnClickListener(v -> {
-                Ent_FilterFragment filterFragment = new Ent_FilterFragment();
-                filterFragment.show(getParentFragmentManager(), "filter_fragment");
+                Ent_FilterFragment entFilterFragment = new Ent_FilterFragment();
+                entFilterFragment.setOnFilterAppliedListener(
+                        (eventDateFrom, eventDateTo, registrationFrom, registrationTo, selectedDays) ->
+                                applyEventFilters(eventDateFrom, eventDateTo, registrationFrom, registrationTo, selectedDays)
+                );
+                entFilterFragment.show(getParentFragmentManager(), "filter_fragment");
             });
         }
 
-        // Search box for live title/description filtering
-        EditText searchEditText = view.findViewById(R.id.search_edit_text);
+        // --- Live search functionality ---
         if (searchEditText != null) {
             searchEditText.addTextChangedListener(new TextWatcher() {
                 @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
                 @Override public void afterTextChanged(Editable s) {}
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    filterEventsByQuery(s.toString());
+                    filterEvents(s.toString());
                 }
             });
         }
@@ -98,88 +93,82 @@ public class Ent_HomeFragment extends Fragment implements Ent_FilterFragment.OnF
         return view;
     }
 
-    /**
-     * Fetches all events from Firestore and updates the RecyclerView.
-     */
+    /** Fetch all events from Firestore and store in fullEventList */
     private void fetchEvents() {
-        firestoreService.events().get()
-                .addOnSuccessListener(querySnapshot -> {
+        firestoreService.events()
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    eventList.clear();
                     fullEventList.clear();
-                    for (DocumentSnapshot doc : querySnapshot) {
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
                         Event event = doc.toObject(Event.class);
                         if (event != null) {
                             event.setEid(doc.getId());
+                            eventList.add(event);
                             fullEventList.add(event);
                         }
                     }
-                    adapter.setEvents(new ArrayList<>(fullEventList));
+                    adapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(),
                         "Error fetching events: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    /**
-     * Filters events based on a text query in title or description.
-     *
-     * @param query The search query entered by the user
-     */
-    private void filterEventsByQuery(String query) {
-        if (query == null || query.isEmpty()) {
+    /** Live search based on title and description */
+    private void filterEvents(String query) {
+        if (query == null || query.trim().isEmpty()) {
             adapter.setEvents(new ArrayList<>(fullEventList));
             return;
         }
 
-        String q = query.toLowerCase(Locale.ROOT);
-        List<Event> filtered = new ArrayList<>();
+        String lowerQuery = query.toLowerCase(Locale.ROOT);
+        List<Event> filteredList = new ArrayList<>();
 
-        for (Event e : fullEventList) {
-            if ((e.getEventTitle() != null && e.getEventTitle().toLowerCase(Locale.ROOT).contains(q)) ||
-                    (e.getDescription() != null && e.getDescription().toLowerCase(Locale.ROOT).contains(q))) {
-                filtered.add(e);
+        for (Event event : fullEventList) {
+            String title = event.getEventTitle() != null ? event.getEventTitle().toLowerCase(Locale.ROOT) : "";
+            String description = event.getDescription() != null ? event.getDescription().toLowerCase(Locale.ROOT) : "";
+
+            if (title.contains(lowerQuery) || description.contains(lowerQuery)) {
+                filteredList.add(event);
             }
         }
 
-        adapter.setEvents(filtered);
+        adapter.setEvents(filteredList);
     }
 
-    /**
-     * Called when filters are applied in the {@link Ent_FilterFragment}.
-     * Filters events based on event date range, selected days, etc.
-     *
-     * @param criteria Filter criteria provided by the filter dialog
-     */
-    @Override
-    public void onFilterApplied(Ent_FilterFragment.FilterCriteria criteria) {
+    /** Apply date range and days-of-week filters */
+    private void applyEventFilters(String eventDateFrom, String eventDateTo,
+                                   String registrationFrom, String registrationTo,
+                                   List<String> selectedDays) {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        Date eventFromDate = parseDate(eventDateFrom, sdf);
+        Date eventToDate = parseDate(eventDateTo, sdf);
+        Date regFromDate = parseDate(registrationFrom, sdf);
+        Date regToDate = parseDate(registrationTo, sdf);
+
         List<Event> filtered = new ArrayList<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
 
         for (Event e : fullEventList) {
             boolean matches = true;
 
-            try {
-                // Parse filter and event dates
-                Date filterFrom = criteria.eventDateFrom.isEmpty() ? null : sdf.parse(criteria.eventDateFrom);
-                Date filterTo = criteria.eventDateTo.isEmpty() ? null : sdf.parse(criteria.eventDateTo);
-                Date eventStart = (e.getEventStartAt() != null) ? e.getEventStartAt().toDate() : null;
-                Date eventEnd = (e.getEventEndAt() != null) ? e.getEventEndAt().toDate() : null;
+            Date eventStart = e.getEventStartAt() != null ? e.getEventStartAt().toDate() : null;
+            Date eventEnd = e.getEventEndAt() != null ? e.getEventEndAt().toDate() : null;
 
-                // Inclusive date range check: include events that overlap the filter range
-                if (filterFrom != null && filterTo != null && eventStart != null && eventEnd != null) {
-                    if (eventEnd.before(filterFrom) || eventStart.after(filterTo)) {
-                        matches = false; // no overlap
-                    }
-                } else if (filterFrom != null && eventEnd != null && eventEnd.before(filterFrom)) {
-                    matches = false;
-                } else if (filterTo != null && eventStart != null && eventStart.after(filterTo)) {
-                    matches = false;
-                }
+            // --- Event date range ---
+            if (eventFromDate != null && (eventEnd == null || eventEnd.before(eventFromDate))) matches = false;
+            if (eventToDate != null && (eventStart == null || eventStart.after(eventToDate))) matches = false;
 
-            } catch (ParseException ignored) {}
+            // --- Registration date range ---
+            Date regStart = e.getRegistrationOpensAt() != null ? e.getRegistrationOpensAt().toDate() : null;
+            Date regEnd = e.getRegistrationClosesAt() != null ? e.getRegistrationClosesAt().toDate() : null;
+            if (regFromDate != null && (regEnd == null || regEnd.before(regFromDate))) matches = false;
+            if (regToDate != null && (regStart == null || regStart.after(regToDate))) matches = false;
 
-            // Filter by selected days of the week
-            if (criteria.daysOfWeek != null && !criteria.daysOfWeek.isEmpty() && e.getEventStartAt() != null) {
+            // --- Days-of-week filter ---
+            if (selectedDays != null && !selectedDays.isEmpty() && eventStart != null) {
                 Calendar cal = Calendar.getInstance();
-                cal.setTime(e.getEventStartAt().toDate());
+                cal.setTime(eventStart);
                 int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
 
                 String dayLetter = "";
@@ -193,18 +182,22 @@ public class Ent_HomeFragment extends Fragment implements Ent_FilterFragment.OnF
                     case Calendar.SUNDAY: dayLetter = "S"; break;
                 }
 
-                if (!criteria.daysOfWeek.contains(dayLetter)) {
-                    matches = false;
-                }
+                if (!selectedDays.contains(dayLetter)) matches = false;
             }
 
-            // TODO: Add registration status and location filters if needed
-
-            if (matches) {
-                filtered.add(e);
-            }
+            if (matches) filtered.add(e);
         }
 
         adapter.setEvents(filtered);
+    }
+
+    private Date parseDate(String dateStr, SimpleDateFormat sdf) {
+        if (dateStr == null || dateStr.isEmpty()) return null;
+        try {
+            return sdf.parse(dateStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
