@@ -73,6 +73,7 @@ public class Ent_CreateProfileFragment extends Fragment {
                 requireActivity().getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, new Ent_HomeFragment())
                         .commit();
+                ((MainActivity) requireActivity()).initBottomNavForRole("entrant");
 
                 //initialize and show bottom navigation for the new user
                 ((MainActivity) requireActivity()).initBottomNavForRole("entrant");
