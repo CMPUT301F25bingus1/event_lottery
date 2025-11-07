@@ -29,18 +29,14 @@ import com.example.eventlotto.ui.LoginFragment;
 import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
 import com.example.eventlotto.ui.admin.Adm_EventsFragment;
 import com.example.eventlotto.ui.admin.Adm_ProfilesFragment;
-import com.example.eventlotto.ui.ImagesFragment;
 import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
 import com.example.eventlotto.ui.entrant.Ent_MyEventsFragment;
 import com.example.eventlotto.ui.entrant.Ent_NotificationsFragment;
 import com.example.eventlotto.ui.entrant.Ent_ScanFragment;
 import com.example.eventlotto.ui.entrant.Ent_WelcomeFragment;
-import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
-
-import android.widget.Toast;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -380,15 +376,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void requestNotificationPermissionIfNeeded() { // we need this for notification
-        if (android.os.Build.VERSION.SDK_INT >= 33) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_POST_NOTIFICATIONS);
-        if (!statusDocRegs.isEmpty()) {
-            for (ListenerRegistration r : statusDocRegs.values()) {
-                if (r != null) r.remove();
-            }
-            statusDocRegs.clear();
+    private void requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= 33
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_POST_NOTIFICATIONS);
         }
     }
-}}}
+
+
+}

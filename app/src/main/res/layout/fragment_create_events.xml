@@ -13,11 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center_horizontal">
-        android:text="@string/create_events"
-        android:textColor="@android:color/white"
-        android:textSize="22sp"
-        android:layout_gravity="center" />
+        android:gravity="center_horizontal"
+        android:layout_gravity="center"></LinearLayout>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/create_event_card"
@@ -193,5 +190,6 @@
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-    </LinearLayout>
-</ScrollView>
+
+    </ScrollView>
+
