@@ -11,7 +11,6 @@ import com.google.firebase.firestore.GeoPoint;
  * It contains data such as the event title, description, capacity,
  * time information (event window, registration window), and geolocation.
  * </p>
- *
  */
 public class Event {
 
@@ -42,8 +41,11 @@ public class Event {
     /** Whether participants consent to location tracking for this event. */
     private Boolean geoConsent;
 
-    /** Whether users should be notified if they are not selected. */
-    private Boolean notifyWhenNotSelected;
+    /** The total number of entrants who have applied to this event. */
+    private Long entrantsApplied;
+
+    /** The maximum number of entrants that can apply to this event. */
+    private Long maxEntrants;
 
     /** Reference to the event's associated image document (if any). */
     private DocumentReference imageId;
@@ -61,6 +63,8 @@ public class Event {
      * Empty constructor required for Firestore automatic deserialization.
      */
     public Event() {}
+
+    // --- Getters ---
 
     /** @return The title of the event. */
     public String getEventTitle() { return eventTitle; }
@@ -89,8 +93,11 @@ public class Event {
     /** @return Whether location consent is enabled. */
     public Boolean getGeoConsent() { return geoConsent; }
 
-    /** @return Whether to notify users if not selected. */
-    public Boolean getNotifyWhenNotSelected() { return notifyWhenNotSelected; }
+    /** @return The total number of entrants who have applied. */
+    public Long getEntrantsApplied() { return entrantsApplied; }
+
+    /** @return The maximum number of entrants allowed. */
+    public Long getMaxEntrants() { return maxEntrants; }
 
     /** @return Reference to the event image document. */
     public DocumentReference getImageId() { return imageId; }
