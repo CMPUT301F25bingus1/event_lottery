@@ -301,7 +301,7 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(() -> showInAppBanner(bannerMessage, isPositive));
     }
 
-    private void showInAppBanner(String message, boolean isPositive) {
+    void showInAppBanner(String message, boolean isPositive) {
         View banner = findViewById(R.id.in_app_banner);
         if (banner == null) return;
         TextView tv = findViewById(R.id.banner_text);
