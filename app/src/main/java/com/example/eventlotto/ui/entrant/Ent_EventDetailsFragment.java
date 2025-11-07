@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,6 +46,9 @@ public class Ent_EventDetailsFragment extends DialogFragment {
     /** Buttons for cancelling the dialog or joining/leaving the waitlist. */
     private Button cancelButton, joinWaitlistButton;
 
+    private LinearLayout acceptDeclineLayout;
+    private Button acceptButton, declineButton;
+
     public static Ent_EventDetailsFragment newInstance(String eventId) {
         Ent_EventDetailsFragment fragment = new Ent_EventDetailsFragment();
         Bundle args = new Bundle();
@@ -75,10 +79,18 @@ public class Ent_EventDetailsFragment extends DialogFragment {
         joinWaitlistButton = view.findViewById(R.id.joinWaitlistButton);
         cancelButton.setOnClickListener(v -> dismiss());
         statusText = view.findViewById(R.id.statusText);
+        acceptDeclineLayout = view.findViewById(R.id.acceptDeclineLayout);
+        acceptButton = view.findViewById(R.id.acceptButton);
+        declineButton = view.findViewById(R.id.declineButton);
 
         if (eventId != null) {
             fetchEventData(eventId);
             loadWaitingCount(eventId);
+        }
+
+        if (acceptButton != null && declineButton != null) {
+            acceptButton.setOnClickListener(v -> acceptInvitation());
+            declineButton.setOnClickListener(v -> declineInvitation());
         }
 
         joinWaitlistButton.setOnClickListener(v -> joinWaitlist());
@@ -237,6 +249,49 @@ public class Ent_EventDetailsFragment extends DialogFragment {
         });
     }
 
+    private void acceptInvitation() {
+
+        String deviceId = Settings.Secure.getString(
+                requireContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID
+        );
+
+        // Update event status (signed_up)
+        FirebaseFirestore.getInstance()
+                .collection("events").document(eventId)
+                .collection("status").document(deviceId)
+                .update("status", "signed_up")
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getContext(), "Event accepted!", Toast.LENGTH_SHORT).show();
+                    getParentFragmentManager().setFragmentResult("eventStatusChanged", Bundle.EMPTY);
+                    dismiss();
+                })
+
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void declineInvitation() {
+        String deviceId = Settings.Secure.getString(
+                requireContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID
+        );
+        // Update event status (cancelled)
+        FirebaseFirestore.getInstance()
+                .collection("events").document(this.eventId)
+                .collection("status").document(deviceId)
+                .update("status", "cancelled")
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getContext(), "Event declined", Toast.LENGTH_SHORT).show();
+                    getParentFragmentManager().setFragmentResult("eventStatusChanged", Bundle.EMPTY);
+                    dismiss();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
     /**
      * Updates the UI to show that the user has joined the waitlist.
      *
@@ -244,11 +299,28 @@ public class Ent_EventDetailsFragment extends DialogFragment {
      * @param deviceId The current device ID.
      */
     private void showJoinedUI(String eventId, String deviceId) {
-        joinWaitlistButton.setText("Leave Waitlist");
-        joinWaitlistButton.setBackgroundTintList(
-                getResources().getColorStateList(android.R.color.holo_red_light)
-        );
-        joinWaitlistButton.setOnClickListener(v -> leaveWaitlist(eventId, deviceId));
+        FirebaseFirestore.getInstance()
+                .collection("events").document(eventId)
+                .collection("status").document(deviceId)
+                .get()
+                .addOnSuccessListener(statusDoc -> {
+                    String status = statusDoc.exists() ? statusDoc.getString("status") : "waiting";
+                    if ("signed_up".equalsIgnoreCase(status)) {
+                        joinWaitlistButton.setText("Leave Registration");
+                        joinWaitlistButton.setBackgroundTintList(
+                                getResources().getColorStateList(android.R.color.holo_red_light)
+                        );
+                        joinWaitlistButton.setOnClickListener(v -> leaveRegistration(eventId, deviceId));
+                        acceptDeclineLayout.setVisibility(View.GONE);
+                    } else {
+                        joinWaitlistButton.setText("Leave Waitlist");
+                        joinWaitlistButton.setBackgroundTintList(
+                                getResources().getColorStateList(android.R.color.holo_red_light)
+                        );
+                        joinWaitlistButton.setOnClickListener(v -> leaveWaitlist(eventId, deviceId));
+                        acceptDeclineLayout.setVisibility(View.GONE);
+                    }
+                });
     }
 
     /** Updates the UI to show that the user has not joined the waitlist. */
@@ -258,6 +330,7 @@ public class Ent_EventDetailsFragment extends DialogFragment {
                 getResources().getColorStateList(android.R.color.holo_green_dark)
         );
         joinWaitlistButton.setOnClickListener(v -> joinWaitlist());
+        acceptDeclineLayout.setVisibility(View.GONE);
     }
 
     /**
@@ -294,6 +367,26 @@ public class Ent_EventDetailsFragment extends DialogFragment {
 
 
     /**
+     * Removes the device from event's registration
+     * @param eventId The event ID.
+     * @param deviceId The current device ID.
+     */
+    private void leaveRegistration(String eventId, String deviceId) {
+        FirebaseFirestore.getInstance()
+                .collection("events").document(eventId)
+                .collection("status").document(deviceId)
+                .update("status", "cancelled")
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getContext(), "Registration cancelled", Toast.LENGTH_SHORT).show();
+                    getParentFragmentManager().setFragmentResult("eventStatusChanged", Bundle.EMPTY);
+                    dismiss();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Failed to cancel registration: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
+    }
+
+    /**
      * Checks if the current device is already on the waitlist and updates the UI accordingly.
      *
      * @param eventId The event ID.
@@ -312,7 +405,12 @@ public class Ent_EventDetailsFragment extends DialogFragment {
                     if (doc.exists()) {
                         String raw = doc.getString("status");
                         if (statusText != null) applyStatusText(statusText, raw);
-                        showJoinedUI(eventId, deviceId);
+                        if ("selected".equalsIgnoreCase(raw) && acceptDeclineLayout != null) {
+                            acceptDeclineLayout.setVisibility(View.VISIBLE);
+                            joinWaitlistButton.setVisibility(View.GONE);
+                        } else {
+                            showJoinedUI(eventId, deviceId);
+                        }
                         loadWaitingCount(eventId);
                     } else {
                         if (statusText != null) statusText.setVisibility(View.GONE);

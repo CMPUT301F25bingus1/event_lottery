@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * RecyclerView adapter for displaying a list of Event objects.
- * Handles real-time updates of the user's waitlist status for each event.
+ * It handles real-time updates of the user's waitlist status for each event.
  */
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
 
@@ -39,7 +39,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     /**
      * Constructor for EventAdapter.
      *
-     * @param events   List of Event objects to display.
+     * @param events   List of Event objects to show.
      * @param listener Listener for handling item clicks.
      */
     public EventAdapter(List<Event> events, OnItemClickListener listener) {
