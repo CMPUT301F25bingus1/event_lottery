@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
+import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class CreateProfileFragment extends Fragment {
@@ -69,7 +70,7 @@ public class CreateProfileFragment extends Fragment {
 
 
                 requireActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new HomeFragment())
+                        .replace(R.id.fragment_container, new Ent_HomeFragment())
                         .commit();
 
 

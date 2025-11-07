@@ -25,13 +25,14 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.example.eventlotto.ui.EntryFragment;
 import com.example.eventlotto.ui.LoginFragment;
 import com.example.eventlotto.ui.UsersFragment;
+import com.example.eventlotto.ui.ImagesFragment;
 import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
 import com.example.eventlotto.ui.entrant.Ent_MyEventsFragment;
 import com.example.eventlotto.ui.entrant.Ent_NotificationsFragment;
 import com.example.eventlotto.ui.entrant.Ent_ScanFragment;
+import com.example.eventlotto.ui.entrant.Ent_WelcomeFragment;
 import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -48,13 +49,10 @@ import androidx.core.app.NotificationManagerCompat;
 
 public class MainActivity extends AppCompatActivity {
 
-    // ---- your/team shared fields ----
     private BottomNavigationView bottomNavigationView;
-
     private FirestoreService firestoreService;
     private String deviceId;
 
-    // notification stuff (from team version)
     private static final String CHANNEL_ID = "event_status_updates";
     private static final int NOTIFICATION_ICON = R.drawable.notification_on;
     private static final int REQ_POST_NOTIFICATIONS = 1001;
@@ -72,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // handle insets like your team's code
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -81,42 +78,37 @@ public class MainActivity extends AppCompatActivity {
 
         firestoreService = new FirestoreService();
         deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        // init bottom nav
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        if (bottomNavigationView != null) {
-            // start hidden – this is your branch behavior
-            bottomNavigationView.setVisibility(View.GONE);
 
-            // we still fetch the role now so the menu is ready when we show it
-            firestoreService.getUser(deviceId)
-                    .addOnSuccessListener(snapshot -> {
-                        String role = "entrant";
-                        if (snapshot.exists() && snapshot.getString("role") != null) {
-                            role = snapshot.getString("role");
-                        }
-                        setupBottomNavMenu(bottomNavigationView, role);
-                    })
-                    .addOnFailureListener(e -> setupBottomNavMenu(bottomNavigationView, "entrant"));
-        }
+        if (bottomNavigationView != null) bottomNavigationView.setVisibility(View.GONE);
 
-        // notifications setup (team)
         ensureNotificationChannel();
         requestNotificationPermissionIfNeeded();
         startSubscriptionListener();
 
-        // load EntryFragment first (your branch)
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new EntryFragment())
-                    .commit();
+            firestoreService.getUser(deviceId)
+                    .addOnSuccessListener(snapshot -> {
+                        if (snapshot != null && snapshot.exists()) {
+                            String role = snapshot.getString("role") != null
+                                    ? snapshot.getString("role") : "entrant";
+                            setupBottomNavMenu(bottomNavigationView, role);
+                            loadFragment(new Ent_HomeFragment());
+                            showBottomNavigation();
+                        } else {
+                            loadFragment(new Ent_WelcomeFragment());
+                            hideBottomNavigation();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        loadFragment(new Ent_WelcomeFragment());
+                        hideBottomNavigation();
+                    });
         }
     }
 
-    // ---------------------------
-    // bottom nav setup (team)
-    // ---------------------------
     private void setupBottomNavMenu(BottomNavigationView bottomNav, String role) {
+        if (bottomNav == null) return;
         bottomNav.getMenu().clear();
 
         switch (role) {
@@ -137,14 +129,14 @@ public class MainActivity extends AppCompatActivity {
             if ("admin".equals(role)) {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
                 else if (id == R.id.nav_users) fragment = new UsersFragment();
-                else if (id == R.id.nav_images) fragment = new com.example.eventlotto.ui.ImagesFragment();
+                else if (id == R.id.nav_images) fragment = new ImagesFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
             } else if ("organizer".equals(role)) {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
                 else if (id == R.id.nav_create_event) fragment = new Org_CreateEventFragment();
                 else if (id == R.id.nav_notifications) fragment = new Ent_NotificationsFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
-            } else { // entrant
+            } else {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
                 else if (id == R.id.nav_my_events) fragment = new Ent_MyEventsFragment();
                 else if (id == R.id.nav_scan) fragment = new Ent_ScanFragment();
@@ -158,36 +150,25 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
-
-        // team code selected home by default; we can leave it
-        bottomNav.setSelectedItemId(R.id.nav_home);
     }
 
-    private void loadFragment(Fragment fragment) {
+    public void loadFragment(Fragment fragment) {
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction tx = fm.beginTransaction();
         tx.replace(R.id.fragment_container, fragment);
         tx.commit();
     }
 
-    // ---------------------------
-    // public helpers for fragments
-    // ---------------------------
     public void showBottomNavigation() {
-        if (bottomNavigationView != null) {
+        if (bottomNavigationView != null)
             bottomNavigationView.setVisibility(View.VISIBLE);
-        }
     }
 
     public void hideBottomNavigation() {
-        if (bottomNavigationView != null) {
+        if (bottomNavigationView != null)
             bottomNavigationView.setVisibility(View.GONE);
-        }
     }
 
-    // ---------------------------
-    // notification / listener logic (team)
-    // ---------------------------
     private void ensureNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -237,7 +218,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updatePerEventStatusListeners() {
-        // remove old
         Iterator<Map.Entry<String, ListenerRegistration>> it = statusDocRegs.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, ListenerRegistration> e = it.next();
@@ -247,7 +227,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        // add listeners for newly subscribed events
         for (String eid : subscribedEventIds) {
             if (statusDocRegs.containsKey(eid)) continue;
             ListenerRegistration reg = com.google.firebase.firestore.FirebaseFirestore.getInstance()
@@ -314,7 +293,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Enable notifications in Settings to receive updates", Toast.LENGTH_SHORT).show();
         }
 
-        // also show in-app banner
         final String bannerMessage =
                 "selected".equals(status)
                         ? "Congratulations! You have been selected for " + (eventTitle != null ? eventTitle : eventId)

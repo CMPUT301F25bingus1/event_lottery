@@ -1,4 +1,4 @@
-package com.example.eventlotto.ui;
+package com.example.eventlotto.ui.entrant;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,8 +11,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.eventlotto.R;
+import com.example.eventlotto.ui.CreateProfileFragment;
 
-public class WelcomeFragment extends Fragment {
+public class Ent_WelcomeFragment extends Fragment {
 
     @Nullable
     @Override

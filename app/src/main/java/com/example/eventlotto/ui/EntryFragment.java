@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
+import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
 
 public class EntryFragment extends Fragment {
 
@@ -43,7 +44,7 @@ public class EntryFragment extends Fragment {
 
                 requireActivity().getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.fragment_container, new HomeFragment())
+                        .replace(R.id.fragment_container, new Ent_HomeFragment())
                         .commit();
 
 
