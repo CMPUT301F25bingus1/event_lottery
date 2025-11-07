@@ -29,7 +29,6 @@ import com.example.eventlotto.ui.LoginFragment;
 import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
 import com.example.eventlotto.ui.admin.Adm_EventsFragment;
 import com.example.eventlotto.ui.admin.Adm_ProfilesFragment;
-import com.example.eventlotto.ui.UsersFragment;
 import com.example.eventlotto.ui.ImagesFragment;
 import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
 import com.example.eventlotto.ui.entrant.Ent_MyEventsFragment;
@@ -132,9 +131,10 @@ public class MainActivity extends AppCompatActivity {
 
             if ("admin".equals(role)) {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
-                else if (id == R.id.nav_users) fragment = new UsersFragment();
-                else if (id == R.id.nav_images) fragment = new ImagesFragment();
-                else if (id == R.id.nav_profile) fragment = new LoginFragment();
+                else if (id == R.id.nav_admin_events)
+                    fragment = new Adm_EventsFragment();
+                else if (id == R.id.nav_admin_profiles)
+                    fragment = new Adm_ProfilesFragment();
             } else if ("organizer".equals(role)) {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
                 else if (id == R.id.nav_create_event) fragment = new Org_CreateEventFragment();
@@ -191,16 +191,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void requestNotificationPermissionIfNeeded() {
-        if (Build.VERSION.SDK_INT >= 33) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
-                        REQ_POST_NOTIFICATIONS);
-            }
-        }
-    }
 
     private void startSubscriptionListener() {
         if (subscriptionsReg != null) {
@@ -401,4 +391,4 @@ public class MainActivity extends AppCompatActivity {
             statusDocRegs.clear();
         }
     }
-}
+}}}

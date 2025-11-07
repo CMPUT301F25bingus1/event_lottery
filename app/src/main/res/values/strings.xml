@@ -43,7 +43,6 @@
     <string name="event_image">Event Image</string>
     <string name="event_title">Event Title</string>
     <string name="event_description">Event Description</string>
-    <string name="event_description_goes_here">Event description goes here.</string>
     <string name="join_waitlist">Join Waitlist</string>
     <string name="cancel">Cancel</string>
     <string name="sign_up_n_a">Sign-up: N/A</string>
@@ -51,12 +50,6 @@
     <string name="geo_consent_required_n_a">Geo Consent Required: N/A</string>
     <string name="location_n_a">Location: N/A</string>
     <string name="organizer_n_a">Organizer: N/A</string>
-    <string name="event_description">Event Description</string>
-    <string name="join_waitlist">Join Waitlist</string>
-    <string name="cancel">Cancel</string>
-    <string name="banner_icon">Banner icon</string>
-    <string name="close">Close</string>
-    <string name="event_description_goes_here">Event description goes here.</string>
     <string name="create_events">create events</string>
     <string name="events">Events</string>
     <string name="users">Users</string>
