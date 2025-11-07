@@ -21,13 +21,49 @@ import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
 import com.example.eventlotto.ui.entrant.Ent_WelcomeFragment;
 
+/**
+ * Fragment for managing a user's profile in the EventLotto app.
+ * <p>
+ * Provides functionality to view, update, and delete the current user's profile.
+ * Uses the device ID as a unique identifier for the user and interacts with Firestore
+ * via {@link FirestoreService}.
+ * </p>
+ */
 public class LoginFragment extends Fragment {
 
-    private EditText nameField, emailField, phoneField;
-    private Button updateBtn, deleteBtn;
+    /** Input user's name. */
+    private EditText nameField;
+
+    /** Input user's email. */
+    private EditText emailField;
+
+    /** Input phone number. */
+    private EditText phoneField;
+
+    /** Button that updates the user's profile. */
+    private Button updateBtn;
+
+    /** Button that deletes the user's profile. */
+    private Button deleteBtn;
+
+    /** Firestore service instance to handle user data operations. */
     private FirestoreService firestoreService;
+
+    /** Unique device ID used as the user's identifier. */
     private String deviceId;
 
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     * <p>
+     * This method inflates the {@link R.layout#fragment_profiles} layout, initializes input fields,
+     * loads existing user data from Firestore, and sets up the update and delete buttons.
+     * </p>
+     *
+     * @param inflater The LayoutInflater used to inflate the fragment's view.
+     * @param container The parent view that the fragment's UI should attach to.
+     * @param savedInstanceState If non-null, the fragment is being re-created from a previous state.
+     * @return The root {@link View} for the fragment's layout.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -46,7 +82,16 @@ public class LoginFragment extends Fragment {
         updateBtn = view.findViewById(R.id.btn_update_profile);
         deleteBtn = view.findViewById(R.id.btn_delete_profile);
 
-        // Load existing user info
+        loadUserProfile();
+
+        updateBtn.setOnClickListener(v -> updateUserProfile());
+        deleteBtn.setOnClickListener(v -> confirmDeleteProfile());
+
+        return view;
+    }
+
+    /** Loads the current user's profile from Firestore and populates the input fields. */
+    private void loadUserProfile() {
         firestoreService.getUser(deviceId)
                 .addOnSuccessListener(snapshot -> {
                     if (snapshot.exists()) {
@@ -63,13 +108,9 @@ public class LoginFragment extends Fragment {
                 .addOnFailureListener(e ->
                         Toast.makeText(requireContext(), "Failed to load profile.", Toast.LENGTH_SHORT).show()
                 );
-
-        updateBtn.setOnClickListener(v -> updateUserProfile());
-        deleteBtn.setOnClickListener(v -> confirmDeleteProfile());
-
-        return view;
     }
 
+    /** Updates the user's profile in Firestore with the values from the input fields. */
     private void updateUserProfile() {
         String name = nameField.getText().toString().trim();
         String email = emailField.getText().toString().trim();
@@ -91,6 +132,7 @@ public class LoginFragment extends Fragment {
         });
     }
 
+    /** Shows a confirmation dialog before deleting the user's profile. */
     private void confirmDeleteProfile() {
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_confirm_delete, null);
         AlertDialog confirmDialog = new AlertDialog.Builder(requireContext())
@@ -109,6 +151,7 @@ public class LoginFragment extends Fragment {
         confirmDialog.show();
     }
 
+    /** Deletes the user's profile from Firestore and navigates back to the welcome screen. */
     private void deleteUserProfile() {
         firestoreService.deleteUserProfile(deviceId, success -> {
             if (success) {
@@ -122,9 +165,7 @@ public class LoginFragment extends Fragment {
                 btnGotIt.setOnClickListener(v -> {
                     deletedDialog.dismiss();
 
-
                     ((MainActivity) requireActivity()).hideBottomNavigation();
-
 
                     requireActivity().getSupportFragmentManager()
                             .beginTransaction()
