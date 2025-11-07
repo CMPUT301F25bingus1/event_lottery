@@ -1,36 +1,53 @@
 <resources>
     <string name="app_name">EventLotto</string>
+
+    <!-- Navigation -->
     <string name="home">Home</string>
     <string name="scan">Scan</string>
     <string name="notification">Notification</string>
     <string name="my_events">My Events</string>
     <string name="profile">Profile</string>
+
     <string name="search_icon" />
     <string name="filter_icon" />
+    <string name="warning_icon">Warning icon</string>
+    <string name="banner_icon">Banner icon</string>
+    <string name="close">Close</string>
+
+    <string name="status">Status</string>
     <string name="status_accepted">Accepted</string>
     <string name="status_waiting">Waiting</string>
     <string name="status_not_chosen">Not chosen</string>
     <string name="status_selected">Selected</string>
     <string name="status_signed_up">Signed up</string>
     <string name="status_cancelled">Cancelled</string>
+    <string name="waiting">Waiting</string>
+    <string name="waiting_0">Waiting: 0</string>
+
+    <!-- Notifications -->
     <string name="notification_toggle">Notification toggle</string>
-    <string name="tab_following">Following</string>
-    <string name="tab_all">All</string>
-    <string name="status">Status</string>
     <string name="confirm_opt_out_title">Opt out</string>
     <string name="confirm_opt_out_message">Would you like to opt-out of receiving notifications?</string>
     <string name="opt_out">Opt out</string>
+
+    <!-- Tabs -->
+    <string name="tab_following">Following</string>
+    <string name="tab_all">All</string>
+
+    <!-- Admin / Organizer -->
     <string name="tester">Tester</string>
     <string name="seed_mock_events">Seed Mock Events</string>
     <string name="seed_success">Mock events seeded</string>
     <string name="seed_failure">Seed failed</string>
-    <string name="warning_icon">Warning icon</string>
+
     <string name="event_image">Event Image</string>
     <string name="event_title">Event Title</string>
-    <string name="waiting">Waiting</string>
+    <string name="event_description">Event Description</string>
+    <string name="event_description_goes_here">Event description goes here.</string>
+    <string name="join_waitlist">Join Waitlist</string>
+    <string name="cancel">Cancel</string>
     <string name="sign_up_n_a">Sign-up: N/A</string>
     <string name="event_n_a">Event: N/A</string>
-    <string name="waiting_0">Waiting: 0</string>
     <string name="geo_consent_required_n_a">Geo Consent Required: N/A</string>
     <string name="location_n_a">Location: N/A</string>
     <string name="organizer_n_a">Organizer: N/A</string>

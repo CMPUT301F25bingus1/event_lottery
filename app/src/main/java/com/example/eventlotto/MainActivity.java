@@ -1,23 +1,23 @@
 package com.example.eventlotto;
 
+import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
-import android.view.View;
-import android.widget.TextView;
-import android.widget.ImageView;
-import android.widget.ImageButton;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -33,28 +33,41 @@ import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
 import com.example.eventlotto.ui.entrant.Ent_MyEventsFragment;
 import com.example.eventlotto.ui.entrant.Ent_NotificationsFragment;
 import com.example.eventlotto.ui.entrant.Ent_ScanFragment;
+import com.example.eventlotto.ui.entrant.Ent_WelcomeFragment;
+import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 
 import android.widget.Toast;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 public class MainActivity extends AppCompatActivity {
 
+    private BottomNavigationView bottomNavigationView;
     private FirestoreService firestoreService;
     private String deviceId;
+
     private static final String CHANNEL_ID = "event_status_updates";
     private static final int NOTIFICATION_ICON = R.drawable.notification_on;
-    private java.util.Set<String> subscribedEventIds = new java.util.HashSet<>();
-    private java.util.Map<String, String> lastNotified = new java.util.HashMap<>();
-    private ListenerRegistration subscriptionsReg;
-    private java.util.Map<String, ListenerRegistration> statusDocRegs = new java.util.HashMap<>();
-    private java.util.Map<String, Boolean> statusDocInitialized = new java.util.HashMap<>();
-    private java.util.Map<String, String> lastSeenStatus = new java.util.HashMap<>();
     private static final int REQ_POST_NOTIFICATIONS = 1001;
 
+    private Set<String> subscribedEventIds = new HashSet<>();
+    private Map<String, String> lastNotified = new HashMap<>();
+    private ListenerRegistration subscriptionsReg;
+    private Map<String, ListenerRegistration> statusDocRegs = new HashMap<>();
+    private Map<String, Boolean> statusDocInitialized = new HashMap<>();
+    private Map<String, String> lastSeenStatus = new HashMap<>();
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
@@ -66,30 +79,40 @@ public class MainActivity extends AppCompatActivity {
         });
 
         firestoreService = new FirestoreService();
-
         deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+        if (bottomNavigationView != null) bottomNavigationView.setVisibility(View.GONE);
+
         ensureNotificationChannel();
         requestNotificationPermissionIfNeeded();
         startSubscriptionListener();
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        if (bottomNavigationView != null) {
+        if (savedInstanceState == null) {
             firestoreService.getUser(deviceId)
                     .addOnSuccessListener(snapshot -> {
-                        String role = "entrant";
-                        if (snapshot.exists() && snapshot.getString("role") != null) {
-                            role = snapshot.getString("role");
+                        if (snapshot != null && snapshot.exists()) {
+                            String role = snapshot.getString("role") != null
+                                    ? snapshot.getString("role") : "entrant";
+                            setupBottomNavMenu(bottomNavigationView, role);
+                            loadFragment(new Ent_HomeFragment());
+                            showBottomNavigation();
+                        } else {
+                            loadFragment(new Ent_WelcomeFragment());
+                            hideBottomNavigation();
                         }
-                        setupBottomNavMenu(bottomNavigationView, role);
                     })
-                    .addOnFailureListener(e -> setupBottomNavMenu(bottomNavigationView, "entrant"));
+                    .addOnFailureListener(e -> {
+                        loadFragment(new Ent_WelcomeFragment());
+                        hideBottomNavigation();
+                    });
         }
     }
 
-    private void setupBottomNavMenu(BottomNavigationView bottomNav, String role) { // bottom navigations
+    private void setupBottomNavMenu(BottomNavigationView bottomNav, String role) {
+        if (bottomNav == null) return;
         bottomNav.getMenu().clear();
 
-        // Inflate menu based on role
         switch (role) {
             case "admin":
                 bottomNav.inflateMenu(R.menu.bottom_nav_menu_admin);
@@ -105,28 +128,17 @@ public class MainActivity extends AppCompatActivity {
             Fragment fragment = null;
             int id = item.getItemId();
 
-            if (role.equals("entrant")) {
+            if ("admin".equals(role)) {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
-                else if (id == R.id.nav_my_events)
-                    fragment = new Ent_MyEventsFragment();
-                else if (id == R.id.nav_scan)
-                    fragment = new Ent_ScanFragment();
-                else if (id == R.id.nav_notifications)
-                    fragment = new Ent_NotificationsFragment();
+                else if (id == R.id.nav_users) fragment = new UsersFragment();
+                else if (id == R.id.nav_images) fragment = new ImagesFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
-            }
-
-
-            else if (role.equals("organizer")) {
+            } else if ("organizer".equals(role)) {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
-                else if (id == R.id.nav_create_event)
-                    fragment = new Org_CreateEventFragment();
-                else if (id == R.id.nav_notifications)
-                    fragment = new Ent_NotificationsFragment();
+                else if (id == R.id.nav_create_event) fragment = new Org_CreateEventFragment();
+                else if (id == R.id.nav_notifications) fragment = new Ent_NotificationsFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
-            }
-
-            else if (role.equals("admin")) {
+            } else {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
                 else if (id == R.id.nav_admin_events)
                     fragment = new Adm_EventsFragment();
@@ -141,39 +153,23 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
-
-        // Set default selected tab
-        bottomNav.setSelectedItemId(R.id.nav_home);
     }
 
-
-    private void loadFragment(Fragment fragment) {
+    public void loadFragment(Fragment fragment) {
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction tx = fm.beginTransaction();
         tx.replace(R.id.fragment_container, fragment);
         tx.commit();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (subscriptionsReg != null) {
-            subscriptionsReg.remove();
-            subscriptionsReg = null;
-        }
-        // Remove any per-event status doc listeners
-        if (!statusDocRegs.isEmpty()) {
-            for (ListenerRegistration r : statusDocRegs.values()) {
-                if (r != null) r.remove();
-            }
-            statusDocRegs.clear();
-        }
-        if (!statusDocRegs.isEmpty()) {
-            for (ListenerRegistration r : statusDocRegs.values()) {
-                if (r != null) r.remove();
-            }
-            statusDocRegs.clear();
-        }
+    public void showBottomNavigation() {
+        if (bottomNavigationView != null)
+            bottomNavigationView.setVisibility(View.VISIBLE);
+    }
+
+    public void hideBottomNavigation() {
+        if (bottomNavigationView != null)
+            bottomNavigationView.setVisibility(View.GONE);
     }
 
     private void ensureNotificationChannel() { // channel required for notification
@@ -182,10 +178,25 @@ public class MainActivity extends AppCompatActivity {
             if (manager != null) {
                 NotificationChannel channel = manager.getNotificationChannel(CHANNEL_ID);
                 if (channel == null) {
-                    channel = new NotificationChannel(CHANNEL_ID, "Event Status Updates", NotificationManager.IMPORTANCE_DEFAULT);
+                    channel = new NotificationChannel(
+                            CHANNEL_ID,
+                            "Event Status Updates",
+                            NotificationManager.IMPORTANCE_DEFAULT
+                    );
                     channel.setDescription("Notifications when your event status changes");
                     manager.createNotificationChannel(channel);
                 }
+            }
+        }
+    }
+
+    private void requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        REQ_POST_NOTIFICATIONS);
             }
         }
     }
@@ -209,7 +220,53 @@ public class MainActivity extends AppCompatActivity {
                     updatePerEventStatusListeners();
                 });
     }
-    
+
+    private void updatePerEventStatusListeners() {
+        Iterator<Map.Entry<String, ListenerRegistration>> it = statusDocRegs.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, ListenerRegistration> e = it.next();
+            if (!subscribedEventIds.contains(e.getKey())) {
+                if (e.getValue() != null) e.getValue().remove();
+                it.remove();
+            }
+        }
+
+        for (String eid : subscribedEventIds) {
+            if (statusDocRegs.containsKey(eid)) continue;
+            ListenerRegistration reg = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                    .collection("events").document(eid)
+                    .collection("status").document(deviceId)
+                    .addSnapshotListener((snap, err) -> {
+                        if (err != null || snap == null || !snap.exists()) return;
+                        String s = safeLower(snap.getString("status"));
+                        String normalized = ("not_chosen".equals(s) ? "not chosen" : s);
+
+                        if (!statusDocInitialized.containsKey(eid)) {
+                            statusDocInitialized.put(eid, true);
+                            lastSeenStatus.put(eid, normalized);
+                            return;
+                        }
+
+                        String prev = lastSeenStatus.get(eid);
+                        if (normalized == null || normalized.equals(prev)) return;
+                        lastSeenStatus.put(eid, normalized);
+
+                        if (!"selected".equals(normalized) && !"not chosen".equals(normalized)) return;
+                        String last = lastNotified.get(eid);
+                        if (normalized.equals(last)) return;
+
+                        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                                .collection("events").document(eid)
+                                .get()
+                                .addOnSuccessListener(eventDoc -> {
+                                    String title = eventDoc.getString("eventTitle");
+                                    sendLocalNotification(eid, title, normalized);
+                                    lastNotified.put(eid, normalized);
+                                });
+                    });
+            statusDocRegs.put(eid, reg);
+        }
+    }
 
     private static String safeLower(String s) {
         return s == null ? null : s.trim().toLowerCase();
@@ -259,10 +316,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (tv != null) tv.setText(message);
         if (icon != null) icon.setImageResource(isPositive ? R.drawable.happy_cat : R.drawable.crying_cat);
-        if (accent != null) accent.setBackgroundColor(ContextCompat.getColor(this, isPositive ? android.R.color.holo_green_dark : android.R.color.holo_red_dark));
+        if (accent != null)
+            accent.setBackgroundColor(ContextCompat.getColor(this,
+                    isPositive ? android.R.color.holo_green_dark : android.R.color.holo_red_dark));
         if (close != null) close.setOnClickListener(v -> hideBannerNow());
 
-        //slide-in + fade animation
         banner.setAlpha(0f);
         banner.setTranslationY(-40f);
         banner.setVisibility(View.VISIBLE);
@@ -272,26 +330,26 @@ public class MainActivity extends AppCompatActivity {
         banner.postDelayed(hideBannerRunnable, 3500);
     }
 
-    private final Runnable hideBannerRunnable = () -> {
-        hideBannerNow();
-    };
+    private final Runnable hideBannerRunnable = this::hideBannerNow;
 
     private void hideBannerNow() {
         View banner = findViewById(R.id.in_app_banner);
         if (banner != null && banner.getVisibility() == View.VISIBLE) {
-            banner.animate().alpha(0f).translationY(-20f).setDuration(180).withEndAction(() -> banner.setVisibility(View.GONE)).start();
+            banner.animate()
+                    .alpha(0f)
+                    .translationY(-20f)
+                    .setDuration(180)
+                    .withEndAction(() -> banner.setVisibility(View.GONE))
+                    .start();
         }
     }
 
-    private void updatePerEventStatusListeners() {
-        //remove listeners for events no longer subscribed
-        java.util.Iterator<java.util.Map.Entry<String, ListenerRegistration>> it = statusDocRegs.entrySet().iterator();
-        while (it.hasNext()) {
-            java.util.Map.Entry<String, ListenerRegistration> e = it.next();
-            if (!subscribedEventIds.contains(e.getKey())) {
-                if (e.getValue() != null) e.getValue().remove();
-                it.remove();
-            }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (subscriptionsReg != null) {
+            subscriptionsReg.remove();
+            subscriptionsReg = null;
         }
 
         //add listeners for newly subscribed events
@@ -336,6 +394,7 @@ public class MainActivity extends AppCompatActivity {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_POST_NOTIFICATIONS);
             }
+            statusDocRegs.clear();
         }
     }
 }
