@@ -18,6 +18,9 @@ import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
 import com.example.eventlotto.functions.events.EventAdapter;
 import com.example.eventlotto.model.Event;
+import com.example.eventlotto.model.EventStatus;
+import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
@@ -36,6 +39,7 @@ public class Ent_MyEventsFragment extends Fragment {
 
     /** Shows pending events. */
     private RecyclerView pendingRecyclerView;
+    private EventAdapter pendingAdapter;
 
     /** Shows registered events. */
     private RecyclerView registeredRecyclerView;
@@ -54,6 +58,7 @@ public class Ent_MyEventsFragment extends Fragment {
 
     /** Firestore service used to query events and user status. */
     private FirestoreService firestoreService;
+    private int currentTab;
 
     /** Unique device ID used to identify current user. */
     private String currentUserId;
@@ -84,16 +89,21 @@ public class Ent_MyEventsFragment extends Fragment {
 
         View root = inflater.inflate(R.layout.fragment_my_events, container, false);
 
+        // Tracks which tab is open
+        currentTab = 0;
+
         firestoreService = new FirestoreService();
 
+        pendingRecyclerView = root.findViewById(R.id.myEventsRecycler);
         currentUserId = Settings.Secure.getString(
                 requireContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID
         );
 
-        pendingLabel = root.findViewById(R.id.pendingLabel);
-        registeredLabel = root.findViewById(R.id.registeredLabel);
+        // Disable nested scrolling to allow proper height calculation inside NestedScrollView
+        pendingRecyclerView.setNestedScrollingEnabled(false);
 
+        pendingRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         // Setup pending events RecyclerView
         pendingRecyclerView = root.findViewById(R.id.pendingRecycler);
         registeredRecyclerView = root.findViewById(R.id.registeredRecycler);
@@ -112,6 +122,10 @@ public class Ent_MyEventsFragment extends Fragment {
         });
         pendingRecyclerView.setAdapter(pendingAdapter);
 
+        // Sets up tabs (current events and history)
+        TabLayout tabs = root.findViewById(R.id.tabFilter);
+        tabs.addTab(tabs.newTab().setText(R.string.tab_current));
+        tabs.addTab(tabs.newTab().setText(R.string.tab_history));
         // Setup registered events RecyclerView
         registeredRecyclerView = root.findViewById(R.id.registeredRecycler);
         registeredRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -126,28 +140,51 @@ public class Ent_MyEventsFragment extends Fragment {
         getParentFragmentManager().setFragmentResultListener(
                 "eventStatusChanged",
                 this,
-                (requestKey, bundle) -> fetchUserEvents()
+                (requestKey, bundle) -> fetchUserEvents(currentTab)
         );
 
+        // Fetch user's events on load
+        fetchUserEvents(0);
+
+        //Default tab is Current Events
+        tabs.selectTab(tabs.getTabAt(0));
+
+        tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                // When tab is selected, load the appropriate events and data
+                currentTab = tab.getPosition();
+                fetchUserEvents(currentTab);
+            }
+
+            @Override public void onTabUnselected(TabLayout.Tab tab) { }
+            @Override public void onTabReselected(TabLayout.Tab tab) {
+                // This could be implemented in the future to 'refresh' the current tab?
+            }
+        });
         // Fetch events on initial load
         fetchUserEvents();
 
         return root;
     }
 
+
     /**
-     * Fetches all events from Firestore and sorts them into pending and registered lists
-     * based on the current user's status.
+     * Gets events and data based on the current user, then updates which events are to be shown
+     * based on this data and the current tab
+     * @param currentTab ; 0 if current tab is Current events, and 1 if it is History
      */
-    public void fetchUserEvents() {
+   public void fetchUserEvents(int currentTab) {
         String deviceId = Settings.Secure.getString(
                 requireContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID
         );
 
+        // Removes any events whose waitlist was left
         pendingEvents.clear();
-        registeredEvents.clear();
+        pendingAdapter.notifyDataSetChanged();
 
+       // query ALL events
         firestoreService.events().get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
@@ -161,21 +198,23 @@ public class Ent_MyEventsFragment extends Fragment {
                                             if (statusDoc.exists()) {
                                                 String status = statusDoc.getString("status");
 
+                                                // Remove from list first to avoid duplicates
                                                 // Remove duplicates
                                                 pendingEvents.removeIf(e -> e.getEid().equals(event.getEid()));
-                                                registeredEvents.removeIf(e -> e.getEid().equals(event.getEid()));
 
-                                                // Sort event based on status
-                                                if ("waiting".equalsIgnoreCase(status) ||
-                                                        "selected".equalsIgnoreCase(status) ||
-                                                        "cancelled".equalsIgnoreCase(status)) {
-                                                    pendingEvents.add(event);
-                                                } else if ("signed_up".equalsIgnoreCase(status)) {
-                                                    registeredEvents.add(event);
+                                                if ("waiting".equalsIgnoreCase(status) || "selected".equalsIgnoreCase(status) || "signed_up".equalsIgnoreCase(status) || "cancelled".equalsIgnoreCase(status)) {
+                                                    // True if the event has not ended/happened yet, false if the event has ended
+                                                    boolean isCurrentEvent = event.getEventEndAt().compareTo(Timestamp.now()) >= 0;
+
+                                                    if (currentTab == 0 && isCurrentEvent){
+                                                        pendingEvents.add(event);
+                                                    }
+                                                    else if (currentTab == 1 && !isCurrentEvent){
+                                                        pendingEvents.add(event);
+                                                    }
                                                 }
 
                                                 pendingAdapter.notifyDataSetChanged();
-                                                registeredAdapter.notifyDataSetChanged();
                                                 updateVisibility();
                                             }
                                         });
@@ -186,7 +225,7 @@ public class Ent_MyEventsFragment extends Fragment {
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Error fetching events: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                 );
-    }
+   }
 
     /**
      * Updates the visibility of labels and RecyclerViews for pending and registered events.
@@ -196,7 +235,6 @@ public class Ent_MyEventsFragment extends Fragment {
         if (pendingLabel != null) pendingLabel.setVisibility(View.VISIBLE);
         if (registeredLabel != null) registeredLabel.setVisibility(View.VISIBLE);
         pendingRecyclerView.setVisibility(View.VISIBLE);
-        registeredRecyclerView.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -205,6 +243,7 @@ public class Ent_MyEventsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        fetchUserEvents();
+        // Refresh events when returning to fragment
+        fetchUserEvents(currentTab);
     }
 }
