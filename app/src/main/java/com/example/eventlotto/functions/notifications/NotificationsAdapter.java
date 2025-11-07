@@ -21,23 +21,56 @@ import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.List;
 
+/**
+ * Adapter class for displaying a list of followed events within a RecyclerView.
+ * <p>
+ * This adapter handles binding of event data, displaying notification toggle icons,
+ * and listening for real-time updates of user-specific event status from Firestore.
+ */
 public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdapter.VH> {
 
+    /**
+     * Listener interface for handling user interactions with notifications and events.
+     */
     public interface Listener {
+        /**
+         * Called when a user toggles the notification state for an event.
+         * @param event    The {@link FollowedEvent} whose notification setting was changed.
+         * @param position The adapter position of the affected item.
+         */
         void onNotificationToggle(FollowedEvent event, int position);
+
+        /**
+         * Called when a user clicks on an event item.
+         * @param event The {@link FollowedEvent} that was clicked.
+         */
         void onEventClick(FollowedEvent event);
     }
 
+    /** The list of followed events displayed in this adapter. */
     private final List<FollowedEvent> items;
+
+    /** Optional listener for handling user interactions. */
     @Nullable private final Listener listener;
 
+    /**
+     * Constructs a new {@link NotificationsAdapter}.
+     *
+     * @param items    The list of {@link FollowedEvent} objects to display.
+     * @param listener The listener to handle user actions (nullable).
+     */
     public NotificationsAdapter(List<FollowedEvent> items, @Nullable Listener listener) {
         this.items = items;
         this.listener = listener;
     }
 
-    // removed status map; statuses now come live from Firestore per row
-
+    /**
+     * Inflates the item layout for each event.
+     *
+     * @param parent   The parent {@link ViewGroup}.
+     * @param viewType The view type (unused).
+     * @return A new {@link VH} instance.
+     */
     @NonNull
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -46,11 +79,22 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         return new VH(v);
     }
 
+    /**
+     * Binds the event data to the given {@link VH}.
+     *
+     * @param holder   The ViewHolder instance.
+     * @param position The position of the item being bound.
+     */
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         holder.bind(items.get(position));
     }
 
+    /**
+     * Cleans up listeners and resources when a ViewHolder is recycled.
+     *
+     * @param holder The ViewHolder being recycled.
+     */
     @Override
     public void onViewRecycled(@NonNull VH holder) {
         super.onViewRecycled(holder);
@@ -62,27 +106,61 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         holder.textStatus.setVisibility(View.GONE);
     }
 
+    /**
+     * Returns the total number of events displayed.
+     *
+     * @return The number of items.
+     */
     @Override
     public int getItemCount() {
         return items.size();
     }
 
-
+    /**
+     * Replaces the current list of items with a new one and refreshes the view.
+     *
+     * @param newItems The new list of followed events.
+     */
     public void setItems(List<FollowedEvent> newItems) {
         items.clear();
         items.addAll(newItems);
         notifyDataSetChanged();
     }
 
+    /**
+     * ViewHolder class that represents each event item in the RecyclerView.
+     * <p>
+     * This class manages view binding, click listeners, and Firestore snapshot listeners
+     * for event status updates.
+     */
     static class VH extends RecyclerView.ViewHolder {
+
+        /** Notification toggle icon. */
         final ImageView iconNotify;
+
+        /** Event thumbnail image. */
         final ImageView imageEvent;
+
+        /** Event name text view. */
         final TextView textName;
+
+        /** Event status chip text view. */
         final TextView textStatus;
+
+        /** Event description text view. */
         final TextView textDescription;
+
+        /** Firestore listener registration for real-time event status updates. */
         @Nullable ListenerRegistration statusReg;
+
+        /** The ID of the event currently bound to this ViewHolder. */
         @Nullable String boundEventId;
 
+        /**
+         * Constructs a ViewHolder and initializes its views.
+         *
+         * @param itemView The root view of the item layout.
+         */
         VH(@NonNull View itemView) {
             super(itemView);
             iconNotify = itemView.findViewById(R.id.iconNotify);
@@ -92,6 +170,11 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
             textDescription = itemView.findViewById(R.id.textDescription);
         }
 
+        /**
+         * Binds a {@link FollowedEvent} to the ViewHolder and sets up UI interactions.
+         *
+         * @param e The event to bind.
+         */
         void bind(FollowedEvent e) {
             textName.setText(e.getName());
             textDescription.setText(e.getDescription());
@@ -107,12 +190,13 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
             String eid = e.getId();
             boundEventId = eid;
 
+            // Get device ID to track user-specific status
             String deviceId = Settings.Secure.getString(
                     itemView.getContext().getContentResolver(),
                     Settings.Secure.ANDROID_ID
             );
 
-            //listen for user's status under events/<eid>/status/<uid>
+            // Listen for user's event status under events/<eid>/status/<deviceId>
             statusReg = FirebaseFirestore.getInstance()
                     .collection("events").document(eid)
                     .collection("status").document(deviceId)
@@ -131,13 +215,17 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
                         }
                     });
 
-            iconNotify.setImageResource(e.isNotificationsEnabled() //toggle between on and off
+            // Set the notification icon based on current state
+            iconNotify.setImageResource(e.isNotificationsEnabled()
                     ? R.drawable.notification_on
                     : R.drawable.notification_off);
 
+            // Handle notification toggle click
             iconNotify.setOnClickListener(v -> {
-                if (e.isNotificationsEnabled()) { //opt-out warning
-                    View dialogView = LayoutInflater.from(v.getContext()).inflate(R.layout.dialog_opt_out, null, false);
+                if (e.isNotificationsEnabled()) {
+                    // Show opt-out confirmation dialog
+                    View dialogView = LayoutInflater.from(v.getContext())
+                            .inflate(R.layout.dialog_opt_out, null, false);
                     AlertDialog dialog = new AlertDialog.Builder(v.getContext())
                             .setView(dialogView)
                             .create();
@@ -152,9 +240,8 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
                     btnOptOut.setOnClickListener(vi -> {
                         dialog.dismiss();
                         e.setNotificationsEnabled(false);
-                        RecyclerView.Adapter<?> a = getBindingAdapter();
-                        if (a != null) a.notifyItemChanged(getBindingAdapterPosition());
                         RecyclerView.Adapter<?> adapter = getBindingAdapter();
+                        if (adapter != null) adapter.notifyItemChanged(getBindingAdapterPosition());
                         if (adapter instanceof NotificationsAdapter) {
                             NotificationsAdapter na = (NotificationsAdapter) adapter;
                             if (na.listener != null) {
@@ -164,10 +251,10 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
                     });
                     dialog.show();
                 } else {
+                    // Enable notifications
                     e.setNotificationsEnabled(true);
-                    RecyclerView.Adapter<?> a = getBindingAdapter();
-                    if (a != null) a.notifyItemChanged(getBindingAdapterPosition());
                     RecyclerView.Adapter<?> adapter = getBindingAdapter();
+                    if (adapter != null) adapter.notifyItemChanged(getBindingAdapterPosition());
                     if (adapter instanceof NotificationsAdapter) {
                         NotificationsAdapter na = (NotificationsAdapter) adapter;
                         if (na.listener != null) {
@@ -177,6 +264,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
                 }
             });
 
+            // Handle event item click
             itemView.setOnClickListener(v -> {
                 RecyclerView.Adapter<?> adapter = getBindingAdapter();
                 if (adapter instanceof NotificationsAdapter) {
@@ -189,6 +277,12 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         }
     }
 
+    /**
+     * Applies a visual chip style and label to a status TextView based on a raw status string.
+     *
+     * @param tv         The TextView to apply the status to.
+     * @param rawStatus  The raw status string (e.g., "selected", "cancelled", etc.).
+     */
     private static void applyStatusChip(TextView tv, @Nullable String rawStatus) {
         String s = (rawStatus == null ? "waiting" : rawStatus).trim().toLowerCase();
         int bg;

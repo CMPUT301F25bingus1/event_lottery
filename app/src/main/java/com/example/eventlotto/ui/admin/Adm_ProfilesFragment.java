@@ -20,73 +20,134 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment for admin users to view and manage all user profiles.
+ * <p>
+ * Displays users in a RecyclerView with the option to delete each profile.
+ * </p>
+ */
 public class Adm_ProfilesFragment extends Fragment {
 
+    /** List of all users retrieved from Firestore. */
     private final List<User> users = new ArrayList<>();
-    private Adm_ProfilesFragment.UsersAdapter adapter;
+
+    /** RecyclerView adapter for displaying users. */
+    private UsersAdapter adapter;
+
+    /** Service class for interacting with Firestore. */
     private FirestoreService firestoreService;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_admin_profiles, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_admin_profiles, container, false);
+
         firestoreService = new FirestoreService();
 
-        RecyclerView rv = v.findViewById(R.id.recycler_admin_users);
-        rv.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new UsersAdapter(users, uid -> deleteUser(uid));
-        rv.setAdapter(adapter);
+        RecyclerView recyclerView = root.findViewById(R.id.recycler_admin_users);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        adapter = new UsersAdapter(users, this::deleteUser);
+        recyclerView.setAdapter(adapter);
 
         loadUsers();
-        return v;
+
+        return root;
     }
 
+    /**
+     * Fetches all users from Firestore and updates the RecyclerView.
+     */
     private void loadUsers() {
         firestoreService.users().get()
-                .addOnSuccessListener(snaps -> {
+                .addOnSuccessListener(snapshots -> {
                     users.clear();
-                    for (DocumentSnapshot d : snaps) {
-                        User u = d.toObject(User.class);
-                        if (u != null) {
-                            u.setUid(d.getId());
-                            users.add(u);
+                    for (DocumentSnapshot doc : snapshots) {
+                        User user = doc.toObject(User.class);
+                        if (user != null) {
+                            user.setUid(doc.getId());
+                            users.add(user);
                         }
                     }
                     adapter.notifyDataSetChanged();
                 })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to load users", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Failed to load users", Toast.LENGTH_SHORT).show()
+                );
     }
 
+    /**
+     * Deletes a user by their UID and refreshes the list.
+     *
+     * @param uid User ID
+     */
     private void deleteUser(String uid) {
-        firestoreService.deleteUser(uid, ok -> {
-            Toast.makeText(getContext(), ok ? "Profile deleted" : "Delete failed", Toast.LENGTH_SHORT).show();
+        firestoreService.deleteUser(uid, success -> {
+            Toast.makeText(getContext(), success ? "Profile deleted" : "Delete failed", Toast.LENGTH_SHORT).show();
             loadUsers();
         });
     }
 
+    /**
+     * RecyclerView adapter for displaying admin user profiles.
+     */
     private static class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.VH> {
-        interface Listener { void onDelete(String uid); }
-        private final List<User> items; private final Listener listener;
-        UsersAdapter(List<User> items, Listener listener) { this.items = items; this.listener = listener; }
 
-        @NonNull @Override public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_admin_user, parent, false);
+        /** Listener interface for delete actions. */
+        interface Listener {
+            void onDelete(String uid);
+        }
+
+        private final List<User> items;
+        private final Listener listener;
+
+        UsersAdapter(List<User> items, Listener listener) {
+            this.items = items;
+            this.listener = listener;
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_admin_user, parent, false);
             return new VH(v);
         }
-        @Override public void onBindViewHolder(@NonNull VH h, int pos) { h.bind(items.get(pos), listener); }
-        @Override public int getItemCount() { return items.size(); }
 
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+            holder.bind(items.get(position), listener);
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size();
+        }
+
+        /**
+         * ViewHolder for individual user items.
+         */
         static class VH extends RecyclerView.ViewHolder {
-            VH(@NonNull View itemView) { super(itemView); }
-            void bind(User u, Listener listener) {
+            VH(@NonNull View itemView) {
+                super(itemView);
+            }
+
+            void bind(User user, Listener listener) {
                 android.widget.TextView name = itemView.findViewById(R.id.text_user_name);
                 android.widget.TextView email = itemView.findViewById(R.id.text_user_email);
-                View btn = itemView.findViewById(R.id.btn_delete_user);
-                name.setText(u.getFullName() != null ? u.getFullName() : u.getUid());
-                email.setText(u.getEmail() != null ? u.getEmail() : "");
-                btn.setOnClickListener(v -> { if (listener != null && u.getUid() != null) listener.onDelete(u.getUid()); });
+                View deleteBtn = itemView.findViewById(R.id.btn_delete_user);
+
+                name.setText(user.getFullName() != null ? user.getFullName() : user.getUid());
+                email.setText(user.getEmail() != null ? user.getEmail() : "");
+
+                deleteBtn.setOnClickListener(v -> {
+                    if (listener != null && user.getUid() != null) {
+                        listener.onDelete(user.getUid());
+                    }
+                });
             }
         }
     }
 }
-
