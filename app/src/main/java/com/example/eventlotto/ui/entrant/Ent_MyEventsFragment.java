@@ -96,7 +96,15 @@ public class Ent_MyEventsFragment extends Fragment {
 
         // Setup pending events RecyclerView
         pendingRecyclerView = root.findViewById(R.id.pendingRecycler);
+        registeredRecyclerView = root.findViewById(R.id.registeredRecycler);
+
+        // Disable nested scrolling to allow proper height calculation inside NestedScrollView
+        pendingRecyclerView.setNestedScrollingEnabled(false);
+        registeredRecyclerView.setNestedScrollingEnabled(false);
+
         pendingRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        registeredRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
         pendingEvents = new ArrayList<>();
         pendingAdapter = new EventAdapter(pendingEvents, event -> {
             Ent_EventDetailsFragment fragment = Ent_EventDetailsFragment.newInstance(event.getEid());
