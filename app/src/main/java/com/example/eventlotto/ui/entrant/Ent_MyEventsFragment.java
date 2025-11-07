@@ -54,7 +54,15 @@ public class Ent_MyEventsFragment extends Fragment {
         registeredLabel = root.findViewById(R.id.registeredLabel);
 
         pendingRecyclerView = root.findViewById(R.id.pendingRecycler);
+        registeredRecyclerView = root.findViewById(R.id.registeredRecycler);
+
+        // Disable nested scrolling to allow proper height calculation inside NestedScrollView
+        pendingRecyclerView.setNestedScrollingEnabled(false);
+        registeredRecyclerView.setNestedScrollingEnabled(false);
+
         pendingRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        registeredRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
         pendingEvents = new ArrayList<>();
         pendingAdapter = new EventAdapter(pendingEvents, event -> {
             // Show the EventDetailsFragment with accept/decline options
@@ -63,9 +71,6 @@ public class Ent_MyEventsFragment extends Fragment {
         });
         pendingRecyclerView.setAdapter(pendingAdapter);
 
-        // setup registered RecyclerView
-        registeredRecyclerView = root.findViewById(R.id.registeredRecycler);
-        registeredRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         registeredEvents = new ArrayList<>();
         registeredAdapter = new EventAdapter(registeredEvents, event -> {
             // Show the EventDetailsFragment (view only for registered events)
@@ -84,7 +89,6 @@ public class Ent_MyEventsFragment extends Fragment {
         fetchUserEvents();
 
         return root;
-
     }
 
 
