@@ -26,9 +26,9 @@ import java.util.Map;
 
 /**
  * Unit tests for FirestoreService (pure JVM + Mockito).
- * We stub FirebaseFirestore so no network/device is required.
+ * Stubbed FirebaseFirestore.
  *
- * What is coveredd:
+ * What is covered:
  *  - saveUserProfile(): happy path + null user (US 01.02.01 / 01.02.02)
  *  - saveEventStatus(): generates sid when missing (US 01.02.03)
  *  - saveNotification(): sets createdAt + writes (US 01.04.01 / 01.04.02)
