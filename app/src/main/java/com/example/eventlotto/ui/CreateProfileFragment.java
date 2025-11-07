@@ -15,9 +15,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.eventlotto.FirestoreService;
+import com.example.eventlotto.MainActivity;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
 import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
+import com.example.eventlotto.MainActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class CreateProfileFragment extends Fragment {
@@ -72,7 +74,7 @@ public class CreateProfileFragment extends Fragment {
                 requireActivity().getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, new Ent_HomeFragment())
                         .commit();
-
+                ((MainActivity) requireActivity()).initBottomNavForRole("entrant");
 
                 BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
                 bottomNav.setVisibility(View.VISIBLE);

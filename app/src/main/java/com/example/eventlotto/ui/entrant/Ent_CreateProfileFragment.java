@@ -73,8 +73,10 @@ public class Ent_CreateProfileFragment extends Fragment {
                 requireActivity().getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, new Ent_HomeFragment())
                         .commit();
+                ((MainActivity) requireActivity()).initBottomNavForRole("entrant");
 
-                ((MainActivity) requireActivity()).showBottomNavigation();
+                //initialize and show bottom navigation for the new user
+                ((MainActivity) requireActivity()).initBottomNavForRole("entrant");
             } else {
                 Toast.makeText(requireContext(), "Failed to create profile. Try again.", Toast.LENGTH_SHORT).show();
             }
