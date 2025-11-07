@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.eventlotto.R;
+import com.example.eventlotto.functions.scan.GenerateQRFragment;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -123,6 +124,9 @@ public class Org_CreateEventFragment extends Fragment {
                     String eventId = documentReference.getId();
                     db.collection("events").document(eventId).update("eventId", eventId);
                     Toast.makeText(getContext(), "Event created successfully!", Toast.LENGTH_LONG).show();
+
+                    GenerateQRFragment qrFragment = GenerateQRFragment.newInstance(eventId);
+                    qrFragment.show(getParentFragmentManager(), "generate_qr_dialog");
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
@@ -140,8 +144,6 @@ public class Org_CreateEventFragment extends Fragment {
             return fallback;
         }
     }
-
-
 
     private void showDatePicker(EditText target) {
         Calendar calendar = Calendar.getInstance();

@@ -16,9 +16,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.eventlotto.FirestoreService;
+import com.example.eventlotto.MainActivity;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
-import com.example.eventlotto.ui.entrant.Ent_EntryFragment;
+import com.example.eventlotto.ui.entrant.Ent_WelcomeFragment;
 
 public class LoginFragment extends Fragment {
 
@@ -45,64 +46,95 @@ public class LoginFragment extends Fragment {
         updateBtn = view.findViewById(R.id.btn_update_profile);
         deleteBtn = view.findViewById(R.id.btn_delete_profile);
 
-        loadProfile();
+        // Load existing user info
+        firestoreService.getUser(deviceId)
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.exists()) {
+                        User user = snapshot.toObject(User.class);
+                        if (user != null) {
+                            nameField.setText(user.getFullName());
+                            emailField.setText(user.getEmail());
+                            phoneField.setText(user.getPhone());
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "No existing profile found.", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(requireContext(), "Failed to load profile.", Toast.LENGTH_SHORT).show()
+                );
 
-        updateBtn.setOnClickListener(v -> updateProfile());
-        deleteBtn.setOnClickListener(v -> confirmDelete());
+        updateBtn.setOnClickListener(v -> updateUserProfile());
+        deleteBtn.setOnClickListener(v -> confirmDeleteProfile());
 
         return view;
     }
 
-    private void loadProfile() {
-        firestoreService.getUser(deviceId).addOnSuccessListener(snapshot -> {
-            if (snapshot.exists()) {
-                User user = snapshot.toObject(User.class);
-                if (user != null) {
-                    nameField.setText(user.getFullName());
-                    emailField.setText(user.getEmail());
-                    phoneField.setText(user.getPhone());
-                }
-            }
-        });
-    }
-
-    private void updateProfile() {
+    private void updateUserProfile() {
         String name = nameField.getText().toString().trim();
         String email = emailField.getText().toString().trim();
         String phone = phoneField.getText().toString().trim();
 
-        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(email)) {
-            Toast.makeText(getContext(), "Name and Email cannot be empty", Toast.LENGTH_SHORT).show();
+        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(email) || TextUtils.isEmpty(phone)) {
+            Toast.makeText(requireContext(), "Please fill in all fields.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        User updatedUser = new User(name, email, phone, deviceId);
-        firestoreService.saveUser(updatedUser)
-                .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Profile updated!", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Update failed.", Toast.LENGTH_SHORT).show());
-    }
+        User updatedUser = new User(deviceId, name, email, phone);
 
-    private void confirmDelete() {
-        new AlertDialog.Builder(getContext())
-                .setTitle("Confirm Deletion")
-                .setMessage("Are you sure you want to delete your profile?")
-                .setPositiveButton("Delete", (dialog, which) -> deleteProfile())
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
-    private void deleteProfile() {
-        firestoreService.deleteUser(deviceId, success -> {
+        firestoreService.updateUserProfile(updatedUser, success -> {
             if (success) {
-                Toast.makeText(getContext(), "Profile deleted.", Toast.LENGTH_LONG).show();
-
-                // Go back to WelcomeFragment
-                getParentFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, new Ent_EntryFragment())
-                        .commit();
+                Toast.makeText(requireContext(), "Profile updated successfully.", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(getContext(), "Error deleting profile.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Failed to update profile.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void confirmDeleteProfile() {
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_confirm_delete, null);
+        AlertDialog confirmDialog = new AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+        Button btnDelete = dialogView.findViewById(R.id.btnDelete);
+
+        btnCancel.setOnClickListener(v -> confirmDialog.dismiss());
+        btnDelete.setOnClickListener(v -> {
+            confirmDialog.dismiss();
+            deleteUserProfile();
+        });
+
+        confirmDialog.show();
+    }
+
+    private void deleteUserProfile() {
+        firestoreService.deleteUserProfile(deviceId, success -> {
+            if (success) {
+                View deletedView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_profile_deleted, null);
+                AlertDialog deletedDialog = new AlertDialog.Builder(requireContext())
+                        .setView(deletedView)
+                        .setCancelable(false)
+                        .create();
+
+                Button btnGotIt = deletedView.findViewById(R.id.btnGotIt);
+                btnGotIt.setOnClickListener(v -> {
+                    deletedDialog.dismiss();
+
+
+                    ((MainActivity) requireActivity()).hideBottomNavigation();
+
+
+                    requireActivity().getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment_container, new Ent_WelcomeFragment())
+                            .commit();
+                });
+
+                deletedDialog.show();
+            } else {
+                Toast.makeText(requireContext(), "Failed to delete profile. Try again.", Toast.LENGTH_SHORT).show();
             }
         });
     }

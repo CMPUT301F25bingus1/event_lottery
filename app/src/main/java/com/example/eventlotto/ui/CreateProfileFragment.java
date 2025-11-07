@@ -1,4 +1,4 @@
-package com.example.eventlotto.ui.entrant;
+package com.example.eventlotto.ui;
 
 import android.os.Bundle;
 import android.provider.Settings;
@@ -15,11 +15,12 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.eventlotto.FirestoreService;
-import com.example.eventlotto.MainActivity;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
+import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class Ent_CreateProfileFragment extends Fragment {
+public class CreateProfileFragment extends Fragment {
 
     private EditText inputName, inputEmail, inputPhone;
     private Button btnCreateProfile;
@@ -39,13 +40,11 @@ public class Ent_CreateProfileFragment extends Fragment {
         inputPhone = view.findViewById(R.id.input_phone);
         btnCreateProfile = view.findViewById(R.id.btn_create_profile);
 
+        // Get device ID
         deviceId = Settings.Secure.getString(
                 requireContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID
         );
-
-
-        ((MainActivity) requireActivity()).hideBottomNavigation();
 
         btnCreateProfile.setOnClickListener(v -> createUserProfile());
 
@@ -74,7 +73,9 @@ public class Ent_CreateProfileFragment extends Fragment {
                         .replace(R.id.fragment_container, new Ent_HomeFragment())
                         .commit();
 
-                ((MainActivity) requireActivity()).showBottomNavigation();
+
+                BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
+                bottomNav.setVisibility(View.VISIBLE);
             } else {
                 Toast.makeText(requireContext(), "Failed to create profile. Try again.", Toast.LENGTH_SHORT).show();
             }
