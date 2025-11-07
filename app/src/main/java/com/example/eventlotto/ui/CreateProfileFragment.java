@@ -18,7 +18,7 @@ import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
 import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.eventlotto.MainActivity;
 
 public class CreateProfileFragment extends Fragment {
 
@@ -73,9 +73,8 @@ public class CreateProfileFragment extends Fragment {
                         .replace(R.id.fragment_container, new Ent_HomeFragment())
                         .commit();
 
-
-                BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottom_navigation);
-                bottomNav.setVisibility(View.VISIBLE);
+                //initialize and show bottom navigation for the new user
+                ((MainActivity) requireActivity()).initBottomNavForRole("entrant");
             } else {
                 Toast.makeText(requireContext(), "Failed to create profile. Try again.", Toast.LENGTH_SHORT).show();
             }
