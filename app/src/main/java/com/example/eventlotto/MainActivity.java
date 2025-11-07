@@ -169,6 +169,15 @@ public class MainActivity extends AppCompatActivity {
             bottomNavigationView.setVisibility(View.GONE);
     }
 
+
+    public void initBottomNavForRole(String role) {
+        setupBottomNavMenu(bottomNavigationView, role);
+        showBottomNavigation();
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setSelectedItemId(R.id.nav_home);
+        }
+    }
+
     private void ensureNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
