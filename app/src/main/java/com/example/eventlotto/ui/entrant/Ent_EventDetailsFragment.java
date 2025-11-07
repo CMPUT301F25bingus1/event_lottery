@@ -284,7 +284,7 @@ public class Ent_EventDetailsFragment extends DialogFragment {
                 .get()
                 .addOnSuccessListener(query -> {
                     int c = (query != null) ? query.size() : 0;
-                    waitlistCount.setText(c+ " is on the waiting list.");
+                    waitlistCount.setText(c+ "is on the waiting list.");
                 })
                 .addOnFailureListener(e -> waitlistCount.setText("Waiting: 0"));
     }
