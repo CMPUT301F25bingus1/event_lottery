@@ -26,17 +26,18 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.eventlotto.ui.LoginFragment;
-import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
-import com.example.eventlotto.ui.admin.Adm_EventsFragment;
-import com.example.eventlotto.ui.admin.Adm_ProfilesFragment;
+import com.example.eventlotto.ui.UsersFragment;
+import com.example.eventlotto.ui.ImagesFragment;
 import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
 import com.example.eventlotto.ui.entrant.Ent_MyEventsFragment;
 import com.example.eventlotto.ui.entrant.Ent_NotificationsFragment;
 import com.example.eventlotto.ui.entrant.Ent_ScanFragment;
 import com.example.eventlotto.ui.entrant.Ent_WelcomeFragment;
+import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -127,10 +128,9 @@ public class MainActivity extends AppCompatActivity {
 
             if ("admin".equals(role)) {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
-                else if (id == R.id.nav_admin_events)
-                    fragment = new Adm_EventsFragment();
-                else if (id == R.id.nav_admin_profiles)
-                    fragment = new Adm_ProfilesFragment();
+                else if (id == R.id.nav_users) fragment = new UsersFragment();
+                else if (id == R.id.nav_images) fragment = new ImagesFragment();
+                else if (id == R.id.nav_profile) fragment = new LoginFragment();
             } else if ("organizer".equals(role)) {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
                 else if (id == R.id.nav_create_event) fragment = new Org_CreateEventFragment();
@@ -196,6 +196,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        REQ_POST_NOTIFICATIONS);
+            }
+        }
+    }
 
     private void startSubscriptionListener() {
         if (subscriptionsReg != null) {
@@ -212,7 +222,6 @@ public class MainActivity extends AppCompatActivity {
                             if (eid != null) subscribedEventIds.add(eid);
                         }
                     }
-                    // attach per-event listeners that don't depend on uid field
                     updatePerEventStatusListeners();
                 });
     }
@@ -271,9 +280,9 @@ public class MainActivity extends AppCompatActivity {
     private void sendLocalNotification(String eventId, String eventTitle, String status) {
         String title;
         String body;
-        if ("selected".equals(status)) { // device notification
+        if ("selected".equals(status)) {
             title = "You're selected!";
-            body = (eventTitle != null ? eventTitle : eventId) + ": You have been selected!";
+            body = (eventTitle != null ? eventTitle : eventId) + ": You have been selected.";
         } else {
             title = "Not chosen";
             body = (eventTitle != null ? eventTitle : eventId) + ": You were not chosen.";
@@ -293,7 +302,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Enable notifications in Settings to receive updates", Toast.LENGTH_SHORT).show();
         }
 
-        // in-app banner at the top
         final String bannerMessage =
                 "selected".equals(status)
                         ? "Congratulations! You have been selected for " + (eventTitle != null ? eventTitle : eventId)
@@ -302,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(() -> showInAppBanner(bannerMessage, isPositive));
     }
 
-    private void showInAppBanner(String message, boolean isPositive) { //in app banner for notification
+    private void showInAppBanner(String message, boolean isPositive) {
         View banner = findViewById(R.id.in_app_banner);
         if (banner == null) return;
         TextView tv = findViewById(R.id.banner_text);
@@ -347,50 +355,11 @@ public class MainActivity extends AppCompatActivity {
             subscriptionsReg.remove();
             subscriptionsReg = null;
         }
-
-        //add listeners for newly subscribed events
-        for (String eid : subscribedEventIds) {
-            if (statusDocRegs.containsKey(eid)) continue;
-            ListenerRegistration reg = com.google.firebase.firestore.FirebaseFirestore.getInstance()
-                    .collection("events").document(eid)
-                    .collection("status").document(deviceId)
-                    .addSnapshotListener((snap, err) -> {
-                        if (err != null || snap == null || !snap.exists()) return;
-                        String s = safeLower(snap.getString("status"));
-                        String normalized = ("not_chosen".equals(s) ? "not chosen" : s);
-
-                        //on first emission for this event, record and skip notifying
-                        if (!statusDocInitialized.containsKey(eid)) {
-                            statusDocInitialized.put(eid, true);
-                            lastSeenStatus.put(eid, normalized);
-                            return;
-                        }
-                        //only notify when the status actually changes and is a target state
-                        String prev = lastSeenStatus.get(eid);
-                        if (normalized == null || normalized.equals(prev)) return;
-                        lastSeenStatus.put(eid, normalized);
-                        if (!"selected".equals(normalized) && !"not chosen".equals(normalized)) return;
-                        String last = lastNotified.get(eid);
-                        if (normalized.equals(last)) return;
-                        com.google.firebase.firestore.FirebaseFirestore.getInstance()
-                                .collection("events").document(eid)
-                                .get()
-                                .addOnSuccessListener(eventDoc -> {
-                                    String title = eventDoc.getString("eventTitle");
-                                    sendLocalNotification(eid, title, normalized);
-                                    lastNotified.put(eid, normalized);
-                                });
-                    });
-            statusDocRegs.put(eid, reg);
+        if (!statusDocRegs.isEmpty()) {
+            for (ListenerRegistration r : statusDocRegs.values()) {
+                if (r != null) r.remove();
+            }
+            statusDocRegs.clear();
         }
     }
-
-    private void requestNotificationPermissionIfNeeded() {
-        if (Build.VERSION.SDK_INT >= 33
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_POST_NOTIFICATIONS);
-        }
-    }
-
-
 }

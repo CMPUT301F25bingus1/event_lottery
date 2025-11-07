@@ -112,7 +112,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
                     Settings.Secure.ANDROID_ID
             );
 
-            //listen for user's status under events/<eid>/status/<uid>
+            // Listen for this user's status under events/<eid>/status/<uid>
             statusReg = FirebaseFirestore.getInstance()
                     .collection("events").document(eid)
                     .collection("status").document(deviceId)
@@ -136,7 +136,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
                     : R.drawable.notification_off);
 
             iconNotify.setOnClickListener(v -> {
-                if (e.isNotificationsEnabled()) { //opt-out warning
+                if (e.isNotificationsEnabled()) {
                     View dialogView = LayoutInflater.from(v.getContext()).inflate(R.layout.dialog_opt_out, null, false);
                     AlertDialog dialog = new AlertDialog.Builder(v.getContext())
                             .setView(dialogView)
