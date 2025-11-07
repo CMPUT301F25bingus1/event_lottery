@@ -128,10 +128,12 @@ public class MainActivity extends AppCompatActivity {
             Fragment fragment = null;
             int id = item.getItemId();
 
-            if ("admin".equals(role)) {
+            if (role.equals("admin")) {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
-                else if (id == R.id.nav_users) fragment = new UsersFragment();
-                else if (id == R.id.nav_images) fragment = new ImagesFragment();
+                else if (id == R.id.nav_admin_events)
+                    fragment = new Adm_EventsFragment();
+                else if (id == R.id.nav_admin_profiles)
+                    fragment = new Adm_ProfilesFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
             } else if ("organizer".equals(role)) {
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
@@ -139,11 +141,11 @@ public class MainActivity extends AppCompatActivity {
                 else if (id == R.id.nav_notifications) fragment = new Ent_NotificationsFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
             } else {
+                // entrant
                 if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
-                else if (id == R.id.nav_admin_events)
-                    fragment = new Adm_EventsFragment();
-                else if (id == R.id.nav_admin_profiles)
-                    fragment = new Adm_ProfilesFragment();
+                else if (id == R.id.nav_scan) fragment = new Ent_ScanFragment();
+                else if (id == R.id.nav_notifications) fragment = new Ent_NotificationsFragment();
+                else if (id == R.id.nav_my_events) fragment = new Ent_MyEventsFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
             }
 
@@ -172,6 +174,16 @@ public class MainActivity extends AppCompatActivity {
             bottomNavigationView.setVisibility(View.GONE);
     }
 
+    // Call this after creating a new profile so the bottom
+    // navigation is fully initialized for the user's role.
+    public void initBottomNavForRole(String role) {
+        setupBottomNavMenu(bottomNavigationView, role);
+        showBottomNavigation();
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setSelectedItemId(R.id.nav_home);
+        }
+    }
+
     private void ensureNotificationChannel() { // channel required for notification
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -190,16 +202,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void requestNotificationPermissionIfNeeded() {
-        if (Build.VERSION.SDK_INT >= 33) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
-                        REQ_POST_NOTIFICATIONS);
-            }
-        }
-    }
+
 
     private void startSubscriptionListener() {
         if (subscriptionsReg != null) {
