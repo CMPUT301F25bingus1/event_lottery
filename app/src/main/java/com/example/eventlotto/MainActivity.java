@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void ensureNotificationChannel() { // channel required for notification
+    void ensureNotificationChannel() { // channel required for notification
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             if (manager != null) {
@@ -271,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static String safeLower(String s) {
+    static String safeLower(String s) {
         return s == null ? null : s.trim().toLowerCase();
     }
 
@@ -309,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(() -> showInAppBanner(bannerMessage, isPositive));
     }
 
-    private void showInAppBanner(String message, boolean isPositive) { //in app banner for notification
+    void showInAppBanner(String message, boolean isPositive) { //in app banner for notification
         View banner = findViewById(R.id.in_app_banner);
         if (banner == null) return;
         TextView tv = findViewById(R.id.banner_text);
