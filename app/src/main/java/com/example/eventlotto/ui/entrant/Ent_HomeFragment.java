@@ -32,16 +32,42 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Fragment displaying the home screen with a list of events and filter/search functionality.
+ * Displays the entrant's home screen containing a scrollable list of available events.
+ * <p>
+ * Users can:
+ * <ul>
+ *   <li>View event listings pulled dynamically from Firestore.</li>
+ *   <li>Open event details.</li>
+ *   <li>Filter events by date ranges or days of the week.</li>
+ *   <li>Search events by title or description.</li>
+ * </ul>
  */
 public class Ent_HomeFragment extends Fragment {
 
+    /** RecyclerView displaying the list of events. */
     private RecyclerView recyclerView;
+
+    /** Adapter for binding {@link Event} data to RecyclerView items. */
     private EventAdapter adapter;
+
+    /** The currently displayed list of events (after filters/search). */
     private List<Event> eventList;
+
+    /** The complete list of all fetched events. */
     private List<Event> fullEventList;
+
+    /** Firestore service instance for event data retrieval. */
     private FirestoreService firestoreService;
 
+    /**
+     * Called to initialize the fragment's UI.
+     * Inflates the layout, sets up RecyclerView, search, and filter logic.
+     *
+     * @param inflater  LayoutInflater to inflate views.
+     * @param container The parent view for this fragment.
+     * @param savedInstanceState Previous instance state (if any).
+     * @return The inflated fragment view.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -54,6 +80,7 @@ public class Ent_HomeFragment extends Fragment {
         fullEventList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        // Initialize the adapter and define event click behavior
         adapter = new EventAdapter(eventList, event -> {
             Ent_EventDetailsFragment fragment = Ent_EventDetailsFragment.newInstance(event.getEid());
             fragment.show(getParentFragmentManager(), "event_details");
@@ -66,7 +93,6 @@ public class Ent_HomeFragment extends Fragment {
         EditText searchEditText = view.findViewById(R.id.search_edit_text);
         ImageView searchIcon = view.findViewById(R.id.search_button);
 
-        // --- Filter button opens filter fragment ---
         if (filterButton != null) {
             filterButton.setOnClickListener(v -> {
                 Ent_FilterFragment entFilterFragment = new Ent_FilterFragment();
@@ -78,11 +104,12 @@ public class Ent_HomeFragment extends Fragment {
             });
         }
 
-        // --- Live search functionality ---
+        //Live search functionality
         if (searchEditText != null) {
             searchEditText.addTextChangedListener(new TextWatcher() {
                 @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
                 @Override public void afterTextChanged(Editable s) {}
+
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     filterEvents(s.toString());
@@ -93,13 +120,19 @@ public class Ent_HomeFragment extends Fragment {
         return view;
     }
 
-    /** Fetch all events from Firestore and store in fullEventList */
+    /**
+     * Fetches all events from Firestore and populates the {@link #fullEventList} and {@link #eventList}.
+     * <p>
+     * If successful, updates the RecyclerView adapter with the new data.
+     * If unsuccessful, displays an error message to the user.
+     */
     private void fetchEvents() {
         firestoreService.events()
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     eventList.clear();
                     fullEventList.clear();
+
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
                         Event event = doc.toObject(Event.class);
                         if (event != null) {
@@ -108,13 +141,19 @@ public class Ent_HomeFragment extends Fragment {
                             fullEventList.add(event);
                         }
                     }
+
                     adapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(),
                         "Error fetching events: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    /** Live search based on title and description */
+    /**
+     * Filters events in real-time based on user search input.
+     * Matches against both title and description (case-insensitive).
+     *
+     * @param query The search term entered by the user.
+     */
     private void filterEvents(String query) {
         if (query == null || query.trim().isEmpty()) {
             adapter.setEvents(new ArrayList<>(fullEventList));
@@ -136,7 +175,16 @@ public class Ent_HomeFragment extends Fragment {
         adapter.setEvents(filteredList);
     }
 
-    /** Apply date range and days-of-week filters */
+    /**
+     * Applies filters to the event list based on selected criteria such as date ranges
+     * and specific days of the week.
+     *
+     * @param eventDateFrom   Start date of the event date range.
+     * @param eventDateTo     End date of the event date range.
+     * @param registrationFrom Start date of registration date range.
+     * @param registrationTo   End date of registration date range.
+     * @param selectedDays    List of selected days of the week.
+     */
     private void applyEventFilters(String eventDateFrom, String eventDateTo,
                                    String registrationFrom, String registrationTo,
                                    List<String> selectedDays) {
@@ -191,6 +239,13 @@ public class Ent_HomeFragment extends Fragment {
         adapter.setEvents(filtered);
     }
 
+    /**
+     * Safely parses a date string using the provided {@link SimpleDateFormat}.
+     *
+     * @param dateStr The date string to parse.
+     * @param sdf     The formatter to use.
+     * @return A {@link Date} object, or {@code null} if parsing fails.
+     */
     private Date parseDate(String dateStr, SimpleDateFormat sdf) {
         if (dateStr == null || dateStr.isEmpty()) return null;
         try {
