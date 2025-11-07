@@ -193,15 +193,48 @@ public class Ent_EventDetailsFragment extends DialogFragment {
                 Settings.Secure.ANDROID_ID
         );
 
-        firestoreService.joinWaitlist(eventId, deviceId)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Successfully joined waitlist", Toast.LENGTH_SHORT).show();
-                    if (statusText != null) applyStatusText(statusText, "waiting");
-                    showJoinedUI(eventId, deviceId);
-                    loadWaitingCount(eventId);
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference eventRef = db.collection("events").document(eventId);
+
+        db.runTransaction(transaction -> {
+            DocumentSnapshot snapshot = transaction.get(eventRef);
+
+            Long entrantsApplied = snapshot.getLong("entrantsApplied");
+            Long maxEntrants = snapshot.getLong("maxEntrants");
+
+            if (entrantsApplied == null) entrantsApplied = 0L;
+
+            // Check if event is full
+            if (maxEntrants != null && entrantsApplied >= maxEntrants) {
+                throw new IllegalStateException("This event is full.");
+            }
+
+            // Add user to status subcollection
+            DocumentReference userStatusRef = eventRef
+                    .collection("status")
+                    .document(deviceId);
+
+            transaction.set(userStatusRef, new java.util.HashMap<String, Object>() {{
+                put("status", "waiting");
+                put("joinedAt", Timestamp.now());
+            }});
+
+            // Increment entrantsApplied
+            transaction.update(eventRef, "entrantsApplied", entrantsApplied + 1);
+
+            return null;
+        }).addOnSuccessListener(aVoid -> {
+            Toast.makeText(getContext(), "Successfully joined waitlist", Toast.LENGTH_SHORT).show();
+            if (statusText != null) applyStatusText(statusText, "waiting");
+            showJoinedUI(eventId, deviceId);
+            loadWaitingCount(eventId);
+        }).addOnFailureListener(e -> {
+            if (e instanceof IllegalStateException) {
+                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
@@ -234,18 +267,31 @@ public class Ent_EventDetailsFragment extends DialogFragment {
      * @param deviceId The current device ID.
      */
     private void leaveWaitlist(String eventId, String deviceId) {
-        FirebaseFirestore.getInstance()
-                .collection("events").document(eventId)
-                .collection("status").document(deviceId)
-                .delete()
-                .addOnSuccessListener(unused -> {
-                    Toast.makeText(getContext(), "Successfully left the waitlist", Toast.LENGTH_SHORT).show();
-                    if (statusText != null) statusText.setVisibility(View.GONE);
-                    showNotJoinedUI();
-                    loadWaitingCount(eventId);
-                })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to leave waitlist: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference eventRef = db.collection("events").document(eventId);
+        DocumentReference userStatusRef = eventRef.collection("status").document(deviceId);
+
+        db.runTransaction(transaction -> {
+            DocumentSnapshot eventSnap = transaction.get(eventRef);
+            Long entrantsApplied = eventSnap.getLong("entrantsApplied");
+            if (entrantsApplied == null || entrantsApplied <= 0) entrantsApplied = 0L;
+
+            // Remove user’s status document
+            transaction.delete(userStatusRef);
+
+            // Decrement entrantsApplied safely
+            transaction.update(eventRef, "entrantsApplied", Math.max(entrantsApplied - 1, 0));
+
+            return null;
+        }).addOnSuccessListener(unused -> {
+            Toast.makeText(getContext(), "Successfully left the waitlist", Toast.LENGTH_SHORT).show();
+            if (statusText != null) statusText.setVisibility(View.GONE);
+            showNotJoinedUI();
+            loadWaitingCount(eventId);
+        }).addOnFailureListener(e ->
+                Toast.makeText(getContext(), "Failed to leave waitlist: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
+
 
     /**
      * Checks if the current device is already on the waitlist and updates the UI accordingly.

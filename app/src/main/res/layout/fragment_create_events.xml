@@ -14,10 +14,15 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal">
-        android:text="@string/create_events"
-        android:textColor="@android:color/white"
-        android:textSize="22sp"
-        android:layout_gravity="center" />
+
+        <!-- Header Text -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/create_events"
+            android:textColor="@android:color/white"
+            android:textSize="22sp"
+            android:layout_gravity="center" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/create_event_card"
@@ -77,6 +82,18 @@
                     android:textColor="@android:color/black"
                     android:textColorHint="#808080"
                     android:backgroundTint="#9E9E9E" />
+
+                <!-- Max Entrants (Optional) -->
+                <EditText
+                    android:id="@+id/input_max_entrants"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Max Entrants (Optional)"
+                    android:inputType="number"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#808080"
+                    android:backgroundTint="#9E9E9E"
+                    android:paddingTop="4dp" />
 
                 <!-- Latitude -->
                 <EditText
@@ -170,14 +187,6 @@
                     android:text="Require Geo Consent?"
                     android:textColor="@android:color/black"
                     android:paddingTop="8dp" />
-
-                <CheckBox
-                    android:id="@+id/check_notify"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Notify when not selected?"
-                    android:textColor="@android:color/black"
-                    android:paddingBottom="8dp" />
 
                 <!-- Create Button -->
                 <Button

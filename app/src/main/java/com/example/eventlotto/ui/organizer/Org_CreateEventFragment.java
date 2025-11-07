@@ -33,7 +33,8 @@ public class Org_CreateEventFragment extends Fragment {
     // Input fields
     private EditText titleField, descField, capacityField, latField, lonField;
     private EditText inputEventStart, inputEventEnd, inputRegOpen, inputRegClose;
-    private CheckBox geoConsentBox, notifyBox;
+    private EditText maxEntrantsField, entrantsAppliedField;
+    private CheckBox geoConsentBox;
     private Button createBtn;
     private FirebaseFirestore db;
 
@@ -50,8 +51,10 @@ public class Org_CreateEventFragment extends Fragment {
         latField = view.findViewById(R.id.input_latitude);
         lonField = view.findViewById(R.id.input_longitude);
         geoConsentBox = view.findViewById(R.id.check_geo_consent);
-        notifyBox = view.findViewById(R.id.check_notify);
         createBtn = view.findViewById(R.id.btn_create_event);
+
+        // New fields
+        maxEntrantsField = view.findViewById(R.id.input_max_entrants);
 
         // Date fields
         inputEventStart = view.findViewById(R.id.input_event_start);
@@ -82,17 +85,21 @@ public class Org_CreateEventFragment extends Fragment {
         String capStr = capacityField.getText().toString().trim();
         String latStr = latField.getText().toString().trim();
         String lonStr = lonField.getText().toString().trim();
+        String maxEntrantsStr = maxEntrantsField.getText().toString().trim();
+        String entrantsAppliedStr = entrantsAppliedField.getText().toString().trim();
 
         // Simple validation
         if (TextUtils.isEmpty(title) || TextUtils.isEmpty(desc) ||
                 TextUtils.isEmpty(capStr) || TextUtils.isEmpty(latStr) || TextUtils.isEmpty(lonStr)) {
-            Toast.makeText(getContext(), "All fields are required", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "All required fields must be filled", Toast.LENGTH_SHORT).show();
             return;
         }
 
         int capacity = Integer.parseInt(capStr);
         double lat = Double.parseDouble(latStr);
         double lon = Double.parseDouble(lonStr);
+        int maxEntrants = TextUtils.isEmpty(maxEntrantsStr) ? 0 : Integer.parseInt(maxEntrantsStr);
+        int entrantsApplied = TextUtils.isEmpty(entrantsAppliedStr) ? 0 : Integer.parseInt(entrantsAppliedStr);
 
         Timestamp now = Timestamp.now();
 
@@ -104,7 +111,7 @@ public class Org_CreateEventFragment extends Fragment {
 
         // Build event map
         Map<String, Object> eventData = new HashMap<>();
-        eventData.put("organizerId", organizerRef); // 🔥 store as DocumentReference
+        eventData.put("organizerId", organizerRef);
         eventData.put("eventTitle", title);
         eventData.put("description", desc);
         eventData.put("capacity", capacity);
@@ -114,7 +121,8 @@ public class Org_CreateEventFragment extends Fragment {
         eventData.put("registrationOpensAt", regOpen);
         eventData.put("registrationClosesAt", regClose);
         eventData.put("geoConsent", geoConsentBox.isChecked());
-        eventData.put("notifyWhenNotSelected", notifyBox.isChecked());
+        eventData.put("entrantsApplied", 0);
+        eventData.put("maxEntrants", maxEntrants);
         eventData.put("location", new GeoPoint(lat, lon));
 
         // Save event
@@ -125,13 +133,13 @@ public class Org_CreateEventFragment extends Fragment {
                     db.collection("events").document(eventId).update("eventId", eventId);
                     Toast.makeText(getContext(), "Event created successfully!", Toast.LENGTH_LONG).show();
 
+                    // Show QR code
                     GenerateQRFragment qrFragment = GenerateQRFragment.newInstance(eventId);
                     qrFragment.show(getParentFragmentManager(), "generate_qr_dialog");
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
     }
-
 
     private Timestamp parseDateToTimestamp(String dateStr, Timestamp fallback) {
         if (TextUtils.isEmpty(dateStr)) return fallback;
