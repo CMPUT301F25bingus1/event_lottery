@@ -23,107 +23,77 @@ import com.example.eventlotto.functions.events.EventAdapter;
 import com.example.eventlotto.model.Event;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Fragment displaying the home screen with a list of events and filter/search functionality.
+ */
 public class Ent_HomeFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private EventAdapter adapter;
     private List<Event> eventList;
-    private List<Event> fullEventList; // Keep full list for search filtering
+    private List<Event> fullEventList;
     private FirestoreService firestoreService;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // Initialize FirestoreService
         firestoreService = new FirestoreService();
-
-        // Setup RecyclerView
         recyclerView = view.findViewById(R.id.recycler_view_events);
         eventList = new ArrayList<>();
         fullEventList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         adapter = new EventAdapter(eventList, event -> {
-            // Show the EventDetailsFragment as a dialog
             Ent_EventDetailsFragment fragment = Ent_EventDetailsFragment.newInstance(event.getEid());
             fragment.show(getParentFragmentManager(), "event_details");
         });
-
         recyclerView.setAdapter(adapter);
 
-        // Fetch events from Firestore
         fetchEvents();
 
-        // --- Initialize UI elements ---
         ImageButton filterButton = view.findViewById(R.id.filter_button);
-        ImageView searchIcon = view.findViewById(R.id.search_button);
         EditText searchEditText = view.findViewById(R.id.search_edit_text);
+        ImageView searchIcon = view.findViewById(R.id.search_button);
 
-        // --- Handle Filter button click ---
+        // --- Filter button opens filter fragment ---
         if (filterButton != null) {
             filterButton.setOnClickListener(v -> {
                 Ent_FilterFragment entFilterFragment = new Ent_FilterFragment();
+                entFilterFragment.setOnFilterAppliedListener(
+                        (eventDateFrom, eventDateTo, registrationFrom, registrationTo, selectedDays) ->
+                                applyEventFilters(eventDateFrom, eventDateTo, registrationFrom, registrationTo, selectedDays)
+                );
                 entFilterFragment.show(getParentFragmentManager(), "filter_fragment");
             });
         }
 
-        // --- Handle Search icon click (optional feedback) ---
-        if (searchIcon != null) {
-            searchIcon.setOnClickListener(v -> {
-                String query = searchEditText.getText().toString().trim();
-                if (query.isEmpty()) {
-                    Toast.makeText(getContext(), "Type something to search", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getContext(), "Searching for: " + query, Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        // --- Live Search Functionality ---
+        // --- Live search functionality ---
         if (searchEditText != null) {
             searchEditText.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void afterTextChanged(Editable s) {}
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     filterEvents(s.toString());
                 }
-
-                @Override
-                public void afterTextChanged(Editable s) {}
-            });
-        }
-
-        // --- Help popup setup ---
-        View popup = view.findViewById(R.id.selection_popup);
-        View gotItButton = view.findViewById(R.id.btn_got_it);
-        View helpRow = view.findViewById(R.id.help_row);
-
-        if (helpRow != null) {
-            helpRow.setOnClickListener(v2 -> {
-                if (popup != null) popup.setVisibility(View.VISIBLE);
-            });
-        }
-
-        if (gotItButton != null) {
-            gotItButton.setOnClickListener(v3 -> {
-                if (popup != null) popup.setVisibility(View.GONE);
             });
         }
 
         return view;
     }
 
-    /**
-     * Fetch events from Firestore and store them in both eventList and fullEventList.
-     */
+    /** Fetch all events from Firestore and store in fullEventList */
     private void fetchEvents() {
         firestoreService.events()
                 .get()
@@ -133,26 +103,21 @@ public class Ent_HomeFragment extends Fragment {
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
                         Event event = doc.toObject(Event.class);
                         if (event != null) {
-                            event.setEid(doc.getId()); // set Firestore document ID
+                            event.setEid(doc.getId());
                             eventList.add(event);
                             fullEventList.add(event);
                         }
                     }
                     adapter.notifyDataSetChanged();
                 })
-                .addOnFailureListener(e -> Toast.makeText(
-                        getContext(),
-                        "Error fetching events: " + e.getMessage(),
-                        Toast.LENGTH_SHORT
-                ).show());
+                .addOnFailureListener(e -> Toast.makeText(getContext(),
+                        "Error fetching events: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    /**
-     * Filters the event list based on a search query.
-     */
+    /** Live search based on title and description */
     private void filterEvents(String query) {
         if (query == null || query.trim().isEmpty()) {
-            adapter.setEvents(new ArrayList<>(fullEventList)); // restore full list
+            adapter.setEvents(new ArrayList<>(fullEventList));
             return;
         }
 
@@ -169,5 +134,70 @@ public class Ent_HomeFragment extends Fragment {
         }
 
         adapter.setEvents(filteredList);
+    }
+
+    /** Apply date range and days-of-week filters */
+    private void applyEventFilters(String eventDateFrom, String eventDateTo,
+                                   String registrationFrom, String registrationTo,
+                                   List<String> selectedDays) {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        Date eventFromDate = parseDate(eventDateFrom, sdf);
+        Date eventToDate = parseDate(eventDateTo, sdf);
+        Date regFromDate = parseDate(registrationFrom, sdf);
+        Date regToDate = parseDate(registrationTo, sdf);
+
+        List<Event> filtered = new ArrayList<>();
+
+        for (Event e : fullEventList) {
+            boolean matches = true;
+
+            Date eventStart = e.getEventStartAt() != null ? e.getEventStartAt().toDate() : null;
+            Date eventEnd = e.getEventEndAt() != null ? e.getEventEndAt().toDate() : null;
+
+            // --- Event date range ---
+            if (eventFromDate != null && (eventEnd == null || eventEnd.before(eventFromDate))) matches = false;
+            if (eventToDate != null && (eventStart == null || eventStart.after(eventToDate))) matches = false;
+
+            // --- Registration date range ---
+            Date regStart = e.getRegistrationOpensAt() != null ? e.getRegistrationOpensAt().toDate() : null;
+            Date regEnd = e.getRegistrationClosesAt() != null ? e.getRegistrationClosesAt().toDate() : null;
+            if (regFromDate != null && (regEnd == null || regEnd.before(regFromDate))) matches = false;
+            if (regToDate != null && (regStart == null || regStart.after(regToDate))) matches = false;
+
+            // --- Days-of-week filter ---
+            if (selectedDays != null && !selectedDays.isEmpty() && eventStart != null) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(eventStart);
+                int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+
+                String dayLetter = "";
+                switch (dayOfWeek) {
+                    case Calendar.MONDAY: dayLetter = "M"; break;
+                    case Calendar.TUESDAY: dayLetter = "T"; break;
+                    case Calendar.WEDNESDAY: dayLetter = "W"; break;
+                    case Calendar.THURSDAY: dayLetter = "T"; break;
+                    case Calendar.FRIDAY: dayLetter = "F"; break;
+                    case Calendar.SATURDAY: dayLetter = "S"; break;
+                    case Calendar.SUNDAY: dayLetter = "S"; break;
+                }
+
+                if (!selectedDays.contains(dayLetter)) matches = false;
+            }
+
+            if (matches) filtered.add(e);
+        }
+
+        adapter.setEvents(filtered);
+    }
+
+    private Date parseDate(String dateStr, SimpleDateFormat sdf) {
+        if (dateStr == null || dateStr.isEmpty()) return null;
+        try {
+            return sdf.parse(dateStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
