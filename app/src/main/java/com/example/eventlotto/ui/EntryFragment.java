@@ -16,6 +16,7 @@ import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.MainActivity;
 import com.example.eventlotto.R;
 import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
+import com.example.eventlotto.MainActivity;
 
 public class EntryFragment extends Fragment {
 
@@ -48,9 +49,8 @@ public class EntryFragment extends Fragment {
                         .replace(R.id.fragment_container, new Ent_HomeFragment())
                         .commit();
 
-
-                View navView = requireActivity().findViewById(R.id.bottom_navigation);
-                if (navView != null) navView.setVisibility(View.VISIBLE);
+                //initialize and show bottom navigation for the new user
+                ((MainActivity) requireActivity()).initBottomNavForRole("entrant");
 
             } else {
                 createProfileBtn.setVisibility(View.VISIBLE);

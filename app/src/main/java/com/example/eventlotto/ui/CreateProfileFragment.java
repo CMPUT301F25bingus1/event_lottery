@@ -19,7 +19,7 @@ import com.example.eventlotto.MainActivity;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
 import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.eventlotto.MainActivity;
 
 public class CreateProfileFragment extends Fragment {
 

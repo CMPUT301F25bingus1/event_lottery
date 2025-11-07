@@ -75,7 +75,8 @@ public class Ent_CreateProfileFragment extends Fragment {
                         .commit();
                 ((MainActivity) requireActivity()).initBottomNavForRole("entrant");
 
-                ((MainActivity) requireActivity()).showBottomNavigation();
+                //initialize and show bottom navigation for the new user
+                ((MainActivity) requireActivity()).initBottomNavForRole("entrant");
             } else {
                 Toast.makeText(requireContext(), "Failed to create profile. Try again.", Toast.LENGTH_SHORT).show();
             }
