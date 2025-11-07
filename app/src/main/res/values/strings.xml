@@ -59,4 +59,6 @@
     <string name="delete">Delete</string>
     <string name="manage_profiles">Manage Profiles</string>
     <string name="manage_events">Manage Events</string>
+    <string name="tab_current">Current Events</string>
+    <string name="tab_history">History</string>
 </resources>
