@@ -11,7 +11,8 @@ local.properties
 *.ipr
 *.iws
 .DS_Store
-
+build\reports\problems\problems-report.html
+build/reports/problems/problems-report.html
 # === Android Generated Files ===
 captures/
 output.json
