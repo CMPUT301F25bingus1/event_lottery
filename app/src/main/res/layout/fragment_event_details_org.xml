@@ -162,6 +162,16 @@
                     android:text="Run Lottery" />
             </LinearLayout>
 
+            <Button
+                android:id="@+id/viewEntrantsButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="View Entrants"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="#5DBD70"
+                android:textColor="@android:color/white" />
+
+
             <!-- Cancel Button Row -->
             <Button
                 android:id="@+id/cancelButton"

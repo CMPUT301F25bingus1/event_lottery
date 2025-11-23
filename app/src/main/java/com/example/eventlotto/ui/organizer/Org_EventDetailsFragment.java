@@ -98,6 +98,14 @@ public class Org_EventDetailsFragment extends DialogFragment {
         capacityText = view.findViewById(R.id.capacityText);
         selectedCountText = view.findViewById(R.id.selectedCountText);
         acceptedCountText = view.findViewById(R.id.acceptedCountText);
+        Button viewEntrantsButton = view.findViewById(R.id.viewEntrantsButton);
+        viewEntrantsButton.setOnClickListener(v -> {
+            if (eventId != null) {
+                Org_EntrantsListFragment fragment = Org_EntrantsListFragment.newInstance(eventId);
+                fragment.show(getParentFragmentManager(), "entrantsList");
+            }
+        });
+
 
 
         if (eventId != null) {
