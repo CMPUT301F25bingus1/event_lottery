@@ -3,6 +3,7 @@ package com.example.eventlotto.ui.organizer;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -65,7 +66,8 @@ public class Org_NotifyEntrantsDialog extends DialogFragment {
             String targetStatus;
             if (rbWaiting.isChecked()) targetStatus = "waiting";
             else if (rbSelected.isChecked()) targetStatus = "selected";
-            else targetStatus = "not_chosen"; // cancelled
+            else if (rbCancelled.isChecked()) targetStatus = "cancelled";
+            else targetStatus = "not_chosen";
 
             sendNotifications(targetStatus, message);
             dialog.dismiss();
@@ -74,42 +76,67 @@ public class Org_NotifyEntrantsDialog extends DialogFragment {
         return dialog;
     }
 
-    private void sendNotifications(String status, String message) {
-
+    private void sendNotifications(String targetStatus, String message) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        // Reference to the status subcollection
         db.collection("events")
                 .document(eventId)
-                .collection("entrants")
-                .whereEqualTo("status", status)
+                .collection("status")
                 .get()
-                .addOnSuccessListener(snaps -> {
+                .addOnSuccessListener(statusSnapshots -> {
+                    Log.i("OrgNotify", "DEBUG — statusSnapshots size: " + statusSnapshots.size());
 
-                    for (DocumentSnapshot entrant : snaps) {
+                    int notificationsSent = 0;
 
-                        String userId = entrant.getId();
+                    for (DocumentSnapshot uidDoc : statusSnapshots) {
+                        String uid = uidDoc.getId();
+                        String status = uidDoc.getString("status");
 
-                        Map<String, Object> n = new HashMap<>();
-                        n.put("nid", userId + "_" + System.currentTimeMillis());
-                        n.put("uid", userId);
-                        n.put("eid", eventId);
-                        n.put("message", message);
-                        n.put("timestamp", System.currentTimeMillis());
+                        Log.i("OrgNotify", "DEBUG — UID doc = " + uid + " → " + uidDoc.getData());
 
-                        db.collection("notifications")
-                                .document((String) n.get("nid"))
-                                .set(n);
+                        // Only notify if status matches the selected targetStatus
+                        if (status != null && status.equalsIgnoreCase(targetStatus)) {
+                            String nid = uid + "_" + eventId;
+
+                            Map<String, Object> n = new HashMap<>();
+                            n.put("uid", uid);
+                            n.put("eid", eventId);
+                            n.put("nid", nid);
+                            n.put("message", message);
+                            n.put("lastSentAt", null);
+                            n.put("createdAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
+
+                            db.collection("notifications")
+                                    .document(nid)
+                                    .set(n)
+                                    .addOnSuccessListener(v -> {
+                                        Log.i("OrgNotify", "DEBUG — notification written for UID=" + uid + ", nid=" + nid);
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e("OrgNotify", "ERROR — failed to write notification for UID=" + uid + ", nid=" + nid, e);
+                                    });
+
+                            notificationsSent++;
+                        }
                     }
 
-                    if (getActivity() != null && !getActivity().isFinishing()) {
-                        Toast.makeText(getActivity(), "Notifications sent!", Toast.LENGTH_LONG).show();
+                    // Show a toast if fragment is still attached
+                    if (isAdded() && getActivity() != null) {
+                        String msg = notificationsSent > 0
+                                ? notificationsSent + " notifications sent!"
+                                : "No entrants matched the selected status.";
+                        Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG).show();
                     }
 
                 })
                 .addOnFailureListener(e -> {
-                    if (getActivity() != null && !getActivity().isFinishing()) {
-                        Toast.makeText(getActivity(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("OrgNotify", "ERROR — failed to fetch status docs", e);
+                    if (isAdded() && getActivity() != null) {
+                        Toast.makeText(getActivity(), "Failed to fetch entrants: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
+
+
 }

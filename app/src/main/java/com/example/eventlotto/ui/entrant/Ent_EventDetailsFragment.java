@@ -20,6 +20,7 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
+import com.example.eventlotto.model.Notification;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -237,6 +238,22 @@ public class Ent_EventDetailsFragment extends DialogFragment {
             return null;
         }).addOnSuccessListener(aVoid -> {
             Toast.makeText(getContext(), "Successfully joined waitlist", Toast.LENGTH_SHORT).show();
+
+            String nid = deviceId + "_" + eventId;
+            Notification n = new Notification();
+            n.setNid(nid);
+            n.setUid(deviceId);
+            n.setEid(eventId);
+
+            firestoreService.saveNotification(n)
+                    .addOnSuccessListener(v -> {
+                        // Optional: small toast
+                        Toast.makeText(requireContext(), "Auto-subscribed to notifications", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(ex -> {
+                        Toast.makeText(requireContext(), "Failed auto-subscribe: " + ex.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+
             if (statusText != null) applyStatusText(statusText, "waiting");
             showJoinedUI(eventId, deviceId);
             loadWaitingCount(eventId);
