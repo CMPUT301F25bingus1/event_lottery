@@ -40,6 +40,7 @@ import java.util.Locale;
  *   <li>Open event details.</li>
  *   <li>Filter events by date ranges or days of the week.</li>
  *   <li>Search events by title or description.</li>
+ *   <li>Access help popup explaining the app's process.</li>
  * </ul>
  */
 public class Ent_HomeFragment extends Fragment {
@@ -114,6 +115,23 @@ public class Ent_HomeFragment extends Fragment {
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     filterEvents(s.toString());
                 }
+            });
+        }
+
+        // --- Help Popup Functionality ---
+        View popup = view.findViewById(R.id.selection_popup);
+        View gotItButton = view.findViewById(R.id.btn_got_it);
+        View helpRow = view.findViewById(R.id.help_row);
+
+        if (helpRow != null) {
+            helpRow.setOnClickListener(v -> {
+                if (popup != null) popup.setVisibility(View.VISIBLE);
+            });
+        }
+
+        if (gotItButton != null) {
+            gotItButton.setOnClickListener(v -> {
+                if (popup != null) popup.setVisibility(View.GONE);
             });
         }
 

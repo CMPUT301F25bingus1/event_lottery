@@ -64,7 +64,7 @@ public class Org_EventDetailsFragment extends DialogFragment {
     private LinearLayout acceptDeclineLayout;
     private Button acceptButton, declineButton;
 
-    public static Org_EventDetailsFragment newInstance(String eventId) {
+    public static Org_EventDetailsFragment newInstance(String eventId ) {
         Org_EventDetailsFragment fragment = new Org_EventDetailsFragment();
         Bundle args = new Bundle();
         args.putString("eventId", eventId);

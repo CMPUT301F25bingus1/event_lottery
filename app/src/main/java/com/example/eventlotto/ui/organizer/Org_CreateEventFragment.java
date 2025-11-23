@@ -100,7 +100,7 @@ public class Org_CreateEventFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_create_events, container, false);
 
         // Initialize input fields
-        titleField = view.findViewById(R.id.input_event_title);
+        titleField = view.findViewById(R.id.input_event_title );
         descField = view.findViewById(R.id.input_description);
         capacityField = view.findViewById(R.id.input_capacity);
         latField = view.findViewById(R.id.input_latitude);

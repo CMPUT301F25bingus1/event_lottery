@@ -35,7 +35,7 @@ public class EntrantsAdapter extends RecyclerView.Adapter<EntrantsAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        DocumentSnapshot doc = entrantsList.get(position);
+        DocumentSnapshot doc = entrantsList.get(position );
         String userId = doc.getId();
         String status = doc.getString("status");
 

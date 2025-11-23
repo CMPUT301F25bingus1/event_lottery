@@ -98,7 +98,7 @@ public class Org_HomeFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        firestoreService = new FirestoreService();
+        firestoreService = new FirestoreService( );
         recyclerView = view.findViewById(R.id.recycler_view_events);
         eventList = new ArrayList<>();
         fullEventList = new ArrayList<>();

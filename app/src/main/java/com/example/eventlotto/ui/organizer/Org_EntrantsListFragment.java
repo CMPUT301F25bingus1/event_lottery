@@ -30,7 +30,7 @@ public class Org_EntrantsListFragment extends DialogFragment {
     private static final String ARG_EVENT_ID = "eventId";
     private String eventId;
 
-    public static Org_EntrantsListFragment newInstance(String eventId) {
+    public static Org_EntrantsListFragment newInstance(String eventId ) {
         Org_EntrantsListFragment fragment = new Org_EntrantsListFragment();
         Bundle args = new Bundle();
         args.putString(ARG_EVENT_ID, eventId);
