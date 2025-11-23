@@ -22,7 +22,7 @@ import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
 import com.example.eventlotto.functions.events.EventAdapter;
 import com.example.eventlotto.model.Event;
-import com.example.eventlotto.ui.entrant.Ent_EventDetailsFragment;
+import com.example.eventlotto.ui.organizer.Org_EventDetailsFragment;
 import com.example.eventlotto.ui.entrant.Ent_FilterFragment;
 import com.example.eventlotto.model.User;
 import com.google.firebase.auth.FirebaseAuth;
@@ -107,9 +107,10 @@ public class Org_HomeFragment extends Fragment {
 
         // Initialize the adapter and define event click behavior
         adapter = new EventAdapter(eventList, event -> {
-            Ent_EventDetailsFragment fragment = Ent_EventDetailsFragment.newInstance(event.getEid());
-            fragment.show(getParentFragmentManager(), "event_details");
+            Org_EventDetailsFragment fragment = Org_EventDetailsFragment.newInstance(event.getEid());
+            fragment.show(getParentFragmentManager(), "org_event_details");
         });
+
         recyclerView.setAdapter(adapter);
 
         firestoreService = new FirestoreService();
