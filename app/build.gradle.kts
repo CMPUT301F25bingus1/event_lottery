@@ -56,6 +56,9 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-functions-ktx:20.2.0")
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-functions")
 
     // QR / Barcode
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
@@ -82,4 +85,3 @@ dependencies {
     // Fix duplicate protobuf issue
     implementation("com.google.protobuf:protobuf-javalite:3.25.5")
 }
-

@@ -26,6 +26,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.eventlotto.ui.LoginFragment;
+import com.example.eventlotto.ui.organizer.Org_HomeFragment;
 import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
 import com.example.eventlotto.ui.admin.Adm_EventsFragment;
 import com.example.eventlotto.ui.admin.Adm_ProfilesFragment;
@@ -101,7 +102,12 @@ public class MainActivity extends AppCompatActivity {
                             String role = snapshot.getString("role") != null
                                     ? snapshot.getString("role") : "entrant";
                             setupBottomNavMenu(bottomNavigationView, role);
-                            loadFragment(new Ent_HomeFragment());
+                            assert role != null;
+                            if (role.equals("organizer")) {
+                                loadFragment(new Org_HomeFragment());
+                            } else {
+                                loadFragment(new Ent_HomeFragment());
+                            }
                             showBottomNavigation();
                         } else {
                             loadFragment(new Ent_WelcomeFragment());
@@ -148,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                     fragment = new Adm_ProfilesFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
             } else if ("organizer".equals(role)) {
-                if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
+                if (id == R.id.nav_home) fragment = new Org_HomeFragment();
                 else if (id == R.id.nav_create_event) fragment = new Org_CreateEventFragment();
                 else if (id == R.id.nav_notifications) fragment = new Ent_NotificationsFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
