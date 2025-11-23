@@ -1,11 +1,13 @@
 package com.example.eventlotto.ui.organizer;
-import com.example.eventlotto.R;
 
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -16,6 +18,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.eventlotto.R;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -28,20 +31,34 @@ import java.util.List;
 public class Org_EntrantsListFragment extends DialogFragment {
 
     private static final String ARG_EVENT_ID = "eventId";
-    private String eventId;
+    private static final String ARG_EVENT_TITLE = "eventTitle";
 
-    public static Org_EntrantsListFragment newInstance(String eventId) {
+    private String eventId;
+    private String eventTitle;
+
+    public static Org_EntrantsListFragment newInstance(String eventId, String eventTitle) {
         Org_EntrantsListFragment fragment = new Org_EntrantsListFragment();
         Bundle args = new Bundle();
         args.putString(ARG_EVENT_ID, eventId);
+        args.putString(ARG_EVENT_TITLE, eventTitle);
         fragment.setArguments(args);
         return fragment;
     }
 
+    // UI Components
     private RecyclerView entrantsRecycler;
+    private FrameLayout mapContainer;
+    private Button listTabButton;
+    private Button mapTabButton;
+    private TextView entrantsTitleView;
+
+    // Data
     private EntrantsAdapter adapter;
     private List<DocumentSnapshot> entrantsList = new ArrayList<>();
     private ActivityResultLauncher<String> createFileLauncher;
+
+    // View state
+    private boolean isListView = true;
 
     @Nullable
     @Override
@@ -50,21 +67,49 @@ public class Org_EntrantsListFragment extends DialogFragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_entrants_list, container, false);
 
-        eventId = getArguments() != null ? getArguments().getString(ARG_EVENT_ID) : null;
+        // Get arguments
+        if (getArguments() != null) {
+            eventId = getArguments().getString(ARG_EVENT_ID);
+            eventTitle = getArguments().getString(ARG_EVENT_TITLE, "Event");
+        }
 
+        // Initialize views
         entrantsRecycler = view.findViewById(R.id.entrantsRecycler);
+        mapContainer = view.findViewById(R.id.mapContainer);
+        listTabButton = view.findViewById(R.id.listTabButton);
+        mapTabButton = view.findViewById(R.id.mapTabButton);
+        entrantsTitleView = view.findViewById(R.id.entrantsTitle);
+
+        // Set event title
+        if (entrantsTitleView != null) {
+            entrantsTitleView.setText(eventTitle);
+        }
+
+        // Setup RecyclerView
         entrantsRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new EntrantsAdapter(entrantsList);
         entrantsRecycler.setAdapter(adapter);
 
-        if (eventId != null) loadEntrants(eventId);
+        // Load entrants
+        if (eventId != null) {
+            loadEntrants(eventId);
+        }
 
+        // Setup tab buttons
+        listTabButton.setOnClickListener(v -> switchToListView());
+        mapTabButton.setOnClickListener(v -> switchToMapView());
+
+        // Return button
         View returnButton = view.findViewById(R.id.returnButton);
         returnButton.setOnClickListener(v -> dismiss());
 
-        super.onViewCreated(view, savedInstanceState);
+        // Cancel button (alternative to return)
+        Button cancelButton = view.findViewById(R.id.cancelButton);
+        if (cancelButton != null) {
+            cancelButton.setOnClickListener(v -> dismiss());
+        }
 
-        // SAF launcher to let user save CSV
+        // CSV Export setup
         createFileLauncher = registerForActivityResult(
                 new ActivityResultContracts.CreateDocument("text/csv"),
                 uri -> {
@@ -73,7 +118,8 @@ public class Org_EntrantsListFragment extends DialogFragment {
         );
 
         view.findViewById(R.id.exportCsvButton).setOnClickListener(v -> {
-            createFileLauncher.launch("entrants_export.csv");
+            String filename = eventTitle.replaceAll("[^a-zA-Z0-9]", "_") + "_entrants.csv";
+            createFileLauncher.launch(filename);
         });
 
         return view;
@@ -90,12 +136,54 @@ public class Org_EntrantsListFragment extends DialogFragment {
         }
     }
 
+    /**
+     * Switch to List View
+     */
+    private void switchToListView() {
+        isListView = true;
+        entrantsRecycler.setVisibility(View.VISIBLE);
+        mapContainer.setVisibility(View.GONE);
+
+        // Update button styles
+        listTabButton.setBackgroundTintList(
+                getResources().getColorStateList(android.R.color.holo_blue_light, null));
+        listTabButton.setTextColor(getResources().getColor(android.R.color.white, null));
+
+        mapTabButton.setBackgroundTintList(
+                getResources().getColorStateList(android.R.color.darker_gray, null));
+        mapTabButton.setTextColor(getResources().getColor(android.R.color.black, null));
+    }
+
+    /**
+     * Switch to Map View
+     */
+    private void switchToMapView() {
+        isListView = false;
+        entrantsRecycler.setVisibility(View.GONE);
+        mapContainer.setVisibility(View.VISIBLE);
+
+        // Update button styles
+        mapTabButton.setBackgroundTintList(
+                getResources().getColorStateList(android.R.color.holo_blue_light, null));
+        mapTabButton.setTextColor(getResources().getColor(android.R.color.white, null));
+
+        listTabButton.setBackgroundTintList(
+                getResources().getColorStateList(android.R.color.darker_gray, null));
+        listTabButton.setTextColor(getResources().getColor(android.R.color.black, null));
+
+        // TODO: Initialize map view here if needed
+        Toast.makeText(getContext(), "Map view - implement Google Maps integration", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Export entrants data to CSV
+     */
     private void exportCsvToUri(Uri uri) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         db.collection("events")
                 .document(eventId)
-                .collection("entrants")
+                .collection("status")
                 .get()
                 .addOnSuccessListener(entrantsSnap -> {
 
@@ -112,7 +200,6 @@ public class Org_EntrantsListFragment extends DialogFragment {
                         String userId = entrant.getId();
                         Task<DocumentSnapshot> userTask =
                                 db.collection("users").document(userId).get();
-
                         userTasks.add(userTask);
                     }
 
@@ -163,6 +250,9 @@ public class Org_EntrantsListFragment extends DialogFragment {
         }
     }
 
+    /**
+     * Load entrants from Firestore
+     */
     private void loadEntrants(String eventId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("events").document(eventId)
