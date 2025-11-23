@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -137,10 +138,19 @@ public class Adm_ProfilesFragment extends Fragment {
             void bind(User user, Listener listener) {
                 android.widget.TextView name = itemView.findViewById(R.id.text_user_name);
                 android.widget.TextView email = itemView.findViewById(R.id.text_user_email);
+                android.widget.TextView role = itemView.findViewById(R.id.text_user_role);
                 View deleteBtn = itemView.findViewById(R.id.btn_delete_user);
 
                 name.setText(user.getFullName() != null ? user.getFullName() : user.getUid());
                 email.setText(user.getEmail() != null ? user.getEmail() : "");
+
+                if (user.getRole() != null) {
+                    String formatRole = user.getRole().substring(0, 1).toUpperCase() +
+                            user.getRole().substring(1).toLowerCase();
+                    role.setText("Role: " + formatRole);
+                } else {
+                    role.setText("Role: Unknown");
+                }
 
                 deleteBtn.setOnClickListener(v -> {
                     if (listener != null && user.getUid() != null) {

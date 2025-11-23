@@ -144,8 +144,6 @@ public class Org_CreateEventFragment extends Fragment {
         String latStr = latField.getText().toString().trim();
         String lonStr = lonField.getText().toString().trim();
         String maxEntrantsStr = maxEntrantsField.getText().toString().trim();
-        String entrantsAppliedStr = entrantsAppliedField.getText() != null ?
-                entrantsAppliedField.getText().toString().trim() : "";
 
         if (TextUtils.isEmpty(title) || TextUtils.isEmpty(desc) ||
                 TextUtils.isEmpty(capStr) || TextUtils.isEmpty(latStr) || TextUtils.isEmpty(lonStr)) {
@@ -157,7 +155,6 @@ public class Org_CreateEventFragment extends Fragment {
         double lat = Double.parseDouble(latStr);
         double lon = Double.parseDouble(lonStr);
         int maxEntrants = TextUtils.isEmpty(maxEntrantsStr) ? 0 : Integer.parseInt(maxEntrantsStr);
-        int entrantsApplied = TextUtils.isEmpty(entrantsAppliedStr) ? 0 : Integer.parseInt(entrantsAppliedStr);
 
         Timestamp now = Timestamp.now();
         Timestamp eventStart = parseDateToTimestamp(inputEventStart.getText().toString(), now);

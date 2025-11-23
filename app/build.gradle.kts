@@ -66,7 +66,6 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.12.0")
     testImplementation("org.mockito:mockito-inline:5.2.0")
     testImplementation("org.robolectric:robolectric:4.11.1")
-    implementation(files("C:/Users/gjftn/AppData/Local/Android/Sdk/platforms/android-36/android.jar"))
 
     // Android Instrumentation / UI tests
     androidTestImplementation("androidx.test:core:1.5.0")

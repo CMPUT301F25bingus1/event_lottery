@@ -136,6 +136,12 @@ public class FirestoreService {
                 .addOnFailureListener(e -> callback.accept(false));
     }
 
+    /** Returns the DocumentReference for a user by deviceId */
+    public DocumentReference getUserRef(String deviceId) {
+        return usersCollection.document(deviceId);
+    }
+
+
     // ---------------------------
     // NOTIFICATION MANAGEMENT
     // ---------------------------
