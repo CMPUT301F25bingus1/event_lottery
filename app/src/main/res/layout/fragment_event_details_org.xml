@@ -163,6 +163,12 @@
             </LinearLayout>
 
             <Button
+                android:id="@+id/notifyEntrantsButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Notify Entrants" />
+
+            <Button
                 android:id="@+id/viewEntrantsButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

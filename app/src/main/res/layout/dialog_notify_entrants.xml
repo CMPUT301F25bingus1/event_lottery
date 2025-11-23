@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RadioGroup
+        android:id="@+id/statusGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/rbWaiting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Notify waiting entrants" />
+
+        <RadioButton
+            android:id="@+id/rbSelected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Notify selected entrants" />
+
+        <RadioButton
+            android:id="@+id/rbCancelled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Notify cancelled entrants" />
+
+    </RadioGroup>
+
+    <EditText
+        android:id="@+id/messageInput"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:hint="Enter message"
+        android:gravity="top"
+        android:inputType="textMultiLine" />
+
+    <Button
+        android:id="@+id/buttonSend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Send"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>

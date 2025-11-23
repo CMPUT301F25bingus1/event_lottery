@@ -3,12 +3,14 @@ package com.example.eventlotto.ui.organizer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.eventlotto.R;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -34,31 +36,36 @@ public class EntrantsAdapter extends RecyclerView.Adapter<EntrantsAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
         DocumentSnapshot doc = entrantsList.get(position);
-
-        String userId = doc.getId();        // <-- doc ID is userId
+        String userId = doc.getId();
         String status = doc.getString("status");
 
         holder.statusText.setText(status != null ? status : "N/A");
 
-// Apply color based on status
-        if (status == null) return;
-
-        switch (status) {
-            case "waiting":
-                holder.statusText.setTextColor(0xFFFFA000); // amber
-                break;
-            case "selected":
-                holder.statusText.setTextColor(0xFF4CAF50); // green
-                break;
-            case "rejected":
-                holder.statusText.setTextColor(0xFFF44336); // red
-                break;
-            default:
-                holder.statusText.setTextColor(0xFF000000); // black
-                break;
+        // --- Set color by status ---
+        if (status != null) {
+            switch (status) {
+                case "waiting":
+                    holder.statusText.setTextColor(0xFFFFA000); // amber
+                    break;
+                case "selected":
+                    holder.statusText.setTextColor(0xFF4CAF50); // green
+                    break;
+                case "not_chosen":
+                    holder.statusText.setTextColor(0xFFF44336); // red
+                    break;
+                default:
+                    holder.statusText.setTextColor(0xFF000000); // black
+            }
         }
 
-        // Fetch user name from /users/{userId}
+        // --- Show Cancel button only for selected users ---
+        if ("selected".equals(status)) {
+            holder.cancelButton.setVisibility(View.VISIBLE);
+        } else {
+            holder.cancelButton.setVisibility(View.GONE);
+        }
+
+        // --- Load user full name ---
         FirebaseFirestore.getInstance()
                 .collection("users")
                 .document(userId)
@@ -71,8 +78,23 @@ public class EntrantsAdapter extends RecyclerView.Adapter<EntrantsAdapter.ViewHo
                         holder.nameText.setText("Unknown");
                     }
                 })
+                .addOnFailureListener(e -> holder.nameText.setText("Error"));
+
+        // --- Handle Cancellation Button ---
+        holder.cancelButton.setOnClickListener(v ->
+                cancelEntrant(doc.getReference(), holder)
+        );
+    }
+
+    private void cancelEntrant(DocumentReference entrantRef, ViewHolder holder) {
+        entrantRef.update("status", "not_chosen")
+                .addOnSuccessListener(aVoid -> {
+                    holder.statusText.setText("not_chosen");
+                    holder.statusText.setTextColor(0xFFF44336);
+                    holder.cancelButton.setVisibility(View.GONE);
+                })
                 .addOnFailureListener(e ->
-                        holder.nameText.setText("Error")
+                        holder.statusText.setText("Error")
                 );
     }
 
@@ -84,11 +106,13 @@ public class EntrantsAdapter extends RecyclerView.Adapter<EntrantsAdapter.ViewHo
     static class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView nameText, statusText;
+        Button cancelButton;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             nameText = itemView.findViewById(R.id.nameText);
             statusText = itemView.findViewById(R.id.statusText);
+            cancelButton = itemView.findViewById(R.id.cancelButton);
         }
     }
 }

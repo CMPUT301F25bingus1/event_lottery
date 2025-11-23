@@ -106,7 +106,11 @@ public class Org_EventDetailsFragment extends DialogFragment {
             }
         });
 
-
+        Button notifyEntrantsButton = view.findViewById(R.id.notifyEntrantsButton);
+        notifyEntrantsButton.setOnClickListener(v -> {
+            Org_NotifyEntrantsDialog dialog = Org_NotifyEntrantsDialog.newInstance(eventId);
+            dialog.show(getParentFragmentManager(), "notify_dialog");
+        });
 
         if (eventId != null) {
             fetchEventData(eventId);
