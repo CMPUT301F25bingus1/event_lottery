@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -30,22 +31,35 @@ import java.text.DateFormat;
 
 public class Org_EventDetailsFragment extends DialogFragment {
 
-    /** The ID of the event to display. */
+    /**
+     * The ID of the event to display.
+     */
     private String eventId;
 
-    /** Firestore service helper for interacting with the database. */
+    /**
+     * Firestore service helper for interacting with the database.
+     */
     private FirestoreService firestoreService;
 
     private ImageView eventImage;
 
-    /** TextView displaying status text. */
+    /**
+     * TextView displaying status text.
+     */
     private TextView statusText;
+    private EditText lotteryNumberInput;
 
-    /** TextViews for event title, description, signup dates, event dates, and capacity. */
+
+    /**
+     * TextViews for event title, description, signup dates, event dates, and capacity.
+     */
     private TextView eventTitle, eventDescription, signupDates, eventDates, waitlistCount;
 
-    /** Buttons for cancelling the dialog or joining/leaving the waitlist. */
+    /**
+     * Buttons for cancelling the dialog or joining/leaving the waitlist.
+     */
     private Button cancelButton, lotteryButton;
+    private TextView capacityText, selectedCountText, acceptedCountText;
 
     private LinearLayout acceptDeclineLayout;
     private Button acceptButton, declineButton;
@@ -80,14 +94,17 @@ public class Org_EventDetailsFragment extends DialogFragment {
         lotteryButton = view.findViewById(R.id.lotteryButton);
         cancelButton.setOnClickListener(v -> dismiss());
         statusText = view.findViewById(R.id.statusText);
-        acceptDeclineLayout = view.findViewById(R.id.acceptDeclineLayout);
-        acceptButton = view.findViewById(R.id.acceptButton);
-        declineButton = view.findViewById(R.id.declineButton);
+        lotteryNumberInput = view.findViewById(R.id.lotteryNumberInput);
+        capacityText = view.findViewById(R.id.capacityText);
+        selectedCountText = view.findViewById(R.id.selectedCountText);
+        acceptedCountText = view.findViewById(R.id.acceptedCountText);
+
 
         if (eventId != null) {
             fetchEventData(eventId);
             loadWaitingCount(eventId);
         }
+        updateCapacityStatus();
 
         lotteryButton.setOnClickListener(v -> doLottery());
 
@@ -118,7 +135,30 @@ public class Org_EventDetailsFragment extends DialogFragment {
                             return; // Stop the lottery
                         }
 
-                        // Step 3: Get all users with status "waiting"
+                        // Step 3: Read number to select from input
+                        int numberToSelect = 0;
+                        String inputStr = lotteryNumberInput.getText().toString();
+                        try {
+                            numberToSelect = Integer.parseInt(inputStr);
+                        } catch (NumberFormatException e) {
+                            Toast.makeText(getContext(), "Enter a valid number", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        int remainingCapacity = (int) (finalCapacity - alreadySelected);
+
+                        // Guard: can't select more than remaining capacity
+                        if (numberToSelect <= 0) {
+                            Toast.makeText(getContext(), "Number must be greater than 0", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (numberToSelect > remainingCapacity) {
+                            Toast.makeText(getContext(), "Cannot select more than remaining capacity: " + remainingCapacity, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        // Step 4: Get waiting users
+                        int finalNumberToSelect = numberToSelect;
                         eventRef.collection("status")
                                 .whereEqualTo("status", "waiting")
                                 .get()
@@ -129,15 +169,16 @@ public class Org_EventDetailsFragment extends DialogFragment {
                                     }
 
                                     java.util.List<DocumentSnapshot> waitingUsers = waitingSnapshot.getDocuments();
-                                    java.util.Collections.shuffle(waitingUsers); // randomize
+                                    java.util.Collections.shuffle(waitingUsers); // randomize order
 
                                     com.google.firebase.firestore.WriteBatch batch = db.batch();
 
-                                    // Calculate how many more users we can select
-                                    int remainingCapacity = (int) (finalCapacity - alreadySelected);
+                                    // Limit winners to either the input number or available waiting users
+                                    int winnersCount = Math.min(finalNumberToSelect, waitingUsers.size());
+
                                     for (int i = 0; i < waitingUsers.size(); i++) {
                                         DocumentReference docRef = waitingUsers.get(i).getReference();
-                                        if (i < remainingCapacity) {
+                                        if (i < winnersCount) {
                                             batch.update(docRef, "status", "selected");
                                         } else {
                                             batch.update(docRef, "status", "not_chosen");
@@ -146,11 +187,13 @@ public class Org_EventDetailsFragment extends DialogFragment {
 
                                     batch.commit()
                                             .addOnSuccessListener(aVoid ->
-                                                    Toast.makeText(getContext(), "Lottery completed! " + Math.min(waitingUsers.size(), remainingCapacity) + " selected.", Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(getContext(), "Lottery completed! " + winnersCount + " selected.", Toast.LENGTH_SHORT).show()
                                             )
                                             .addOnFailureListener(e ->
                                                     Toast.makeText(getContext(), "Lottery failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                                             );
+                                    updateCapacityStatus();
+
 
                                 }).addOnFailureListener(e ->
                                         Toast.makeText(getContext(), "Failed to get waiting users: " + e.getMessage(), Toast.LENGTH_SHORT).show()
@@ -165,6 +208,35 @@ public class Org_EventDetailsFragment extends DialogFragment {
         );
     }
 
+    private void updateCapacityStatus() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference eventRef = db.collection("events").document(eventId);
+
+        eventRef.get().addOnSuccessListener(eventSnap -> {
+            if (!eventSnap.exists()) return;
+
+            Long capacity = eventSnap.getLong("capacity");
+            capacityText.setText("Capacity: " + (capacity != null ? capacity : 0));
+
+            // Get selected count
+            eventRef.collection("status")
+                    .whereEqualTo("status", "selected")
+                    .get()
+                    .addOnSuccessListener(selectedSnap -> {
+                        int selectedCount = (selectedSnap != null) ? selectedSnap.size() : 0;
+                        selectedCountText.setText("Selected: " + selectedCount);
+
+                        // Get accepted count
+                        eventRef.collection("status")
+                                .whereEqualTo("status", "accepted")
+                                .get()
+                                .addOnSuccessListener(acceptedSnap -> {
+                                    int acceptedCount = (acceptedSnap != null) ? acceptedSnap.size() : 0;
+                                    acceptedCountText.setText("Accepted: " + acceptedCount);
+                                });
+                    });
+        });
+    }
 
 
     /**
@@ -275,7 +347,7 @@ public class Org_EventDetailsFragment extends DialogFragment {
                 .get()
                 .addOnSuccessListener(query -> {
                     int c = (query != null) ? query.size() : 0;
-                    waitlistCount.setText(c+ " is on the waiting list.");
+                    waitlistCount.setText(c + " is on the waiting list.");
                 })
                 .addOnFailureListener(e -> waitlistCount.setText("Waiting: 0"));
     }

@@ -95,35 +95,81 @@
             android:text="@string/event_description"
             android:textColor="@android:color/black" />
 
-        <!-- Buttons Row -->
+        <LinearLayout
+            android:id="@+id/capacityLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/capacityText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Capacity: 0" />
+
+            <TextView
+                android:id="@+id/selectedCountText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Selected: 0" />
+
+            <TextView
+                android:id="@+id/acceptedCountText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Accepted: 0" />
+
+        </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_marginTop="16dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:weightSum="2">
+            android:gravity="center_horizontal">
 
+            <!-- Lottery Row -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Number to select:" />
+
+                <EditText
+                    android:id="@+id/lotteryNumberInput"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:hint="0"
+                    android:gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp" />
+
+                <Button
+                    android:id="@+id/lotteryButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#5DBD70"
+                    android:textColor="@android:color/white"
+                    android:text="Run Lottery" />
+            </LinearLayout>
+
+            <!-- Cancel Button Row -->
             <Button
                 android:id="@+id/cancelButton"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="#D9D9D9"
                 android:textColor="@android:color/black"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
                 android:text="@string/cancel" />
-
-            <!-- Replace joinWaitlistButton with lotteryButton -->
-            <Button
-                android:id="@+id/lotteryButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:backgroundTint="#5DBD70"
-                android:textColor="@android:color/white"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:text="Do Lottery" />
 
         </LinearLayout>
 
