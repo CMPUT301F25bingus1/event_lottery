@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -35,83 +37,23 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Fragment for organizers to create new events in the EventLotto app.
- * <p>
- * Provides input fields for event details such as title, description, capacity,
- * location coordinates, date ranges for event and registration, and optional max entrants.
- * On successful creation, the event is stored in Firestore, and a QR code is displayed
- * for event access.
- * </p>
+ * Fragment for organizers to create new events.
  */
 public class Org_CreateEventFragment extends Fragment {
 
-    /** Input field for the event title. */
-    private EditText titleField;
-
-    /** Input field for the event description. */
-    private EditText descField;
-
-    /** Input field for the event capacity. */
-    private EditText capacityField;
-
-    /** Input field for the event location. */
-    private EditText locationField;
-
-    /** Input field for the event latitude (hidden). */
-    private EditText latField;
-
-    /** Input field for the event longitude (hidden). */
-    private EditText lonField;
-
-    /** Input field for event start date. */
-    private EditText inputEventStart;
-
-    /** Input field for event end date. */
-    private EditText inputEventEnd;
-
-    /** Input field for event start time. */
-    private EditText inputTimeStart;
-
-    /** Input field for event end time. */
-    private EditText inputTimeEnd;
-
-    /** Input field for registration open date. */
-    private EditText inputRegOpen;
-
-    /** Input field for registration close date. */
-    private EditText inputRegClose;
-
-    /** Input field for maximum entrants allowed (optional). */
-    private EditText maxEntrantsField;
-
-    /** Input field for the poster URL. */
-    private EditText posterUrlField;
-
-    /** Toggle group for days of week selection. */
+    private EditText titleField, descField, capacityField, locationField, latField, lonField;
+    private EditText inputEventStart, inputEventEnd, inputTimeStart, inputTimeEnd;
+    private EditText inputRegOpen, inputRegClose, maxEntrantsField, posterUrlField;
     private MaterialButtonToggleGroup daysToggleGroup;
-
-    /** List to store selected days of the week. */
     private List<String> selectedDays = new ArrayList<>();
-
-    /** Switch for geolocation consent. */
     private SwitchCompat geoConsentSwitch;
-
-    /** Button to trigger event creation. */
     private Button createBtn;
-
-    /** Firestore database instance for saving events. */
     private FirebaseFirestore db;
 
-    /**
-     * Called to create and return the view hierarchy associated with this fragment.
-     * <p>
-     * Initializes input fields, date pickers, time pickers, and create button listeners.
-     *
-     * @param inflater LayoutInflater used to inflate the fragment's layout.
-     * @param container Parent view that this fragment's UI should attach to.
-     * @param savedInstanceState Previously saved state, if any.
-     * @return The root view of the fragment.
-     */
+    // Info text toggle
+    private ImageView geoInfoButton;
+    private TextView geoInfoText;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -120,7 +62,7 @@ public class Org_CreateEventFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_create_events, container, false);
 
-        // Initialize input fields
+        // Initialize fields
         titleField = view.findViewById(R.id.input_event_title);
         descField = view.findViewById(R.id.input_description);
         capacityField = view.findViewById(R.id.input_capacity);
@@ -139,39 +81,46 @@ public class Org_CreateEventFragment extends Fragment {
         inputRegClose = view.findViewById(R.id.input_reg_close);
         daysToggleGroup = view.findViewById(R.id.days_toggle_group);
 
+        geoInfoButton = view.findViewById(R.id.info_geo);
+        geoInfoText = view.findViewById(R.id.txt_geo_info);
+
         db = FirebaseFirestore.getInstance();
 
-        // Setup date pickers
+        // Toggle info text visibility
+        geoInfoButton.setOnClickListener(v -> {
+            if (geoInfoText.getVisibility() == View.GONE) {
+                geoInfoText.setVisibility(View.VISIBLE);
+            } else {
+                geoInfoText.setVisibility(View.GONE);
+            }
+        });
+
+        // Date pickers
         inputEventStart.setOnClickListener(v -> showDatePicker(inputEventStart));
         inputEventEnd.setOnClickListener(v -> showDatePicker(inputEventEnd));
         inputRegOpen.setOnClickListener(v -> showDatePicker(inputRegOpen));
         inputRegClose.setOnClickListener(v -> showDatePicker(inputRegClose));
 
-        // Setup time pickers
+        // Time pickers
         inputTimeStart.setOnClickListener(v -> showTimePicker(inputTimeStart));
         inputTimeEnd.setOnClickListener(v -> showTimePicker(inputTimeEnd));
 
-        // Setup days of week toggle
+        // Days of week toggle
         setupDaySelection();
 
-        // Setup create event button
+        // Create button
         createBtn.setOnClickListener(v -> createEvent());
 
         return view;
     }
 
-    /**
-     * Setup day toggle buttons - matching filter popup pattern
-     */
     private void setupDaySelection() {
         daysToggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             MaterialButton button = group.findViewById(checkedId);
             if (button != null) {
                 String label = button.getText().toString();
                 if (isChecked) {
-                    if (!selectedDays.contains(label)) {
-                        selectedDays.add(label);
-                    }
+                    if (!selectedDays.contains(label)) selectedDays.add(label);
                     button.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.day_selected));
                     button.setTextColor(ContextCompat.getColor(requireContext(), R.color.day_text_selected));
                 } else {
@@ -182,7 +131,7 @@ public class Org_CreateEventFragment extends Fragment {
             }
         });
 
-        // Initialize buttons color
+        // Initialize buttons
         for (int i = 0; i < daysToggleGroup.getChildCount(); i++) {
             View child = daysToggleGroup.getChildAt(i);
             if (child instanceof MaterialButton) {
@@ -193,12 +142,6 @@ public class Org_CreateEventFragment extends Fragment {
         }
     }
 
-    /**
-     * Creates a new event using the provided input fields and stores it in Firestore.
-     * <p>
-     * Performs basic validation, parses numeric and date inputs, and constructs
-     * a map of event data. On success, displays a QR code for the event.
-     */
     private void createEvent() {
         String deviceId = Settings.Secure.getString(requireContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID);
@@ -213,27 +156,13 @@ public class Org_CreateEventFragment extends Fragment {
         String maxEntrantsStr = maxEntrantsField.getText().toString().trim();
         String posterUrl = posterUrlField.getText().toString().trim();
 
-        // Validate required fields
-        if (TextUtils.isEmpty(title)) {
-            Toast.makeText(getContext(), "Event name is required", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (TextUtils.isEmpty(capStr)) {
-            Toast.makeText(getContext(), "Number of participants is required", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (TextUtils.isEmpty(desc)) {
-            Toast.makeText(getContext(), "Event description is required", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (TextUtils.isEmpty(location)) {
-            Toast.makeText(getContext(), "Event location is required", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // Validation
+        if (TextUtils.isEmpty(title)) { showToast("Event name is required"); return; }
+        if (TextUtils.isEmpty(capStr)) { showToast("Number of participants is required"); return; }
+        if (TextUtils.isEmpty(desc)) { showToast("Event description is required"); return; }
+        if (TextUtils.isEmpty(location)) { showToast("Event location is required"); return; }
 
         int capacity = Integer.parseInt(capStr);
-
-        // Default coordinates if not provided (can be enhanced with geocoding)
         double lat = TextUtils.isEmpty(latStr) ? 0.0 : Double.parseDouble(latStr);
         double lon = TextUtils.isEmpty(lonStr) ? 0.0 : Double.parseDouble(lonStr);
         int maxEntrants = TextUtils.isEmpty(maxEntrantsStr) ? 0 : Integer.parseInt(maxEntrantsStr);
@@ -261,69 +190,43 @@ public class Org_CreateEventFragment extends Fragment {
         eventData.put("maxEntrants", maxEntrants);
         eventData.put("daysOfWeek", new ArrayList<>(selectedDays));
 
-        // Store poster URL if provided
-        if (!TextUtils.isEmpty(posterUrl)) {
-            eventData.put("posterUrl", posterUrl);
-        }
+        if (!TextUtils.isEmpty(posterUrl)) eventData.put("posterUrl", posterUrl);
 
-        // Store time information if provided
         String timeStart = inputTimeStart.getText().toString();
         String timeEnd = inputTimeEnd.getText().toString();
-        if (!TextUtils.isEmpty(timeStart)) {
-            eventData.put("timeStart", timeStart);
-        }
-        if (!TextUtils.isEmpty(timeEnd)) {
-            eventData.put("timeEnd", timeEnd);
-        }
+        if (!TextUtils.isEmpty(timeStart)) eventData.put("timeStart", timeStart);
+        if (!TextUtils.isEmpty(timeEnd)) eventData.put("timeEnd", timeEnd);
 
         db.collection("events")
                 .add(eventData)
-                .addOnSuccessListener(documentReference -> {
-                    String eventId = documentReference.getId();
+                .addOnSuccessListener(docRef -> {
+                    String eventId = docRef.getId();
                     db.collection("events").document(eventId).update("eventId", eventId);
-                    Toast.makeText(getContext(), "Event created successfully!", Toast.LENGTH_LONG).show();
-
-                    GenerateQRFragment qrFragment = GenerateQRFragment.newInstance(eventId);
-                    qrFragment.show(getParentFragmentManager(), "generate_qr_dialog");
+                    showToast("Event created successfully!");
+                    GenerateQRFragment.newInstance(eventId)
+                            .show(getParentFragmentManager(), "generate_qr_dialog");
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                .addOnFailureListener(e -> showToast("Error: " + e.getMessage()));
     }
 
-    /**
-     * Converts a date string to a Firestore {@link Timestamp}.
-     * <p>
-     * If parsing fails or input is empty, returns the fallback timestamp.
-     *
-     * @param dateStr Date string in "yyyy-MM-dd" format.
-     * @param fallback Fallback timestamp to use if parsing fails.
-     * @return Parsed {@link Timestamp} or fallback.
-     */
     private Timestamp parseDateToTimestamp(String dateStr, Timestamp fallback) {
         if (TextUtils.isEmpty(dateStr)) return fallback;
         try {
             java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            java.util.Date date = sdf.parse(dateStr);
-            return new Timestamp(date);
+            return new Timestamp(sdf.parse(dateStr));
         } catch (Exception e) {
             e.printStackTrace();
             return fallback;
         }
     }
 
-    /**
-     * Shows a {@link DatePickerDialog} and sets the selected date on the target EditText.
-     *
-     * @param target EditText to populate with the selected date.
-     */
     private void showDatePicker(EditText target) {
         Calendar calendar = Calendar.getInstance();
         DatePickerDialog dialog = new DatePickerDialog(
                 getContext(),
-                (view, year, month, dayOfMonth) -> {
-                    String dateStr = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth);
-                    target.setText(dateStr);
-                },
+                R.style.CustomDatePicker,
+                (view, year, month, dayOfMonth) -> target.setText(
+                        String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth)),
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)
@@ -331,23 +234,20 @@ public class Org_CreateEventFragment extends Fragment {
         dialog.show();
     }
 
-    /**
-     * Shows a {@link TimePickerDialog} and sets the selected time on the target EditText.
-     *
-     * @param target EditText to populate with the selected time.
-     */
     private void showTimePicker(EditText target) {
         Calendar calendar = Calendar.getInstance();
         TimePickerDialog dialog = new TimePickerDialog(
                 getContext(),
-                (view, hourOfDay, minute) -> {
-                    String timeStr = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
-                    target.setText(timeStr);
-                },
+                (view, hourOfDay, minute) -> target.setText(
+                        String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute)),
                 calendar.get(Calendar.HOUR_OF_DAY),
                 calendar.get(Calendar.MINUTE),
-                true // 24-hour format
+                true
         );
         dialog.show();
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 }

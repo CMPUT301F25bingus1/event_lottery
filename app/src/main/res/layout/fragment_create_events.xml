@@ -4,7 +4,7 @@
     android:id="@+id/create_event_scroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
+    android:fitsSystemWindows="false"
     android:fillViewport="true"
     android:background="@android:color/transparent"
     android:padding="16dp">
@@ -17,12 +17,13 @@
 
         <!-- Header Text -->
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/create_events"
             android:textColor="@android:color/white"
-            android:textSize="22sp"
-            android:layout_gravity="center"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp"
             android:paddingBottom="16dp" />
 
         <androidx.cardview.widget.CardView
@@ -371,7 +372,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginBottom="0dp">
 
                     <TextView
                         android:layout_width="0dp"
@@ -388,6 +389,7 @@
                         android:layout_height="wrap_content" />
 
                     <ImageView
+                        android:id="@+id/info_geo"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@android:drawable/ic_dialog_info"
@@ -397,11 +399,13 @@
                 </LinearLayout>
 
                 <TextView
+                    android:id="@+id/txt_geo_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="See where people are registering from."
                     android:textColor="#757575"
                     android:textSize="12sp"
+                    android:visibility="gone"
                     android:layout_marginBottom="16dp" />
 
                 <!-- Submit Button -->
@@ -410,8 +414,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Submit"
-                    android:textColor="@android:color/black"
-                    android:backgroundTint="#D9D9D9"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="@android:color/black"
                     android:textAllCaps="false" />
 
             </LinearLayout>
