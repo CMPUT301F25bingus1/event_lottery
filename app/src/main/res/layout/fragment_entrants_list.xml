@@ -108,19 +108,13 @@
             <FrameLayout
                 android:id="@+id/mapContainer"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="400dp"
                 android:visibility="gone">
 
-                <!-- MapView will be added programmatically here -->
-                <TextView
-                    android:id="@+id/mapPlaceholder"
+                <com.google.android.gms.maps.MapView
+                    android:id="@+id/mapView"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="Map View\n(Requires Google Maps integration)"
-                    android:gravity="center"
-                    android:textSize="16sp"
-                    android:textColor="@color/black"
-                    android:background="#E0E0E0" />
+                    android:layout_height="match_parent" />
             </FrameLayout>
         </FrameLayout>
 

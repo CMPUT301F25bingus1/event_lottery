@@ -1,5 +1,6 @@
 package com.example.eventlotto.ui.entrant;
 
+import android.Manifest;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -13,6 +14,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -20,12 +23,17 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
+import com.example.eventlotto.ui.organizer.LocationCapture;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 
 import java.text.DateFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Ent_EventDetailsFragment extends DialogFragment {
 
@@ -49,12 +57,47 @@ public class Ent_EventDetailsFragment extends DialogFragment {
     private LinearLayout acceptDeclineLayout;
     private Button acceptButton, declineButton;
 
+    /** Location permission launcher */
+    private ActivityResultLauncher<String> requestPermissionLauncher;
+
+    /** Flag to track if we're waiting for permission */
+    private boolean waitingForLocationPermission = false;
+
     public static Ent_EventDetailsFragment newInstance(String eventId) {
         Ent_EventDetailsFragment fragment = new Ent_EventDetailsFragment();
         Bundle args = new Bundle();
         args.putString("eventId", eventId);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Setup location permission launcher
+        requestPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted && waitingForLocationPermission) {
+                        waitingForLocationPermission = false;
+                        // Permission granted, capture location and join
+                        captureLocationAndJoin();
+                    } else if (!isGranted && waitingForLocationPermission) {
+                        waitingForLocationPermission = false;
+                        // Permission denied - give user choice
+                        Toast.makeText(getContext(),
+                                "Location permission denied. Join without location?",
+                                Toast.LENGTH_LONG).show();
+                        // Join without location as fallback
+                        String deviceId = Settings.Secure.getString(
+                                requireContext().getContentResolver(),
+                                Settings.Secure.ANDROID_ID
+                        );
+                        addToWaitlistWithLocation(deviceId, null);
+                    }
+                }
+        );
     }
 
     @Nullable
@@ -151,11 +194,10 @@ public class Ent_EventDetailsFragment extends DialogFragment {
             geoConsentText.setText("Geo Consent Required: " + (geoConsent != null && geoConsent ? "Yes" : "No"));
         }
 
-
         // Location
         TextView locationText = getView().findViewById(R.id.location);
         if (locationText != null) {
-            com.google.firebase.firestore.GeoPoint location = doc.getGeoPoint("location");
+            GeoPoint location = doc.getGeoPoint("location");
             locationText.setText(location != null
                     ? "Location: " + location.getLatitude() + ", " + location.getLongitude()
                     : "Location: N/A");
@@ -206,6 +248,70 @@ public class Ent_EventDetailsFragment extends DialogFragment {
         );
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // First, check if event requires geo consent
+        db.collection("events").document(eventId).get()
+                .addOnSuccessListener(eventDoc -> {
+                    Boolean geoConsent = eventDoc.getBoolean("geoConsent");
+
+                    if (geoConsent != null && geoConsent) {
+                        // Event requires location - check permission
+                        LocationCapture locationCapture = new LocationCapture(requireContext());
+
+                        if (locationCapture.hasLocationPermission()) {
+                            // Has permission - get location and join
+                            captureLocationAndJoin();
+                        } else {
+                            // Request permission
+                            waitingForLocationPermission = true;
+                            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+                        }
+                    } else {
+                        // No geo consent required - add without location
+                        addToWaitlistWithLocation(deviceId, null);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(),
+                            "Failed to check event requirements: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    /**
+     * Captures location and joins waitlist - called after permission is granted
+     */
+    private void captureLocationAndJoin() {
+        String deviceId = Settings.Secure.getString(
+                requireContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID
+        );
+
+        LocationCapture locationCapture = new LocationCapture(requireContext());
+        locationCapture.getCurrentLocation(new LocationCapture.LocationCallback() {
+            @Override
+            public void onLocationReceived(GeoPoint location) {
+                // Add to waitlist WITH location
+                addToWaitlistWithLocation(deviceId, location);
+            }
+
+            @Override
+            public void onLocationFailed(String error) {
+                // Location failed but permission was granted
+                Toast.makeText(getContext(),
+                        "Could not get location: " + error + ". Joining without location.",
+                        Toast.LENGTH_SHORT).show();
+                // Join without location (organizer won't see on map)
+                addToWaitlistWithLocation(deviceId, null);
+            }
+        });
+    }
+
+    /**
+     * Adds user to waitlist with optional location data
+     */
+    private void addToWaitlistWithLocation(String deviceId, GeoPoint location) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference eventRef = db.collection("events").document(eventId);
 
         db.runTransaction(transaction -> {
@@ -226,10 +332,16 @@ public class Ent_EventDetailsFragment extends DialogFragment {
                     .collection("status")
                     .document(deviceId);
 
-            transaction.set(userStatusRef, new java.util.HashMap<String, Object>() {{
-                put("status", "waiting");
-                put("joinedAt", Timestamp.now());
-            }});
+            Map<String, Object> statusData = new HashMap<>();
+            statusData.put("status", "waiting");
+            statusData.put("joinedAt", FieldValue.serverTimestamp());
+
+            // Add location if available
+            if (location != null) {
+                statusData.put("joinLocation", location);
+            }
+
+            transaction.set(userStatusRef, statusData);
 
             // Increment entrantsApplied
             transaction.update(eventRef, "entrantsApplied", entrantsApplied + 1);
@@ -250,23 +362,21 @@ public class Ent_EventDetailsFragment extends DialogFragment {
     }
 
     private void acceptInvitation() {
-
         String deviceId = Settings.Secure.getString(
                 requireContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID
         );
 
-        // Update event status (signed_up)
+        // Update event status (accepted)
         FirebaseFirestore.getInstance()
                 .collection("events").document(eventId)
                 .collection("status").document(deviceId)
-                .update("status", "signed_up")
+                .update("status", "accepted")
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(getContext(), "Event accepted!", Toast.LENGTH_SHORT).show();
                     getParentFragmentManager().setFragmentResult("eventStatusChanged", Bundle.EMPTY);
                     dismiss();
                 })
-
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
@@ -305,17 +415,17 @@ public class Ent_EventDetailsFragment extends DialogFragment {
                 .get()
                 .addOnSuccessListener(statusDoc -> {
                     String status = statusDoc.exists() ? statusDoc.getString("status") : "waiting";
-                    if ("signed_up".equalsIgnoreCase(status)) {
+                    if ("accepted".equalsIgnoreCase(status)) {
                         joinWaitlistButton.setText("Leave Registration");
                         joinWaitlistButton.setBackgroundTintList(
-                                getResources().getColorStateList(android.R.color.holo_red_light)
+                                ContextCompat.getColorStateList(requireContext(), android.R.color.holo_red_light)
                         );
                         joinWaitlistButton.setOnClickListener(v -> leaveRegistration(eventId, deviceId));
                         acceptDeclineLayout.setVisibility(View.GONE);
                     } else {
                         joinWaitlistButton.setText("Leave Waitlist");
                         joinWaitlistButton.setBackgroundTintList(
-                                getResources().getColorStateList(android.R.color.holo_red_light)
+                                ContextCompat.getColorStateList(requireContext(), android.R.color.holo_red_light)
                         );
                         joinWaitlistButton.setOnClickListener(v -> leaveWaitlist(eventId, deviceId));
                         acceptDeclineLayout.setVisibility(View.GONE);
@@ -327,7 +437,7 @@ public class Ent_EventDetailsFragment extends DialogFragment {
     private void showNotJoinedUI() {
         joinWaitlistButton.setText("Join Waitlist");
         joinWaitlistButton.setBackgroundTintList(
-                getResources().getColorStateList(android.R.color.holo_green_dark)
+                ContextCompat.getColorStateList(requireContext(), android.R.color.holo_green_dark)
         );
         joinWaitlistButton.setOnClickListener(v -> joinWaitlist());
         acceptDeclineLayout.setVisibility(View.GONE);
@@ -349,7 +459,7 @@ public class Ent_EventDetailsFragment extends DialogFragment {
             Long entrantsApplied = eventSnap.getLong("entrantsApplied");
             if (entrantsApplied == null || entrantsApplied <= 0) entrantsApplied = 0L;
 
-            // Remove user’s status document
+            // Remove user's status document
             transaction.delete(userStatusRef);
 
             // Decrement entrantsApplied safely
@@ -364,7 +474,6 @@ public class Ent_EventDetailsFragment extends DialogFragment {
         }).addOnFailureListener(e ->
                 Toast.makeText(getContext(), "Failed to leave waitlist: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
-
 
     /**
      * Removes the device from event's registration
@@ -419,6 +528,7 @@ public class Ent_EventDetailsFragment extends DialogFragment {
                     }
                 });
     }
+
     private void loadWaitingCount(String eventId) {
         if (waitlistCount == null) return;
         FirebaseFirestore.getInstance()
@@ -428,7 +538,7 @@ public class Ent_EventDetailsFragment extends DialogFragment {
                 .get()
                 .addOnSuccessListener(query -> {
                     int c = (query != null) ? query.size() : 0;
-                    waitlistCount.setText(c+ " is on the waiting list.");
+                    waitlistCount.setText(c + " is on the waiting list.");
                 })
                 .addOnFailureListener(e -> waitlistCount.setText("Waiting: 0"));
     }
@@ -446,18 +556,28 @@ public class Ent_EventDetailsFragment extends DialogFragment {
 
         switch (s) {
             case "selected":
-                drawableRes = R.drawable.bg_status_selected; label = "Selected"; break;
+                drawableRes = R.drawable.bg_status_selected;
+                label = "Selected";
+                break;
+            case "accepted":
             case "signed up":
             case "signed_up":
-                drawableRes = R.drawable.bg_status_signed_up; label = "Signed Up"; break;
+                drawableRes = R.drawable.bg_status_signed_up;
+                label = "Accepted";
+                break;
             case "cancelled":
             case "canceled":
-                drawableRes = R.drawable.bg_status_cancelled; label = "Cancelled"; break;
+                drawableRes = R.drawable.bg_status_cancelled;
+                label = "Cancelled";
+                break;
             case "not chosen":
             case "not_chosen":
-                drawableRes = R.drawable.bg_status_not_chosen; label = "Not Chosen"; break;
+                drawableRes = R.drawable.bg_status_not_chosen;
+                label = "Not Chosen";
+                break;
             default:
-                drawableRes = R.drawable.bg_status_waiting; label = "Waiting";
+                drawableRes = R.drawable.bg_status_waiting;
+                label = "Waiting";
         }
 
         try {
