@@ -24,10 +24,9 @@
         android:theme="@style/Theme.EventLotto">
 
         <!-- NEW: Google Maps API Key -->
-        <!-- TODO: Replace YOUR_API_KEY_HERE with your actual Google Maps API key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_API_KEY_HERE" />
+            android:value="AIzaSyCnmjpaSef9PdJ1oEBZRcwMqTtn7tT5sHQ" />
 
         <activity
             android:name=".MainActivity"
