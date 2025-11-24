@@ -49,6 +49,20 @@
             app:layout_constraintEnd_toEndOf="parent"/>
 
         <TextView
+            android:id="@+id/notificationMessage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/red"
+            android:textSize="14sp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@id/textDescription"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textDescription"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"/>
+
+
+        <TextView
             android:id="@+id/textStatus"
             android:layout_width="@dimen/status_chip_width"
             android:layout_height="wrap_content"

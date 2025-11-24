@@ -41,10 +41,29 @@ public class EntrantsAdapter extends RecyclerView.Adapter<EntrantsAdapter.ViewHo
         String userId = doc.getId();
         String status = doc.getString("status");
 
+        holder.statusText.setText(status != null ? status : "N/A");
         // Set status badge with styling
         setStatusBadge(holder.statusText, status);
 
         // Show Cancel button only for selected users
+        // --- Set color by status ---
+        if (status != null) {
+            switch (status) {
+                case "waiting":
+                    holder.statusText.setTextColor(0xFFFFA000); // amber
+                    break;
+                case "selected":
+                    holder.statusText.setTextColor(0xFF4CAF50); // green
+                    break;
+                case "not_chosen":
+                    holder.statusText.setTextColor(0xFFF44336); // red
+                    break;
+                default:
+                    holder.statusText.setTextColor(0xFF000000); // black
+            }
+        }
+
+        // --- Show Cancel button only for selected users ---
         if ("selected".equals(status)) {
             holder.cancelButton.setVisibility(View.VISIBLE);
         } else {
@@ -133,15 +152,15 @@ public class EntrantsAdapter extends RecyclerView.Adapter<EntrantsAdapter.ViewHo
     }
 
     private void cancelEntrant(DocumentReference entrantRef, ViewHolder holder) {
-        entrantRef.update("status", "cancelled")
+        entrantRef.update("status", "not_chosen")
                 .addOnSuccessListener(aVoid -> {
-                    setStatusBadge(holder.statusText, "cancelled");
+                    holder.statusText.setText("not_chosen");
+                    holder.statusText.setTextColor(0xFFF44336);
                     holder.cancelButton.setVisibility(View.GONE);
                 })
-                .addOnFailureListener(e -> {
-                    holder.statusText.setText("Error");
-                    createRoundedBadge(holder.statusText, "#FF0000", "#FFFFFF");
-                });
+                .addOnFailureListener(e ->
+                        holder.statusText.setText("Error")
+                );
     }
 
     @Override

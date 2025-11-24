@@ -23,6 +23,7 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
+import com.example.eventlotto.model.Notification;
 import com.example.eventlotto.ui.organizer.LocationCapture;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
@@ -349,6 +350,22 @@ public class Ent_EventDetailsFragment extends DialogFragment {
             return null;
         }).addOnSuccessListener(aVoid -> {
             Toast.makeText(getContext(), "Successfully joined waitlist", Toast.LENGTH_SHORT).show();
+
+            String nid = deviceId + "_" + eventId;
+            Notification n = new Notification();
+            n.setNid(nid);
+            n.setUid(deviceId);
+            n.setEid(eventId);
+
+            firestoreService.saveNotification(n)
+                    .addOnSuccessListener(v -> {
+                        // Optional: small toast
+                        Toast.makeText(requireContext(), "Auto-subscribed to notifications", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(ex -> {
+                        Toast.makeText(requireContext(), "Failed auto-subscribe: " + ex.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+
             if (statusText != null) applyStatusText(statusText, "waiting");
             showJoinedUI(eventId, deviceId);
             loadWaitingCount(eventId);
@@ -528,7 +545,6 @@ public class Ent_EventDetailsFragment extends DialogFragment {
                     }
                 });
     }
-
     private void loadWaitingCount(String eventId) {
         if (waitlistCount == null) return;
         FirebaseFirestore.getInstance()
@@ -556,28 +572,19 @@ public class Ent_EventDetailsFragment extends DialogFragment {
 
         switch (s) {
             case "selected":
-                drawableRes = R.drawable.bg_status_selected;
-                label = "Selected";
-                break;
+                drawableRes = R.drawable.bg_status_selected; label = "Selected"; break;
             case "accepted":
             case "signed up":
             case "signed_up":
-                drawableRes = R.drawable.bg_status_signed_up;
-                label = "Accepted";
-                break;
+                drawableRes = R.drawable.bg_status_signed_up; label = "Signed Up"; break;
             case "cancelled":
             case "canceled":
-                drawableRes = R.drawable.bg_status_cancelled;
-                label = "Cancelled";
-                break;
+                drawableRes = R.drawable.bg_status_cancelled; label = "Cancelled"; break;
             case "not chosen":
             case "not_chosen":
-                drawableRes = R.drawable.bg_status_not_chosen;
-                label = "Not Chosen";
-                break;
+                drawableRes = R.drawable.bg_status_not_chosen; label = "Not Chosen"; break;
             default:
-                drawableRes = R.drawable.bg_status_waiting;
-                label = "Waiting";
+                drawableRes = R.drawable.bg_status_waiting; label = "Waiting";
         }
 
         try {

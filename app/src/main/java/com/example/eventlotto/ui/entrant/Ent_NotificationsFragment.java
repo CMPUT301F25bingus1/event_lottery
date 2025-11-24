@@ -110,23 +110,28 @@ public class Ent_NotificationsFragment extends Fragment {
                         String id = doc.getId();
                         String name = doc.getString("eventTitle");
                         String description = doc.getString("description");
-                        FollowedEvent e = new FollowedEvent(
+                        String organizerMessage = doc.getString("organizerMessage"); // optional field from Firestore
+
+                        FollowedEvent event = new FollowedEvent(
                                 id,
                                 name != null ? name : "Untitled",
                                 description != null ? description : "",
                                 R.drawable.event1,
-                                false,
-                                false
+                                false, // notificationsEnabled default
+                                organizerMessage // optional message
                         );
-                        allEvents.add(e);
+
+                        allEvents.add(event);
                     }
+                    // Once all events are loaded, load user subscriptions
                     loadUserSubscriptions();
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error fetching events: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Error fetching events: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show()
+                );
     }
+
 
     /**
      * Loads the user's current notification subscriptions and updates the events accordingly.
@@ -174,13 +179,22 @@ public class Ent_NotificationsFragment extends Fragment {
             n.setNid(nid);
             n.setUid(deviceId);
             n.setEid(event.getId());
+
+            // Optional: set a message if available from the event
+            String organizerMessage = event.getMessage(); // Add message field to FollowedEvent
+            if (organizerMessage != null && !organizerMessage.isEmpty()) {
+                n.setMessage("Message from organizer: " + organizerMessage);
+            }
+
             firestoreService.saveNotification(n)
                     .addOnSuccessListener(aVoid -> {})
-                    .addOnFailureListener(ex -> Toast.makeText(getContext(), "Failed to subscribe", Toast.LENGTH_SHORT).show());
+                    .addOnFailureListener(ex ->
+                            Toast.makeText(getContext(), "Failed to subscribe", Toast.LENGTH_SHORT).show());
         } else {
             firestoreService.notifications().document(nid).delete()
                     .addOnSuccessListener(aVoid -> {})
-                    .addOnFailureListener(ex -> Toast.makeText(getContext(), "Failed to unsubscribe", Toast.LENGTH_SHORT).show());
+                    .addOnFailureListener(ex ->
+                            Toast.makeText(getContext(), "Failed to unsubscribe", Toast.LENGTH_SHORT).show());
         }
     }
 

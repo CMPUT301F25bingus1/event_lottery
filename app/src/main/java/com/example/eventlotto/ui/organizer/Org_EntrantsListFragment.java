@@ -1,4 +1,5 @@
 package com.example.eventlotto.ui.organizer;
+import com.example.eventlotto.R;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -146,7 +147,7 @@ public class Org_EntrantsListFragment extends DialogFragment implements OnMapRea
             cancelButton.setOnClickListener(v -> dismiss());
         }
 
-        // CSV Export setup
+        // SAF launcher to let user save CSV
         createFileLauncher = registerForActivityResult(
                 new ActivityResultContracts.CreateDocument("text/csv"),
                 uri -> {
@@ -155,8 +156,7 @@ public class Org_EntrantsListFragment extends DialogFragment implements OnMapRea
         );
 
         view.findViewById(R.id.exportCsvButton).setOnClickListener(v -> {
-            String filename = eventTitle.replaceAll("[^a-zA-Z0-9]", "_") + "_entrants.csv";
-            createFileLauncher.launch(filename);
+            createFileLauncher.launch("entrants_export.csv");
         });
 
         return view;
@@ -376,7 +376,7 @@ public class Org_EntrantsListFragment extends DialogFragment implements OnMapRea
 
         db.collection("events")
                 .document(eventId)
-                .collection("status")
+                .collection("entrants")
                 .get()
                 .addOnSuccessListener(entrantsSnap -> {
 
@@ -388,13 +388,16 @@ public class Org_EntrantsListFragment extends DialogFragment implements OnMapRea
                     List<Task<DocumentSnapshot>> userTasks = new ArrayList<>();
                     List<DocumentSnapshot> entrantsDocs = entrantsSnap.getDocuments();
 
+                    // For each entrant, fetch matching user
                     for (DocumentSnapshot entrant : entrantsDocs) {
                         String userId = entrant.getId();
                         Task<DocumentSnapshot> userTask =
                                 db.collection("users").document(userId).get();
+
                         userTasks.add(userTask);
                     }
 
+                    // When ALL user tasks complete:
                     Tasks.whenAllSuccess(userTasks)
                             .addOnSuccessListener(results -> {
 

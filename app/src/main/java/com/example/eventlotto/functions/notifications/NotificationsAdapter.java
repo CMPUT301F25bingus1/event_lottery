@@ -149,6 +149,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
 
         /** Event description text view. */
         final TextView textDescription;
+        final TextView notificationMessage;
 
         /** Firestore listener registration for real-time event status updates. */
         @Nullable ListenerRegistration statusReg;
@@ -168,6 +169,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
             textName = itemView.findViewById(R.id.textName);
             textStatus = itemView.findViewById(R.id.textStatus);
             textDescription = itemView.findViewById(R.id.textDescription);
+            notificationMessage = itemView.findViewById(R.id.notificationMessage);
         }
 
         /**
@@ -176,12 +178,15 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
          * @param e The event to bind.
          */
         void bind(FollowedEvent e) {
+            // Set basic info
             textName.setText(e.getName());
             textDescription.setText(e.getDescription());
             imageEvent.setImageResource(e.getImageResId());
 
-            // Clear previous status state and listener
+            // Reset previous status and message
             textStatus.setVisibility(View.GONE);
+            notificationMessage.setVisibility(View.GONE);
+            notificationMessage.setText("");
             if (statusReg != null) {
                 statusReg.remove();
                 statusReg = null;
@@ -190,40 +195,47 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
             String eid = e.getId();
             boundEventId = eid;
 
-            // Get device ID to track user-specific status
             String deviceId = Settings.Secure.getString(
                     itemView.getContext().getContentResolver(),
                     Settings.Secure.ANDROID_ID
             );
 
-            // Listen for user's event status under events/<eid>/status/<deviceId>
             statusReg = FirebaseFirestore.getInstance()
                     .collection("events").document(eid)
                     .collection("status").document(deviceId)
                     .addSnapshotListener((snap, err) -> {
                         if (boundEventId == null || !eid.equals(boundEventId)) return;
-                        if (err != null || snap == null) {
+                        if (err != null || snap == null || !snap.exists()) {
                             textStatus.setVisibility(View.GONE);
                             return;
                         }
-                        if (snap.exists()) {
-                            String raw = snap.getString("status");
-                            applyStatusChip(textStatus, raw);
-                            textStatus.setVisibility(View.VISIBLE);
-                        } else {
-                            textStatus.setVisibility(View.GONE);
+                        String rawStatus = snap.getString("status");
+                        applyStatusChip(textStatus, rawStatus);
+                        textStatus.setVisibility(View.VISIBLE);
+                    });
+
+            FirebaseFirestore.getInstance()
+                    .collection("notifications")
+                    .whereEqualTo("eid", eid)
+                    .whereEqualTo("uid", deviceId)
+                    .get()
+                    .addOnSuccessListener(query -> {
+                        if (!query.isEmpty()) {
+                            String userMessage = query.getDocuments().get(0).getString("message");
+                            if (userMessage != null && !userMessage.isEmpty()) {
+                                notificationMessage.setText("Organizer message: " + userMessage);
+                                notificationMessage.setVisibility(View.VISIBLE);
+                            }
                         }
                     });
 
-            // Set the notification icon based on current state
             iconNotify.setImageResource(e.isNotificationsEnabled()
                     ? R.drawable.notification_on
                     : R.drawable.notification_off);
 
-            // Handle notification toggle click
             iconNotify.setOnClickListener(v -> {
                 if (e.isNotificationsEnabled()) {
-                    // Show opt-out confirmation dialog
+                    // Show opt-out dialog
                     View dialogView = LayoutInflater.from(v.getContext())
                             .inflate(R.layout.dialog_opt_out, null, false);
                     AlertDialog dialog = new AlertDialog.Builder(v.getContext())
@@ -233,45 +245,32 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
                         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                     }
 
-                    View btnCancel = dialogView.findViewById(R.id.btn_cancel);
-                    View btnOptOut = dialogView.findViewById(R.id.btn_opt_out);
-
-                    btnCancel.setOnClickListener(vi -> dialog.dismiss());
-                    btnOptOut.setOnClickListener(vi -> {
+                    dialogView.findViewById(R.id.btn_cancel).setOnClickListener(vi -> dialog.dismiss());
+                    dialogView.findViewById(R.id.btn_opt_out).setOnClickListener(vi -> {
                         dialog.dismiss();
                         e.setNotificationsEnabled(false);
                         RecyclerView.Adapter<?> adapter = getBindingAdapter();
                         if (adapter != null) adapter.notifyItemChanged(getBindingAdapterPosition());
-                        if (adapter instanceof NotificationsAdapter) {
-                            NotificationsAdapter na = (NotificationsAdapter) adapter;
-                            if (na.listener != null) {
-                                na.listener.onNotificationToggle(e, getBindingAdapterPosition());
-                            }
+                        if (adapter instanceof NotificationsAdapter && ((NotificationsAdapter) adapter).listener != null) {
+                            ((NotificationsAdapter) adapter).listener.onNotificationToggle(e, getBindingAdapterPosition());
                         }
                     });
                     dialog.show();
                 } else {
-                    // Enable notifications
+                    // Turn on notifications
                     e.setNotificationsEnabled(true);
                     RecyclerView.Adapter<?> adapter = getBindingAdapter();
                     if (adapter != null) adapter.notifyItemChanged(getBindingAdapterPosition());
-                    if (adapter instanceof NotificationsAdapter) {
-                        NotificationsAdapter na = (NotificationsAdapter) adapter;
-                        if (na.listener != null) {
-                            na.listener.onNotificationToggle(e, getBindingAdapterPosition());
-                        }
+                    if (adapter instanceof NotificationsAdapter && ((NotificationsAdapter) adapter).listener != null) {
+                        ((NotificationsAdapter) adapter).listener.onNotificationToggle(e, getBindingAdapterPosition());
                     }
                 }
             });
 
-            // Handle event item click
             itemView.setOnClickListener(v -> {
                 RecyclerView.Adapter<?> adapter = getBindingAdapter();
-                if (adapter instanceof NotificationsAdapter) {
-                    NotificationsAdapter na = (NotificationsAdapter) adapter;
-                    if (na.listener != null) {
-                        na.listener.onEventClick(e);
-                    }
+                if (adapter instanceof NotificationsAdapter && ((NotificationsAdapter) adapter).listener != null) {
+                    ((NotificationsAdapter) adapter).listener.onEventClick(e);
                 }
             });
         }
