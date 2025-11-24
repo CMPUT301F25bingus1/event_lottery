@@ -97,6 +97,34 @@
             android:text="@string/event_description"
             android:textColor="@android:color/black" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Event URL"
+            android:textColor="@android:color/black"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/input_event_url_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="https://example.com/poster.jpg"
+            android:inputType="textUri"
+            android:textColor="@android:color/black"
+            android:textColorHint="#808080"
+            android:backgroundTint="#9E9E9E" />
+
+        <Button
+            android:id="@+id/btn_update_event_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Update Event URL"
+            android:textAllCaps="false"
+            android:backgroundTint="#2196F3"
+            android:textColor="@android:color/white" />
+
         <LinearLayout
             android:id="@+id/capacityLayout"
             android:layout_width="match_parent"
