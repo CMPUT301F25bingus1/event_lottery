@@ -1,20 +1,24 @@
 package com.example.eventlotto.model;
 
+import androidx.annotation.Nullable;
+
 public class FollowedEvent {
     private final String id;
     private final String name;
     private final String description;
     private final int imageResId;
+    @Nullable private final String imageUrl;
     private boolean notificationsEnabled;
     private String message; // optional organizer message
 
     // Constructor with message
     public FollowedEvent(String id, String name, String description, int imageResId,
-                         boolean notificationsEnabled, String message) {
+                         @Nullable String imageUrl, boolean notificationsEnabled, String message) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.imageResId = imageResId;
+        this.imageUrl = imageUrl;
         this.notificationsEnabled = notificationsEnabled;
         this.message = message;
     }
@@ -27,6 +31,7 @@ public class FollowedEvent {
     public String getName() { return name; }
     public String getDescription() { return description; }
     public int getImageResId() { return imageResId; }
+    @Nullable public String getImageUrl() { return imageUrl; }
     public boolean isNotificationsEnabled() { return notificationsEnabled; }
     public void setNotificationsEnabled(boolean enabled) { this.notificationsEnabled = enabled; }
 }

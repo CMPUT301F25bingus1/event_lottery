@@ -16,9 +16,11 @@
         <ImageView
             android:id="@+id/eventImage"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="wrap_content"
+            android:maxHeight="320dp"
+            android:adjustViewBounds="true"
             android:contentDescription="@string/event_image"
-            android:scaleType="centerCrop"
+            android:scaleType="fitCenter"
             android:src="@drawable/ic_launcher_foreground" />
 
 

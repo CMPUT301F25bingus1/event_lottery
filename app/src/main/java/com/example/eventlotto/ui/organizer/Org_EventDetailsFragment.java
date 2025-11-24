@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
+import com.bumptech.glide.Glide;
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
 import com.example.eventlotto.ui.entrant.Ent_EventDetailsFragment;
@@ -337,19 +338,19 @@ public class Org_EventDetailsFragment extends DialogFragment {
         }
 
         // Load event image
-        String imageUrl = doc.getString("imageUrl");
-        if (imageUrl != null && !imageUrl.isEmpty()) {
-            new Thread(() -> {
-                try {
-                    java.net.URL url = new java.net.URL(imageUrl);
-                    final android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> eventImage.setImageBitmap(bmp));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }).start();
+        String imageUrl = doc.getString("eventURL");
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageUrl = doc.getString("imageUrl"); // legacy fallback
+        }
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            Glide.with(requireContext())
+                    .load(imageUrl.trim())
+                    .placeholder(R.mipmap.ic_launcher)
+                    .error(R.mipmap.ic_launcher)
+                    .fitCenter()
+                    .into(eventImage);
+        } else {
+            eventImage.setImageResource(R.mipmap.ic_launcher);
         }
     }
 

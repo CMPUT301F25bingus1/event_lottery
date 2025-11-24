@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.FollowedEvent;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -182,6 +183,15 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
             textName.setText(e.getName());
             textDescription.setText(e.getDescription());
             imageEvent.setImageResource(e.getImageResId());
+            String imageUrl = e.getImageUrl();
+            if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+                Glide.with(itemView.getContext())
+                        .load(imageUrl.trim())
+                        .placeholder(e.getImageResId())
+                        .error(e.getImageResId())
+                        .centerCrop()
+                        .into(imageEvent);
+            }
 
             // Reset previous status and message
             textStatus.setVisibility(View.GONE);

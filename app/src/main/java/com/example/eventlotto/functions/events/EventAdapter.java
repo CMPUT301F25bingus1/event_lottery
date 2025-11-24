@@ -4,12 +4,14 @@ import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.Event;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -71,6 +73,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
         holder.title.setText(event.getEventTitle());
         holder.description.setText(event.getDescription());
+        holder.imageEvent.setImageResource(R.mipmap.ic_launcher);
 
         // Reset UI for recycling
         holder.status.setVisibility(View.GONE);
@@ -79,6 +82,16 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         if (holder.waitlistReg != null) {
             holder.waitlistReg.remove();
             holder.waitlistReg = null;
+        }
+
+        String imageUrl = event.getEventURL();
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(imageUrl.trim())
+                    .placeholder(R.mipmap.ic_launcher)
+                    .error(R.mipmap.ic_launcher)
+                    .centerCrop()
+                    .into(holder.imageEvent);
         }
 
         String eid = event.getEid();
@@ -146,6 +159,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
         TextView description;
 
+        ImageView imageEvent;
+
         TextView status;
 
         @Nullable
@@ -158,6 +173,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             super(itemView);
             title = itemView.findViewById(R.id.textName);
             description = itemView.findViewById(R.id.textDescription);
+            imageEvent = itemView.findViewById(R.id.imageEvent);
             status = itemView.findViewById(R.id.textStatus);
         }
     }
