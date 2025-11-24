@@ -110,13 +110,15 @@ public class Ent_NotificationsFragment extends Fragment {
                         String id = doc.getId();
                         String name = doc.getString("eventTitle");
                         String description = doc.getString("description");
+                        String imageUrl = doc.getString("eventURL");
                         String organizerMessage = doc.getString("organizerMessage"); // optional field from Firestore
 
                         FollowedEvent event = new FollowedEvent(
                                 id,
                                 name != null ? name : "Untitled",
                                 description != null ? description : "",
-                                R.drawable.event1,
+                                R.mipmap.ic_launcher,
+                                imageUrl,
                                 false, // notificationsEnabled default
                                 organizerMessage // optional message
                         );

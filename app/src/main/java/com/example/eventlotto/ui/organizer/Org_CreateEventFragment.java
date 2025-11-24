@@ -45,6 +45,9 @@ public class Org_CreateEventFragment extends Fragment {
     /** Input field for the event description. */
     private EditText descField;
 
+    /** Input field for an optional event URL (poster or info page). */
+    private EditText urlField;
+
     /** Input field for the event capacity. */
     private EditText capacityField;
 
@@ -102,6 +105,7 @@ public class Org_CreateEventFragment extends Fragment {
         // Initialize input fields
         titleField = view.findViewById(R.id.input_event_title);
         descField = view.findViewById(R.id.input_description);
+        urlField = view.findViewById(R.id.input_event_url);
         capacityField = view.findViewById(R.id.input_capacity);
         latField = view.findViewById(R.id.input_latitude);
         lonField = view.findViewById(R.id.input_longitude);
@@ -140,6 +144,7 @@ public class Org_CreateEventFragment extends Fragment {
 
         String title = titleField.getText().toString().trim();
         String desc = descField.getText().toString().trim();
+        String eventUrl = urlField.getText().toString().trim();
         String capStr = capacityField.getText().toString().trim();
         String latStr = latField.getText().toString().trim();
         String lonStr = lonField.getText().toString().trim();
@@ -166,6 +171,7 @@ public class Org_CreateEventFragment extends Fragment {
         eventData.put("organizerId", organizerRef);
         eventData.put("eventTitle", title);
         eventData.put("description", desc);
+        if (!TextUtils.isEmpty(eventUrl)) eventData.put("eventURL", eventUrl);
         eventData.put("capacity", capacity);
         eventData.put("createdAt", now);
         eventData.put("eventStartAt", eventStart);

@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,12 +20,14 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
+import com.bumptech.glide.Glide;
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
 import com.example.eventlotto.ui.entrant.Ent_EventDetailsFragment;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DateFormat;
@@ -60,6 +63,8 @@ public class Org_EventDetailsFragment extends DialogFragment {
      */
     private Button cancelButton, lotteryButton;
     private TextView capacityText, selectedCountText, acceptedCountText;
+    private EditText eventUrlField;
+    private Button updateUrlButton;
 
     private LinearLayout acceptDeclineLayout;
     private Button acceptButton, declineButton;
@@ -98,6 +103,8 @@ public class Org_EventDetailsFragment extends DialogFragment {
         capacityText = view.findViewById(R.id.capacityText);
         selectedCountText = view.findViewById(R.id.selectedCountText);
         acceptedCountText = view.findViewById(R.id.acceptedCountText);
+        eventUrlField = view.findViewById(R.id.input_event_url_details);
+        updateUrlButton = view.findViewById(R.id.btn_update_event_url);
 
         // View Entrants Button - UPDATED
         Button viewEntrantsButton = view.findViewById(R.id.viewEntrantsButton);
@@ -114,6 +121,10 @@ public class Org_EventDetailsFragment extends DialogFragment {
             Org_NotifyEntrantsDialog dialog = Org_NotifyEntrantsDialog.newInstance(eventId);
             dialog.show(getParentFragmentManager(), "notify_dialog");
         });
+
+        if (updateUrlButton != null) {
+            updateUrlButton.setOnClickListener(v -> updateEventUrl());
+        }
 
         if (eventId != null) {
             fetchEventData(eventId);
@@ -337,20 +348,43 @@ public class Org_EventDetailsFragment extends DialogFragment {
         }
 
         // Load event image
-        String imageUrl = doc.getString("imageUrl");
-        if (imageUrl != null && !imageUrl.isEmpty()) {
-            new Thread(() -> {
-                try {
-                    java.net.URL url = new java.net.URL(imageUrl);
-                    final android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> eventImage.setImageBitmap(bmp));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }).start();
+        String imageUrl = doc.getString("eventURL");
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageUrl = doc.getString("imageUrl"); // legacy fallback
         }
+        if (eventUrlField != null) {
+            eventUrlField.setText(imageUrl != null ? imageUrl : "");
+        }
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            Glide.with(requireContext())
+                    .load(imageUrl.trim())
+                    .placeholder(R.mipmap.ic_launcher)
+                    .error(R.mipmap.ic_launcher)
+                    .fitCenter()
+                    .into(eventImage);
+        } else {
+            eventImage.setImageResource(R.mipmap.ic_launcher);
+        }
+    }
+
+    /**
+     * Updates the eventURL field for this event in Firestore.
+     */
+    private void updateEventUrl() {
+        if (eventId == null || eventUrlField == null) return;
+        String newUrl = eventUrlField.getText().toString().trim();
+
+        DocumentReference eventRef = FirebaseFirestore.getInstance()
+                .collection("events")
+                .document(eventId);
+
+        Object value = TextUtils.isEmpty(newUrl) ? FieldValue.delete() : newUrl;
+
+        eventRef.update("eventURL", value)
+                .addOnSuccessListener(aVoid -> Toast.makeText(getContext(),
+                        "Event URL updated", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(getContext(),
+                        "Failed to update URL: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private void loadWaitingCount(String eventId) {
