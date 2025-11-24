@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -13,41 +14,137 @@
         android:padding="16dp"
         android:elevation="4dp">
 
-        <!-- Return Button -->
-        <Button
-            android:id="@+id/returnButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Return"
-            android:backgroundTint="#D9D9D9"
-            android:textColor="@android:color/black" />
-
-        <!-- Title -->
-        <TextView
-            android:id="@+id/entrantsTitle"
+        <!-- Header Row with Return Button -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Entrants"
-            android:textStyle="bold"
-            android:textSize="20sp"
+            android:orientation="horizontal"
+            android:gravity="start">
+
+            <Button
+                android:id="@+id/returnButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Return"
+                android:backgroundTint="#D9D9D9"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
+        </LinearLayout>
+
+        <!-- Title and Tab Toggle -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginTop="16dp"
-            android:paddingBottom="8dp"
-            android:textColor="@color/black"/>
+            android:layout_marginTop="8dp">
 
-        <!-- RecyclerView -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/entrantsRecycler"
+            <TextView
+                android:id="@+id/entrantsTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Event 1"
+                android:textStyle="bold"
+                android:textSize="24sp"
+                android:textColor="@color/black"
+                android:layout_marginBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/entrantsSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Waitlist"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Tab Toggle (List/Map) -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/tab_indicator_rounded"
+                android:padding="4dp">
+
+                <Button
+                    android:id="@+id/listTabButton"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:text="List"
+                    android:textSize="14sp"
+                    android:backgroundTint="#4A90E2"
+                    android:textColor="@android:color/white" />
+
+                <Button
+                    android:id="@+id/mapTabButton"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:text="Map"
+                    android:textSize="14sp"
+                    android:backgroundTint="#D9D9D9"
+                    android:textColor="@android:color/black" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Content Container (switches between list and map) -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp">
+
+            <!-- List View -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/entrantsRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:visibility="visible" />
+
+            <!-- Map View Container -->
+            <FrameLayout
+                android:id="@+id/mapContainer"
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
+                android:visibility="gone">
+
+                <com.google.android.gms.maps.MapView
+                    android:id="@+id/mapView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </FrameLayout>
+        </FrameLayout>
+
+        <!-- Bottom Buttons -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false" />
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="16dp">
 
-        <Button
-            android:id="@+id/exportCsvButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Export CSV" />
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Cancel"
+                android:backgroundTint="#D9D9D9"
+                android:textColor="@android:color/black"
+                android:layout_marginEnd="8dp" />
 
+            <Button
+                android:id="@+id/exportCsvButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Export CSV"
+                android:backgroundTint="#4A90E2"
+                android:textColor="@android:color/white"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
 
     </LinearLayout>
 

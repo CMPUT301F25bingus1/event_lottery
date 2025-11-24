@@ -137,6 +137,4 @@ public class Org_NotifyEntrantsDialog extends DialogFragment {
                     }
                 });
     }
-
-
 }

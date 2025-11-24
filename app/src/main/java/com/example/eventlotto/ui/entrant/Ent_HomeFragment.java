@@ -140,6 +140,7 @@ public class Ent_HomeFragment extends Fragment {
 
     /**
      * Fetches all events from Firestore and populates the {@link #fullEventList} and {@link #eventList}.
+     * Only includes events where registration is currently open or will open in the future.
      * <p>
      * If successful, updates the RecyclerView adapter with the new data.
      * If unsuccessful, displays an error message to the user.
@@ -151,12 +152,23 @@ public class Ent_HomeFragment extends Fragment {
                     eventList.clear();
                     fullEventList.clear();
 
+                    Date currentDate = new Date();
+
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
                         Event event = doc.toObject(Event.class);
                         if (event != null) {
                             event.setEid(doc.getId());
-                            eventList.add(event);
-                            fullEventList.add(event);
+
+                            // Only add events where registration hasn't closed yet
+                            Date regCloses = event.getRegistrationClosesAt() != null
+                                    ? event.getRegistrationClosesAt().toDate()
+                                    : null;
+
+                            // Include event if registration close date is null or in the future
+                            if (regCloses == null || regCloses.after(currentDate)) {
+                                eventList.add(event);
+                                fullEventList.add(event);
+                            }
                         }
                     }
 

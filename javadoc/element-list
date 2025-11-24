@@ -1,9 +1,0 @@
-com.example.eventlotto
-com.example.eventlotto.functions.events
-com.example.eventlotto.functions.notifications
-com.example.eventlotto.functions.scan
-com.example.eventlotto.model
-com.example.eventlotto.ui
-com.example.eventlotto.ui.admin
-com.example.eventlotto.ui.entrant
-com.example.eventlotto.ui.organizer

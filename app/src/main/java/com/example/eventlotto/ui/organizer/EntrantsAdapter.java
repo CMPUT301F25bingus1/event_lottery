@@ -1,5 +1,7 @@
 package com.example.eventlotto.ui.organizer;
 
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +42,10 @@ public class EntrantsAdapter extends RecyclerView.Adapter<EntrantsAdapter.ViewHo
         String status = doc.getString("status");
 
         holder.statusText.setText(status != null ? status : "N/A");
+        // Set status badge with styling
+        setStatusBadge(holder.statusText, status);
 
+        // Show Cancel button only for selected users
         // --- Set color by status ---
         if (status != null) {
             switch (status) {
@@ -65,7 +70,7 @@ public class EntrantsAdapter extends RecyclerView.Adapter<EntrantsAdapter.ViewHo
             holder.cancelButton.setVisibility(View.GONE);
         }
 
-        // --- Load user full name ---
+        // Load user full name
         FirebaseFirestore.getInstance()
                 .collection("users")
                 .document(userId)
@@ -80,10 +85,70 @@ public class EntrantsAdapter extends RecyclerView.Adapter<EntrantsAdapter.ViewHo
                 })
                 .addOnFailureListener(e -> holder.nameText.setText("Error"));
 
-        // --- Handle Cancellation Button ---
+        // Handle Cancellation Button
         holder.cancelButton.setOnClickListener(v ->
                 cancelEntrant(doc.getReference(), holder)
         );
+    }
+
+    /**
+     * Sets the status badge with appropriate text, colors, and rounded background
+     */
+    private void setStatusBadge(TextView statusText, String status) {
+        if (status == null) {
+            statusText.setText("N/A");
+            statusText.setVisibility(View.VISIBLE);
+            createRoundedBadge(statusText, "#CCCCCC", "#000000");
+            return;
+        }
+
+        statusText.setVisibility(View.VISIBLE);
+
+        switch (status.toLowerCase()) {
+            case "waiting":
+                statusText.setText("Pending");
+                createRoundedBadge(statusText, "#87CEEB", "#000000"); // Light blue
+                break;
+
+            case "selected":
+                statusText.setText("Selected");
+                createRoundedBadge(statusText, "#90EE90", "#000000"); // Light green
+                break;
+
+            case "accepted":
+                statusText.setText("Accepted");
+                createRoundedBadge(statusText, "#32CD32", "#FFFFFF"); // Green
+                break;
+
+            case "not_chosen":
+                statusText.setText("Not Chosen");
+                createRoundedBadge(statusText, "#FFB6C1", "#000000"); // Light pink
+                break;
+
+            case "cancelled":
+                statusText.setText("Cancelled");
+                createRoundedBadge(statusText, "#FF6B6B", "#FFFFFF"); // Red
+                break;
+
+            default:
+                statusText.setText(status);
+                createRoundedBadge(statusText, "#CCCCCC", "#000000"); // Gray
+                break;
+        }
+    }
+
+    /**
+     * Creates a rounded badge background for the status text
+     */
+    private void createRoundedBadge(TextView textView, String bgColor, String textColor) {
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setShape(GradientDrawable.RECTANGLE);
+        drawable.setCornerRadius(24f); // Rounded corners
+        drawable.setColor(Color.parseColor(bgColor));
+
+        textView.setBackground(drawable);
+        textView.setTextColor(Color.parseColor(textColor));
+        textView.setPadding(24, 8, 24, 8); // Horizontal and vertical padding
     }
 
     private void cancelEntrant(DocumentReference entrantRef, ViewHolder holder) {
