@@ -22,7 +22,8 @@
             android:text="@string/create_events"
             android:textColor="@android:color/white"
             android:textSize="22sp"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:paddingBottom="16dp" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/create_event_card"
@@ -31,174 +32,387 @@
             android:layout_margin="8dp"
             app:cardCornerRadius="24dp"
             app:cardElevation="8dp"
-            android:backgroundTint="@android:color/white"
-            android:padding="24dp">
+            android:backgroundTint="@android:color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="20dp">
 
-                <!-- Title -->
+                <!-- Event Name -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Create New Event"
-                    android:textSize="22sp"
+                    android:text="@string/event_name"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
-                    android:layout_gravity="center_horizontal"
-                    android:paddingBottom="20dp" />
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
 
-                <!-- Event Title -->
                 <EditText
                     android:id="@+id/input_event_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Event Title"
+                    android:hint="Value"
                     android:textColor="@android:color/black"
-                    android:textColorHint="#808080"
-                    android:backgroundTint="#9E9E9E"
-                    android:inputType="text" />
+                    android:textColorHint="#BDBDBD"
+                    android:inputType="text"
+                    android:layout_marginBottom="12dp" />
 
-                <!-- Description -->
-                <EditText
-                    android:id="@+id/input_description"
+                <!-- Event Period -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/event_period"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Description"
-                    android:inputType="textMultiLine"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="#808080"
-                    android:backgroundTint="#9E9E9E" />
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
 
-                <!-- Capacity -->
+                    <EditText
+                        android:id="@+id/input_event_start"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="From"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:inputType="none"
+                        android:drawableStart="@android:drawable/ic_menu_my_calendar"
+                        android:drawablePadding="6dp"
+                        android:textColor="@android:color/black" />
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="match_parent" />
+
+                    <EditText
+                        android:id="@+id/input_event_end"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="To"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:inputType="none"
+                        android:drawableStart="@android:drawable/ic_menu_my_calendar"
+                        android:drawablePadding="6dp"
+                        android:textColor="@android:color/black" />
+                </LinearLayout>
+
+                <!-- Time -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/time"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <EditText
+                        android:id="@+id/input_time_start"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="From"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:inputType="none"
+                        android:textColor="@android:color/black" />
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="match_parent" />
+
+                    <EditText
+                        android:id="@+id/input_time_end"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="To"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:inputType="none"
+                        android:textColor="@android:color/black" />
+                </LinearLayout>
+
+                <!-- DAYS OF WEEK FILTER -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dotw"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="4dp" />
+
+                <!-- Material Multi-Select Day Buttons -->
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/days_toggle_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:singleSelection="false"
+                    app:selectionRequired="false">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/day_mon"
+                        android:text="M"
+                        style="@style/DayToggleStyle" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/day_tue"
+                        android:text="T"
+                        style="@style/DayToggleStyle" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/day_wed"
+                        android:text="W"
+                        style="@style/DayToggleStyle" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/day_thu"
+                        android:text="T"
+                        style="@style/DayToggleStyle" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/day_fri"
+                        android:text="F"
+                        style="@style/DayToggleStyle" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/day_sat"
+                        android:text="S"
+                        style="@style/DayToggleStyle" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/day_sun"
+                        android:text="S"
+                        style="@style/DayToggleStyle" />
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                <!-- Number of Participants -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/noparti"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
+
                 <EditText
                     android:id="@+id/input_capacity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Capacity"
+                    android:hint="Value"
                     android:inputType="number"
                     android:textColor="@android:color/black"
-                    android:textColorHint="#808080"
-                    android:backgroundTint="#9E9E9E" />
+                    android:textColorHint="#BDBDBD"
+                    android:layout_marginBottom="12dp" />
 
-                <!-- Max Entrants (Optional) -->
+                <!-- Registration Period -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/reg_period"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <EditText
+                        android:id="@+id/input_reg_open"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="From"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:inputType="none"
+                        android:drawableStart="@android:drawable/ic_menu_my_calendar"
+                        android:drawablePadding="6dp"
+                        android:textColor="@android:color/black" />
+
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="match_parent" />
+
+                    <EditText
+                        android:id="@+id/input_reg_close"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="To"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:inputType="none"
+                        android:drawableStart="@android:drawable/ic_menu_my_calendar"
+                        android:drawablePadding="6dp"
+                        android:textColor="@android:color/black" />
+                </LinearLayout>
+
+                <!-- Limit Registration -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Limit Registration (Optional)"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
+
                 <EditText
                     android:id="@+id/input_max_entrants"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Max Entrants (Optional)"
+                    android:hint="Value"
                     android:inputType="number"
                     android:textColor="@android:color/black"
-                    android:textColorHint="#808080"
-                    android:backgroundTint="#9E9E9E"
-                    android:paddingTop="4dp" />
+                    android:textColorHint="#BDBDBD"
+                    android:layout_marginBottom="12dp" />
+                <!-- Poster Upload -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Poster Upload (Optional)"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
 
-                <!-- Latitude -->
+                <EditText
+                    android:id="@+id/input_poster_url"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter poster URL"
+                    android:inputType="textUri"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#BDBDBD"
+                    android:layout_marginBottom="12dp" />
+                <!-- Event Description -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/event_desc"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
+
+                <EditText
+                    android:id="@+id/input_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Value"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#BDBDBD"
+                    android:inputType="text"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Event Location -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/event_location"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
+
+                <EditText
+                    android:id="@+id/input_location"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter location"
+                    android:drawableStart="@android:drawable/ic_menu_mylocation"
+                    android:drawablePadding="8dp"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#BDBDBD"
+                    android:layout_marginBottom="4dp" />
+
+                <!-- Hidden coordinate fields -->
                 <EditText
                     android:id="@+id/input_latitude"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Latitude"
-                    android:inputType="numberDecimal"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="#808080"
-                    android:backgroundTint="#9E9E9E" />
+                    android:visibility="gone"
+                    android:inputType="numberDecimal" />
 
-                <!-- Longitude -->
                 <EditText
                     android:id="@+id/input_longitude"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Longitude"
-                    android:inputType="numberDecimal"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="#808080"
-                    android:backgroundTint="#9E9E9E" />
+                    android:visibility="gone"
+                    android:inputType="numberDecimal" />
 
-                <!-- Event Dates -->
+                <!-- Enable Geolocation Toggle -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/enable_geoconsent"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/check_geo_consent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_dialog_info"
+                        android:tint="#757575"
+                        android:layout_marginStart="8dp"
+                        android:contentDescription="Info" />
+                </LinearLayout>
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Event Dates"
-                    android:textColor="@android:color/black"
-                    android:textStyle="bold"
-                    android:paddingTop="16dp" />
+                    android:text="See where people are registering from."
+                    android:textColor="#757575"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="16dp" />
 
-                <EditText
-                    android:id="@+id/input_event_start"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Event Start Date"
-                    android:focusable="false"
-                    android:clickable="true"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="#808080"
-                    android:backgroundTint="#9E9E9E" />
-
-                <EditText
-                    android:id="@+id/input_event_end"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Event End Date"
-                    android:focusable="false"
-                    android:clickable="true"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="#808080"
-                    android:backgroundTint="#9E9E9E" />
-
-                <!-- Registration Dates -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Registration Period"
-                    android:textColor="@android:color/black"
-                    android:textStyle="bold"
-                    android:paddingTop="16dp" />
-
-                <EditText
-                    android:id="@+id/input_reg_open"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Registration Opens At"
-                    android:focusable="false"
-                    android:clickable="true"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="#808080"
-                    android:backgroundTint="#9E9E9E" />
-
-                <EditText
-                    android:id="@+id/input_reg_close"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Registration Closes At"
-                    android:focusable="false"
-                    android:clickable="true"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="#808080"
-                    android:backgroundTint="#9E9E9E" />
-
-                <!-- Checkboxes -->
-                <CheckBox
-                    android:id="@+id/check_geo_consent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Require Geo Consent?"
-                    android:textColor="@android:color/black"
-                    android:paddingTop="8dp" />
-
-                <!-- Create Button -->
+                <!-- Submit Button -->
                 <Button
                     android:id="@+id/btn_create_event"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Create Event"
-                    android:textAllCaps="false"
-                    android:textColor="@android:color/white"
-                    android:backgroundTint="#2196F3"
-                    android:layout_marginTop="16dp"
-                    android:padding="12dp" />
+                    android:text="Submit"
+                    android:textColor="@android:color/black"
+                    android:backgroundTint="#D9D9D9"
+                    android:textAllCaps="false" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>

@@ -61,4 +61,14 @@
     <string name="manage_events">Manage Events</string>
     <string name="tab_current">Current Events</string>
     <string name="tab_history">History</string>
+
+    <string name="event_name">Event Name <font color="#D32F2F">* (Required)</font></string>
+    <string name="event_period">Event Period <font color="#D32F2F">*</font></string>
+    <string name="time">Time <font color="#D32F2F">*</font></string>
+    <string name="dotw">Days of Week <font color="#D32F2F">*</font></string>
+    <string name="noparti">Number of Participants <font color="#D32F2F">*</font></string>
+    <string name="reg_period">Registration Period <font color="#D32F2F">*</font></string>
+    <string name="event_desc">Event Description <font color="#D32F2F">*</font></string>
+    <string name="event_location">Event Location <font color="#D32F2F">*</font></string>
+    <string name="enable_geoconsent">Enable Geolocation? <font color="#D32F2F">*</font></string>
 </resources>
