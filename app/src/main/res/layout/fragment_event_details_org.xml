@@ -153,6 +153,7 @@
 
         </LinearLayout>
 
+        <!-- LOTTERY + BUTTONS SECTION -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -160,43 +161,23 @@
             android:layout_marginTop="16dp"
             android:gravity="center_horizontal">
 
-            <!-- Lottery Row -->
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <!-- Run Lottery (No Input Needed) -->
+            <Button
+                android:id="@+id/lotteryButton"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="8dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Number to select:" />
-
-                <EditText
-                    android:id="@+id/lotteryNumberInput"
-                    android:layout_width="60dp"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"
-                    android:hint="0"
-                    android:gravity="center"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp" />
-
-                <Button
-                    android:id="@+id/lotteryButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:backgroundTint="#5DBD70"
-                    android:textColor="@android:color/white"
-                    android:text="Run Lottery" />
-            </LinearLayout>
+                android:text="Run Lottery"
+                android:backgroundTint="#5DBD70"
+                android:textColor="@android:color/white"
+                android:layout_marginBottom="12dp" />
 
             <Button
                 android:id="@+id/notifyEntrantsButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Notify Entrants" />
+                android:text="Notify Entrants"
+                android:backgroundTint="#67c7f3"
+                />
 
             <Button
                 android:id="@+id/viewEntrantsButton"
@@ -204,11 +185,9 @@
                 android:layout_height="wrap_content"
                 android:text="View Entrants"
                 android:layout_marginTop="16dp"
-                android:backgroundTint="#5DBD70"
+                android:backgroundTint="#105fa5"
                 android:textColor="@android:color/white" />
 
-
-            <!-- Cancel Button Row -->
             <Button
                 android:id="@+id/cancelButton"
                 android:layout_width="match_parent"
@@ -219,6 +198,7 @@
 
         </LinearLayout>
 
+        <!-- ACCEPT/DECLINE SECTION (Organizer Reviewing Entrant) -->
         <LinearLayout
             android:id="@+id/acceptDeclineLayout"
             android:layout_width="match_parent"
@@ -249,5 +229,6 @@
                 android:backgroundTint="@android:color/holo_red_dark"
                 android:layout_marginStart="8dp" />
         </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

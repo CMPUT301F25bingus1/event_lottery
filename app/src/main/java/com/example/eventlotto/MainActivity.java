@@ -26,21 +26,20 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.eventlotto.ui.LoginFragment;
+import com.example.eventlotto.ui.admin.Adm_HomeFragment;
 import com.example.eventlotto.ui.organizer.Org_HomeFragment;
 import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
-import com.example.eventlotto.ui.admin.Adm_EventsFragment;
+import com.example.eventlotto.ui.admin.Adm_ImagesFragment;
 import com.example.eventlotto.ui.admin.Adm_ProfilesFragment;
 import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
 import com.example.eventlotto.ui.entrant.Ent_MyEventsFragment;
 import com.example.eventlotto.ui.entrant.Ent_NotificationsFragment;
 import com.example.eventlotto.ui.entrant.Ent_ScanFragment;
 import com.example.eventlotto.ui.entrant.Ent_WelcomeFragment;
-import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 
-import android.widget.Toast;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -147,9 +146,9 @@ public class MainActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (role.equals("admin")) {
-                if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
-                else if (id == R.id.nav_admin_events)
-                    fragment = new Adm_EventsFragment();
+                if (id == R.id.nav_home) fragment = new Adm_HomeFragment();
+                else if (id == R.id.nav_admin_images)
+                    fragment = new Adm_ImagesFragment();
                 else if (id == R.id.nav_admin_profiles)
                     fragment = new Adm_ProfilesFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();

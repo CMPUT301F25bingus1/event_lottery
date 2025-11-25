@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="search_icon" type="id" />
+    <item name="input_description" type="id" />
+    <item name="input_location" type="id" />
+    <item name="input_latitude" type="id" />
+    <item name="input_longitude" type="id" />
+    <item name="check_geo_consent" type="id" />
+    <item name="btn_create_event" type="id" />
 </resources>

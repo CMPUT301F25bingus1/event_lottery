@@ -1,0 +1,81 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@drawable/tab_indicator_rounded"
+        android:elevation="4dp"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Event Image -->
+        <ImageView
+            android:id="@+id/eventImage"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/event_image"
+            android:src="@mipmap/ic_launcher" />
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/eventTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:text="Event Title"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <!-- Optional Additional Info (Admins may want these too) -->
+        <TextView
+            android:id="@+id/signupDates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/sign_up_n_a"
+            android:textColor="@android:color/darker_gray" />
+
+        <TextView
+            android:id="@+id/eventDates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/event_n_a"
+            android:textColor="@android:color/darker_gray" />
+
+        <TextView
+            android:id="@+id/location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Location: N/A"
+            android:textColor="@android:color/darker_gray" />
+
+        <!-- Description -->
+        <TextView
+            android:id="@+id/eventDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Event Description"
+            android:textColor="@android:color/black" />
+
+        <!-- DELETE BUTTON (Admin Only) -->
+        <Button
+            android:id="@+id/btnDeleteEvent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Delete Event"
+            android:textStyle="bold"
+            android:backgroundTint="@android:color/holo_red_light"
+            android:textColor="@android:color/white" />
+
+    </LinearLayout>
+</ScrollView>

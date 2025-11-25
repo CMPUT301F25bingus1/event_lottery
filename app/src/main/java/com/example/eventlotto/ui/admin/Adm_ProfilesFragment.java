@@ -4,11 +4,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,24 +22,19 @@ import com.example.eventlotto.model.User;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-/**
- * Fragment for admin users to view and manage all user profiles.
- * <p>
- * Displays users in a RecyclerView with the option to delete each profile.
- * </p>
- */
 public class Adm_ProfilesFragment extends Fragment {
 
-    /** List of all users retrieved from Firestore. */
     private final List<User> users = new ArrayList<>();
+    private final Set<String> selectedUserIds = new HashSet<>();
 
-    /** RecyclerView adapter for displaying users. */
     private UsersAdapter adapter;
-
-    /** Service class for interacting with Firestore. */
     private FirestoreService firestoreService;
+    private Button btnOrganizers, btnUsers, btnDelete;
+    private String currentFilter = "organizer"; // Default to organizers
 
     @Nullable
     @Override
@@ -50,17 +48,54 @@ public class Adm_ProfilesFragment extends Fragment {
         RecyclerView recyclerView = root.findViewById(R.id.recycler_admin_users);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        adapter = new UsersAdapter(users, this::deleteUser);
+        btnOrganizers = root.findViewById(R.id.btn_organizers);
+        btnUsers = root.findViewById(R.id.btn_users);
+        btnDelete = root.findViewById(R.id.btn_delete);
+        Button btnCancel = root.findViewById(R.id.btn_cancel);
+
+        adapter = new UsersAdapter(users, selectedUserIds);
         recyclerView.setAdapter(adapter);
+
+        // Tab switching
+        btnOrganizers.setOnClickListener(v -> switchTab("organizer"));
+        btnUsers.setOnClickListener(v -> switchTab("entrant"));
+
+        // Delete button
+        btnDelete.setOnClickListener(v -> {
+            if (selectedUserIds.isEmpty()) {
+                Toast.makeText(getContext(), "No users selected", Toast.LENGTH_SHORT).show();
+            } else {
+                showDeleteConfirmationDialog();
+            }
+        });
+
+        // Cancel button - clear selections
+        btnCancel.setOnClickListener(v -> {
+            selectedUserIds.clear();
+            adapter.notifyDataSetChanged();
+        });
 
         loadUsers();
 
         return root;
     }
 
-    /**
-     * Fetches all users from Firestore and updates the RecyclerView.
-     */
+    private void switchTab(String role) {
+        currentFilter = role;
+        selectedUserIds.clear();
+
+        // Update tab UI
+        if (role.equals("organizer")) {
+            btnOrganizers.setBackgroundResource(R.drawable.bg_tab_selected);
+            btnUsers.setBackgroundResource(R.drawable.bg_tab_unselected);
+        } else {
+            btnOrganizers.setBackgroundResource(R.drawable.bg_tab_unselected);
+            btnUsers.setBackgroundResource(R.drawable.bg_tab_selected);
+        }
+
+        loadUsers();
+    }
+
     private void loadUsers() {
         firestoreService.users().get()
                 .addOnSuccessListener(snapshots -> {
@@ -69,7 +104,12 @@ public class Adm_ProfilesFragment extends Fragment {
                         User user = doc.toObject(User.class);
                         if (user != null) {
                             user.setUid(doc.getId());
-                            users.add(user);
+
+                            // Filter by role
+                            String userRole = user.getRole() != null ? user.getRole().toLowerCase() : "";
+                            if (userRole.equals(currentFilter)) {
+                                users.add(user);
+                            }
                         }
                     }
                     adapter.notifyDataSetChanged();
@@ -79,34 +119,40 @@ public class Adm_ProfilesFragment extends Fragment {
                 );
     }
 
-    /**
-     * Deletes a user by their UID and refreshes the list.
-     *
-     * @param uid User ID
-     */
-    private void deleteUser(String uid) {
-        firestoreService.deleteUser(uid, success -> {
-            Toast.makeText(getContext(), success ? "Profile deleted" : "Delete failed", Toast.LENGTH_SHORT).show();
-            loadUsers();
-        });
+    private void showDeleteConfirmationDialog() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Delete Selected?")
+                .setMessage("Are you sure you want to delete selected user/organizers?")
+                .setCancelable(true)
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .setPositiveButton("Yes", (dialog, which) -> deleteSelectedUsers())
+                .show();
     }
 
-    /**
-     * RecyclerView adapter for displaying admin user profiles.
-     */
+    private void deleteSelectedUsers() {
+        int totalToDelete = selectedUserIds.size();
+        int[] deleteCount = {0};
+
+        for (String uid : new ArrayList<>(selectedUserIds)) {
+            firestoreService.deleteUser(uid, success -> {
+                deleteCount[0]++;
+                if (deleteCount[0] == totalToDelete) {
+                    Toast.makeText(getContext(), "Deleted " + totalToDelete + " user(s)", Toast.LENGTH_SHORT).show();
+                    selectedUserIds.clear();
+                    loadUsers();
+                }
+            });
+        }
+    }
+
     private static class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.VH> {
 
-        /** Listener interface for delete actions. */
-        interface Listener {
-            void onDelete(String uid);
-        }
-
         private final List<User> items;
-        private final Listener listener;
+        private final Set<String> selectedIds;
 
-        UsersAdapter(List<User> items, Listener listener) {
+        UsersAdapter(List<User> items, Set<String> selectedIds) {
             this.items = items;
-            this.listener = listener;
+            this.selectedIds = selectedIds;
         }
 
         @NonNull
@@ -119,7 +165,7 @@ public class Adm_ProfilesFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull VH holder, int position) {
-            holder.bind(items.get(position), listener);
+            holder.bind(items.get(position), selectedIds);
         }
 
         @Override
@@ -127,34 +173,40 @@ public class Adm_ProfilesFragment extends Fragment {
             return items.size();
         }
 
-        /**
-         * ViewHolder for individual user items.
-         */
         static class VH extends RecyclerView.ViewHolder {
+            TextView name;
+            CheckBox checkbox;
+
             VH(@NonNull View itemView) {
                 super(itemView);
+                name = itemView.findViewById(R.id.text_user_name);
+                checkbox = itemView.findViewById(R.id.checkbox_select_user);
             }
 
-            void bind(User user, Listener listener) {
-                android.widget.TextView name = itemView.findViewById(R.id.text_user_name);
-                android.widget.TextView email = itemView.findViewById(R.id.text_user_email);
-                android.widget.TextView role = itemView.findViewById(R.id.text_user_role);
-                View deleteBtn = itemView.findViewById(R.id.btn_delete_user);
+            void bind(User user, Set<String> selectedIds) {
+                String displayName = user.getFullName() != null ? user.getFullName() :
+                        (user.getEmail() != null ? user.getEmail() : user.getUid());
+                name.setText(displayName);
 
-                name.setText(user.getFullName() != null ? user.getFullName() : user.getUid());
-                email.setText(user.getEmail() != null ? user.getEmail() : "");
+                boolean isSelected = selectedIds.contains(user.getUid());
+                checkbox.setChecked(isSelected);
 
-                if (user.getRole() != null) {
-                    String formatRole = user.getRole().substring(0, 1).toUpperCase() +
-                            user.getRole().substring(1).toLowerCase();
-                    role.setText("Role: " + formatRole);
-                } else {
-                    role.setText("Role: Unknown");
-                }
+                // Toggle selection on click
+                itemView.setOnClickListener(v -> {
+                    if (selectedIds.contains(user.getUid())) {
+                        selectedIds.remove(user.getUid());
+                        checkbox.setChecked(false);
+                    } else {
+                        selectedIds.add(user.getUid());
+                        checkbox.setChecked(true);
+                    }
+                });
 
-                deleteBtn.setOnClickListener(v -> {
-                    if (listener != null && user.getUid() != null) {
-                        listener.onDelete(user.getUid());
+                checkbox.setOnClickListener(v -> {
+                    if (checkbox.isChecked()) {
+                        selectedIds.add(user.getUid());
+                    } else {
+                        selectedIds.remove(user.getUid());
                     }
                 });
             }
