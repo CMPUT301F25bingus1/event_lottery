@@ -53,6 +53,9 @@ public class Org_CreateEventFragment extends Fragment {
     /** Input field for the event capacity. */
     private EditText capacityField;
 
+    /** Input field for the event location. */
+    private EditText locationField;
+
     /** Input field for the event latitude. */
     private EditText latField;
 
@@ -74,11 +77,17 @@ public class Org_CreateEventFragment extends Fragment {
     /** Input field for maximum entrants allowed (optional). */
     private EditText maxEntrantsField;
 
-    /** Input field for number of entrants already applied (optional). */
-    private EditText entrantsAppliedField;
+    /** Input field for optional event poster URL. */
+    private EditText posterUrlField;
 
-    /** Checkbox indicating organizer consent for geolocation. */
-    private CheckBox geoConsentBox;
+    /** Input field for event start time. */
+    private EditText inputTimeStart;
+
+    /** Input field for event end time. */
+    private EditText inputTimeEnd;
+
+    /** Toggle indicating organizer consent for geolocation. */
+    private SwitchCompat geoConsentSwitch;
 
     /** Button to trigger event creation. */
     private Button createBtn;
@@ -87,6 +96,8 @@ public class Org_CreateEventFragment extends Fragment {
     // Info text toggle
     private ImageView geoInfoButton;
     private TextView geoInfoText;
+    private MaterialButtonToggleGroup daysToggleGroup;
+    private final List<String> selectedDays = new ArrayList<>();
 
     @Nullable
     @Override

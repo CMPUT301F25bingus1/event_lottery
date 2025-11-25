@@ -119,6 +119,37 @@
                     android:layout_marginBottom="4dp" />
 
                 <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                <EditText
+                    android:id="@+id/input_time_start"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="From"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:inputType="none"
+                    android:textColor="@android:color/black" />
+                <View
+                    android:layout_width="8dp"
+                    android:layout_height="match_parent" />
+
+                <EditText
+                    android:id="@+id/input_time_end"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:autofillHints=""
+                    android:hint="To"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:inputType="none"
+                    android:textColor="@android:color/black" />
+            </LinearLayout>
                 <!-- Event URL (poster or webpage) -->
                 <EditText
                     android:id="@+id/input_event_url"
@@ -130,40 +161,31 @@
                     android:textColorHint="#808080"
                     android:backgroundTint="#9E9E9E" />
 
-                <!-- Capacity -->
-                <EditText
-                    android:id="@+id/input_capacity"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="12dp">
 
-                    <EditText
-                        android:id="@+id/input_time_start"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="From"
-                        android:focusable="false"
-                        android:clickable="true"
-                        android:inputType="none"
-                        android:textColor="@android:color/black" />
 
-                    <View
-                        android:layout_width="8dp"
-                        android:layout_height="match_parent" />
 
-                    <EditText
-                        android:id="@+id/input_time_end"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="To"
-                        android:focusable="false"
-                        android:clickable="true"
-                        android:inputType="none"
-                        android:textColor="@android:color/black" />
-                </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/noparti"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:layout_marginBottom="4dp" />
+
+            <EditText
+                android:id="@+id/input_capacity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Value"
+                android:inputType="number"
+                android:textColor="@android:color/black"
+                android:textColorHint="#BDBDBD"
+                android:layout_marginBottom="12dp" />
+
+
+
+
 
                 <!-- DAYS OF WEEK FILTER -->
                 <TextView
@@ -220,24 +242,7 @@
                 </com.google.android.material.button.MaterialButtonToggleGroup>
 
                 <!-- Number of Participants -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/noparti"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/black"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="4dp" />
 
-                <EditText
-                    android:id="@+id/input_capacity"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Value"
-                    android:inputType="number"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="#BDBDBD"
-                    android:layout_marginBottom="12dp" />
 
                 <!-- Registration Period -->
                 <TextView
