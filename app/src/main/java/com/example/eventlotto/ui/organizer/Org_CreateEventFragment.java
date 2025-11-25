@@ -41,12 +41,46 @@ import java.util.Map;
  */
 public class Org_CreateEventFragment extends Fragment {
 
-    private EditText titleField, descField, capacityField, locationField, latField, lonField;
-    private EditText inputEventStart, inputEventEnd, inputTimeStart, inputTimeEnd;
-    private EditText inputRegOpen, inputRegClose, maxEntrantsField, posterUrlField;
-    private MaterialButtonToggleGroup daysToggleGroup;
-    private List<String> selectedDays = new ArrayList<>();
-    private SwitchCompat geoConsentSwitch;
+    /** Input field for the event title. */
+    private EditText titleField;
+
+    /** Input field for the event description. */
+    private EditText descField;
+
+    /** Input field for an optional event URL (poster or info page). */
+    private EditText urlField;
+
+    /** Input field for the event capacity. */
+    private EditText capacityField;
+
+    /** Input field for the event latitude. */
+    private EditText latField;
+
+    /** Input field for the event longitude. */
+    private EditText lonField;
+
+    /** Input field for event start date. */
+    private EditText inputEventStart;
+
+    /** Input field for event end date. */
+    private EditText inputEventEnd;
+
+    /** Input field for registration open date. */
+    private EditText inputRegOpen;
+
+    /** Input field for registration close date. */
+    private EditText inputRegClose;
+
+    /** Input field for maximum entrants allowed (optional). */
+    private EditText maxEntrantsField;
+
+    /** Input field for number of entrants already applied (optional). */
+    private EditText entrantsAppliedField;
+
+    /** Checkbox indicating organizer consent for geolocation. */
+    private CheckBox geoConsentBox;
+
+    /** Button to trigger event creation. */
     private Button createBtn;
     private FirebaseFirestore db;
 
@@ -65,6 +99,7 @@ public class Org_CreateEventFragment extends Fragment {
         // Initialize fields
         titleField = view.findViewById(R.id.input_event_title);
         descField = view.findViewById(R.id.input_description);
+        urlField = view.findViewById(R.id.input_event_url);
         capacityField = view.findViewById(R.id.input_capacity);
         locationField = view.findViewById(R.id.input_location);
         latField = view.findViewById(R.id.input_latitude);
@@ -149,6 +184,7 @@ public class Org_CreateEventFragment extends Fragment {
 
         String title = titleField.getText().toString().trim();
         String desc = descField.getText().toString().trim();
+        String eventUrl = urlField.getText().toString().trim();
         String capStr = capacityField.getText().toString().trim();
         String location = locationField.getText().toString().trim();
         String latStr = latField.getText().toString().trim();
@@ -177,6 +213,7 @@ public class Org_CreateEventFragment extends Fragment {
         eventData.put("organizerId", organizerRef);
         eventData.put("eventTitle", title);
         eventData.put("description", desc);
+        if (!TextUtils.isEmpty(eventUrl)) eventData.put("eventURL", eventUrl);
         eventData.put("capacity", capacity);
         eventData.put("location", location);
         eventData.put("geoLocation", new GeoPoint(lat, lon));

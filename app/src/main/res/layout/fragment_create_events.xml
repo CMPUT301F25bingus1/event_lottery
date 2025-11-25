@@ -119,6 +119,20 @@
                     android:layout_marginBottom="4dp" />
 
                 <LinearLayout
+                <!-- Event URL (poster or webpage) -->
+                <EditText
+                    android:id="@+id/input_event_url"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Event URL (image or webpage)"
+                    android:inputType="textUri"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#808080"
+                    android:backgroundTint="#9E9E9E" />
+
+                <!-- Capacity -->
+                <EditText
+                    android:id="@+id/input_capacity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"

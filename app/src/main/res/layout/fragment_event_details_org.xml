@@ -97,7 +97,6 @@
             android:text="@string/event_description"
             android:textColor="@android:color/black" />
 
-        <!-- EVENT URL SECTION -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -123,10 +122,9 @@
             android:layout_marginTop="8dp"
             android:text="Update Event URL"
             android:textAllCaps="false"
-            android:backgroundTint="#137ac4"
+            android:backgroundTint="#2196F3"
             android:textColor="@android:color/white" />
 
-        <!-- CAPACITY BLOCK -->
         <LinearLayout
             android:id="@+id/capacityLayout"
             android:layout_width="match_parent"

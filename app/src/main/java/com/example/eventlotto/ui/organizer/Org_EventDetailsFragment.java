@@ -1,6 +1,7 @@
 package com.example.eventlotto.ui.organizer;
 
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +42,7 @@ public class Org_EventDetailsFragment extends DialogFragment {
     private TextView capacityText, selectedCountText, acceptedCountText;
     private EditText eventUrlField;
     private Button updateUrlButton;
+
     private LinearLayout acceptDeclineLayout;
     private Button acceptButton, declineButton;
 
@@ -290,10 +292,10 @@ public class Org_EventDetailsFragment extends DialogFragment {
             }
         }
 
-        // Poster URL / Image loading
+        // Load event image
         String imageUrl = doc.getString("eventURL");
         if (imageUrl == null || imageUrl.isEmpty()) {
-            imageUrl = doc.getString("imageUrl"); // fallback
+            imageUrl = doc.getString("imageUrl"); // legacy fallback
         }
         if (eventUrlField != null) {
             eventUrlField.setText(imageUrl != null ? imageUrl : "");
@@ -310,6 +312,9 @@ public class Org_EventDetailsFragment extends DialogFragment {
         }
     }
 
+    /**
+     * Updates the eventURL field for this event in Firestore.
+     */
     private void updateEventUrl() {
         if (eventId == null || eventUrlField == null) return;
         String newUrl = eventUrlField.getText().toString().trim();
