@@ -1,9 +1,7 @@
 package com.example.eventlotto.ui.organizer;
 
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,51 +14,32 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
+import com.bumptech.glide.Glide;
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
-import com.example.eventlotto.ui.entrant.Ent_EventDetailsFragment;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DateFormat;
 
 public class Org_EventDetailsFragment extends DialogFragment {
 
-    /**
-     * The ID of the event to display.
-     */
     private String eventId;
-
-    /**
-     * Firestore service helper for interacting with the database.
-     */
     private FirestoreService firestoreService;
 
     private ImageView eventImage;
-
-    /**
-     * TextView displaying status text.
-     */
     private TextView statusText;
     private EditText lotteryNumberInput;
-
-
-    /**
-     * TextViews for event title, description, signup dates, event dates, and capacity.
-     */
     private TextView eventTitle, eventDescription, signupDates, eventDates, waitlistCount;
-
-    /**
-     * Buttons for cancelling the dialog or joining/leaving the waitlist.
-     */
     private Button cancelButton, lotteryButton;
     private TextView capacityText, selectedCountText, acceptedCountText;
-
+    private EditText eventUrlField;
+    private Button updateUrlButton;
     private LinearLayout acceptDeclineLayout;
     private Button acceptButton, declineButton;
 
@@ -98,8 +77,10 @@ public class Org_EventDetailsFragment extends DialogFragment {
         capacityText = view.findViewById(R.id.capacityText);
         selectedCountText = view.findViewById(R.id.selectedCountText);
         acceptedCountText = view.findViewById(R.id.acceptedCountText);
+        eventUrlField = view.findViewById(R.id.input_event_url_details);
+        updateUrlButton = view.findViewById(R.id.btn_update_event_url);
 
-        // View Entrants Button - UPDATED
+        // Entrants buttons
         Button viewEntrantsButton = view.findViewById(R.id.viewEntrantsButton);
         viewEntrantsButton.setOnClickListener(v -> {
             if (eventId != null) {
@@ -114,6 +95,10 @@ public class Org_EventDetailsFragment extends DialogFragment {
             Org_NotifyEntrantsDialog dialog = Org_NotifyEntrantsDialog.newInstance(eventId);
             dialog.show(getParentFragmentManager(), "notify_dialog");
         });
+
+        if (updateUrlButton != null) {
+            updateUrlButton.setOnClickListener(v -> updateEventUrl());
+        }
 
         if (eventId != null) {
             fetchEventData(eventId);
@@ -130,7 +115,6 @@ public class Org_EventDetailsFragment extends DialogFragment {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference eventRef = db.collection("events").document(eventId);
 
-        // Step 1: Get event capacity
         eventRef.get().addOnSuccessListener(eventSnap -> {
             if (!eventSnap.exists()) return;
 
@@ -138,7 +122,6 @@ public class Org_EventDetailsFragment extends DialogFragment {
             if (capacity == null) capacity = 0L;
             Long finalCapacity = capacity;
 
-            // Step 2: Check how many users are already selected/accepted
             eventRef.collection("status")
                     .whereIn("status", java.util.Arrays.asList("selected", "accepted"))
                     .get()
@@ -147,22 +130,18 @@ public class Org_EventDetailsFragment extends DialogFragment {
 
                         if (alreadySelected >= finalCapacity) {
                             Toast.makeText(getContext(), "Entrants at capacity", Toast.LENGTH_SHORT).show();
-                            return; // Stop the lottery
+                            return;
                         }
 
-                        // Step 3: Read number to select from input
-                        int numberToSelect = 0;
-                        String inputStr = lotteryNumberInput.getText().toString();
+                        int numberToSelect;
                         try {
-                            numberToSelect = Integer.parseInt(inputStr);
+                            numberToSelect = Integer.parseInt(lotteryNumberInput.getText().toString());
                         } catch (NumberFormatException e) {
                             Toast.makeText(getContext(), "Enter a valid number", Toast.LENGTH_SHORT).show();
                             return;
                         }
 
                         int remainingCapacity = (int) (finalCapacity - alreadySelected);
-
-                        // Guard: can't select more than remaining capacity
                         if (numberToSelect <= 0) {
                             Toast.makeText(getContext(), "Number must be greater than 0", Toast.LENGTH_SHORT).show();
                             return;
@@ -172,7 +151,6 @@ public class Org_EventDetailsFragment extends DialogFragment {
                             return;
                         }
 
-                        // Step 4: Get waiting users
                         int finalNumberToSelect = numberToSelect;
                         eventRef.collection("status")
                                 .whereEqualTo("status", "waiting")
@@ -184,11 +162,9 @@ public class Org_EventDetailsFragment extends DialogFragment {
                                     }
 
                                     java.util.List<DocumentSnapshot> waitingUsers = waitingSnapshot.getDocuments();
-                                    java.util.Collections.shuffle(waitingUsers); // randomize order
+                                    java.util.Collections.shuffle(waitingUsers);
 
                                     com.google.firebase.firestore.WriteBatch batch = db.batch();
-
-                                    // Limit winners to either the input number or available waiting users
                                     int winnersCount = Math.min(finalNumberToSelect, waitingUsers.size());
 
                                     for (int i = 0; i < waitingUsers.size(); i++) {
@@ -208,7 +184,6 @@ public class Org_EventDetailsFragment extends DialogFragment {
                                                     Toast.makeText(getContext(), "Lottery failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                                             );
                                     updateCapacityStatus();
-
 
                                 }).addOnFailureListener(e ->
                                         Toast.makeText(getContext(), "Failed to get waiting users: " + e.getMessage(), Toast.LENGTH_SHORT).show()
@@ -233,7 +208,6 @@ public class Org_EventDetailsFragment extends DialogFragment {
             Long capacity = eventSnap.getLong("capacity");
             capacityText.setText("Capacity: " + (capacity != null ? capacity : 0));
 
-            // Get selected count
             eventRef.collection("status")
                     .whereEqualTo("status", "selected")
                     .get()
@@ -241,7 +215,6 @@ public class Org_EventDetailsFragment extends DialogFragment {
                         int selectedCount = (selectedSnap != null) ? selectedSnap.size() : 0;
                         selectedCountText.setText("Selected: " + selectedCount);
 
-                        // Get accepted count
                         eventRef.collection("status")
                                 .whereEqualTo("status", "accepted")
                                 .get()
@@ -253,12 +226,6 @@ public class Org_EventDetailsFragment extends DialogFragment {
         });
     }
 
-
-    /**
-     * Fetches event data from Firestore and populates the UI.
-     *
-     * @param eventId The ID of the event to fetch.
-     */
     private void fetchEventData(String eventId) {
         firestoreService.events()
                 .document(eventId)
@@ -274,17 +241,10 @@ public class Org_EventDetailsFragment extends DialogFragment {
                         Toast.makeText(getContext(), "Failed to load event: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    /**
-     * Populates the fragment UI with data from the Firestore document.
-     *
-     * @param doc Firestore document containing event data.
-     */
     private void populateEvent(DocumentSnapshot doc) {
-        // Basic fields
         eventTitle.setText(doc.getString("eventTitle") != null ? doc.getString("eventTitle") : "No Title");
         eventDescription.setText(doc.getString("description") != null ? doc.getString("description") : "No Description");
 
-        // Registration and event dates
         Timestamp regOpen = doc.getTimestamp("registrationOpensAt");
         Timestamp regClose = doc.getTimestamp("registrationClosesAt");
         signupDates.setText("Sign-up: " + formatTimestampRange(regOpen, regClose));
@@ -293,21 +253,16 @@ public class Org_EventDetailsFragment extends DialogFragment {
         Timestamp eventEnd = doc.getTimestamp("eventEndAt");
         eventDates.setText("Event: " + formatTimestampRange(eventStart, eventEnd));
 
-        // Initialize waiting count label; actual count loaded separately
         if (waitlistCount != null) {
             waitlistCount.setText("Waiting: 0");
         }
 
-        // Boolean fields
         TextView geoConsentText = getView().findViewById(R.id.geoConsent);
-
         if (geoConsentText != null) {
             Boolean geoConsent = doc.getBoolean("geoConsent");
             geoConsentText.setText("Geo Consent Required: " + (geoConsent != null && geoConsent ? "Yes" : "No"));
         }
 
-
-        // Location
         TextView locationText = getView().findViewById(R.id.location);
         if (locationText != null) {
             com.google.firebase.firestore.GeoPoint location = doc.getGeoPoint("location");
@@ -316,7 +271,6 @@ public class Org_EventDetailsFragment extends DialogFragment {
                     : "Location: N/A");
         }
 
-        // Organizer
         TextView organizerText = getView().findViewById(R.id.organizerId);
         if (organizerText != null) {
             DocumentReference organizerRef = doc.getDocumentReference("organizerId");
@@ -336,21 +290,41 @@ public class Org_EventDetailsFragment extends DialogFragment {
             }
         }
 
-        // Load event image
-        String imageUrl = doc.getString("imageUrl");
-        if (imageUrl != null && !imageUrl.isEmpty()) {
-            new Thread(() -> {
-                try {
-                    java.net.URL url = new java.net.URL(imageUrl);
-                    final android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> eventImage.setImageBitmap(bmp));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }).start();
+        // Poster URL / Image loading
+        String imageUrl = doc.getString("eventURL");
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageUrl = doc.getString("imageUrl"); // fallback
         }
+        if (eventUrlField != null) {
+            eventUrlField.setText(imageUrl != null ? imageUrl : "");
+        }
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            Glide.with(requireContext())
+                    .load(imageUrl.trim())
+                    .placeholder(R.mipmap.ic_launcher)
+                    .error(R.mipmap.ic_launcher)
+                    .fitCenter()
+                    .into(eventImage);
+        } else {
+            eventImage.setImageResource(R.mipmap.ic_launcher);
+        }
+    }
+
+    private void updateEventUrl() {
+        if (eventId == null || eventUrlField == null) return;
+        String newUrl = eventUrlField.getText().toString().trim();
+
+        DocumentReference eventRef = FirebaseFirestore.getInstance()
+                .collection("events")
+                .document(eventId);
+
+        Object value = TextUtils.isEmpty(newUrl) ? FieldValue.delete() : newUrl;
+
+        eventRef.update("eventURL", value)
+                .addOnSuccessListener(aVoid -> Toast.makeText(getContext(),
+                        "Event URL updated", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(getContext(),
+                        "Failed to update URL: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private void loadWaitingCount(String eventId) {
@@ -367,13 +341,6 @@ public class Org_EventDetailsFragment extends DialogFragment {
                 .addOnFailureListener(e -> waitlistCount.setText("Waiting: 0"));
     }
 
-    /**
-     * Formats a start and end timestamp as a human-readable date range.
-     *
-     * @param start Start timestamp.
-     * @param end   End timestamp.
-     * @return Formatted date range or "N/A" if either timestamp is null.
-     */
     private String formatTimestampRange(Timestamp start, Timestamp end) {
         if (start == null || end == null) return "N/A";
         DateFormat df = DateFormat.getDateInstance();
@@ -384,7 +351,6 @@ public class Org_EventDetailsFragment extends DialogFragment {
     public void onStart() {
         super.onStart();
         if (getDialog() != null && getDialog().getWindow() != null) {
-            // Make dialog full width
             getDialog().getWindow().setLayout(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT

@@ -20,6 +20,9 @@ public class Event {
     /** A detailed description of the event. */
     private String description;
 
+    /** Public facing link for the event (optional). */
+    private String eventURL;
+
     /** The timestamp when the event was created. */
     private Timestamp createdAt;
 
@@ -72,6 +75,9 @@ public class Event {
     /** @return The event description. */
     public String getDescription() { return description; }
 
+    /** @return The event's public URL, if provided. */
+    public String getEventURL() { return eventURL; }
+
     /** @return The creation timestamp. */
     public Timestamp getCreatedAt() { return createdAt; }
 
@@ -113,4 +119,7 @@ public class Event {
 
     /** Sets the event ID. @param eid The Firestore document ID of the event. */
     public void setEid(String eid) { this.eid = eid; }
+
+    /** Sets the event URL. @param eventURL Link associated with this event. */
+    public void setEventURL(String eventURL) { this.eventURL = eventURL; }
 }
