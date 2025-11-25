@@ -24,6 +24,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.text.DateFormat;
 
@@ -73,7 +74,6 @@ public class Org_EventDetailsFragment extends DialogFragment {
         lotteryButton = view.findViewById(R.id.lotteryButton);
         cancelButton.setOnClickListener(v -> dismiss());
         statusText = view.findViewById(R.id.statusText);
-        lotteryNumberInput = view.findViewById(R.id.lotteryNumberInput);
         capacityText = view.findViewById(R.id.capacityText);
         selectedCountText = view.findViewById(R.id.selectedCountText);
         acceptedCountText = view.findViewById(R.id.acceptedCountText);
@@ -122,50 +122,36 @@ public class Org_EventDetailsFragment extends DialogFragment {
             if (capacity == null) capacity = 0L;
             Long finalCapacity = capacity;
 
+            // Count selected + accepted
             eventRef.collection("status")
                     .whereIn("status", java.util.Arrays.asList("selected", "accepted"))
                     .get()
                     .addOnSuccessListener(selectedSnapshot -> {
-                        int alreadySelected = (selectedSnapshot != null) ? selectedSnapshot.size() : 0;
+                        int alreadyChosen = (selectedSnapshot != null) ? selectedSnapshot.size() : 0;
 
-                        if (alreadySelected >= finalCapacity) {
-                            Toast.makeText(getContext(), "Entrants at capacity", Toast.LENGTH_SHORT).show();
+                        if (alreadyChosen >= finalCapacity) {
+                            Toast.makeText(getContext(), "Event is already at capacity.", Toast.LENGTH_SHORT).show();
                             return;
                         }
 
-                        int numberToSelect;
-                        try {
-                            numberToSelect = Integer.parseInt(lotteryNumberInput.getText().toString());
-                        } catch (NumberFormatException e) {
-                            Toast.makeText(getContext(), "Enter a valid number", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
+                        int remainingCapacity = (int) (finalCapacity - alreadyChosen);
 
-                        int remainingCapacity = (int) (finalCapacity - alreadySelected);
-                        if (numberToSelect <= 0) {
-                            Toast.makeText(getContext(), "Number must be greater than 0", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        if (numberToSelect > remainingCapacity) {
-                            Toast.makeText(getContext(), "Cannot select more than remaining capacity: " + remainingCapacity, Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        int finalNumberToSelect = numberToSelect;
+                        // Load waiting users
                         eventRef.collection("status")
                                 .whereEqualTo("status", "waiting")
                                 .get()
                                 .addOnSuccessListener(waitingSnapshot -> {
                                     if (waitingSnapshot == null || waitingSnapshot.isEmpty()) {
-                                        Toast.makeText(getContext(), "No users waiting for lottery", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getContext(), "No users on the waiting list.", Toast.LENGTH_SHORT).show();
                                         return;
                                     }
 
                                     java.util.List<DocumentSnapshot> waitingUsers = waitingSnapshot.getDocuments();
                                     java.util.Collections.shuffle(waitingUsers);
 
-                                    com.google.firebase.firestore.WriteBatch batch = db.batch();
-                                    int winnersCount = Math.min(finalNumberToSelect, waitingUsers.size());
+                                    int winnersCount = Math.min(remainingCapacity, waitingUsers.size());
+
+                                    WriteBatch batch = db.batch();
 
                                     for (int i = 0; i < waitingUsers.size(); i++) {
                                         DocumentReference docRef = waitingUsers.get(i).getReference();
@@ -177,24 +163,38 @@ public class Org_EventDetailsFragment extends DialogFragment {
                                     }
 
                                     batch.commit()
-                                            .addOnSuccessListener(aVoid ->
-                                                    Toast.makeText(getContext(), "Lottery completed! " + winnersCount + " selected.", Toast.LENGTH_SHORT).show()
-                                            )
+                                            .addOnSuccessListener(aVoid -> {
+                                                Toast.makeText(
+                                                        getContext(),
+                                                        "Lottery complete! Selected " + winnersCount + " entrants.",
+                                                        Toast.LENGTH_SHORT
+                                                ).show();
+                                                updateCapacityStatus();
+                                            })
                                             .addOnFailureListener(e ->
-                                                    Toast.makeText(getContext(), "Lottery failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(getContext(),
+                                                            "Lottery failed: " + e.getMessage(),
+                                                            Toast.LENGTH_SHORT).show()
                                             );
-                                    updateCapacityStatus();
 
-                                }).addOnFailureListener(e ->
-                                        Toast.makeText(getContext(), "Failed to get waiting users: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                                })
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(getContext(),
+                                                "Failed to load waiting list: " + e.getMessage(),
+                                                Toast.LENGTH_SHORT).show()
                                 );
 
-                    }).addOnFailureListener(e ->
-                            Toast.makeText(getContext(), "Failed to check already selected users: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                    })
+                    .addOnFailureListener(e ->
+                            Toast.makeText(getContext(),
+                                    "Failed to check selected users: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show()
                     );
 
         }).addOnFailureListener(e ->
-                Toast.makeText(getContext(), "Failed to get event data: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                Toast.makeText(getContext(),
+                        "Failed to load event data: " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show()
         );
     }
 
