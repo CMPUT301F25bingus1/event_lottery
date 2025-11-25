@@ -55,6 +55,7 @@
     <string name="event_description_goes_here">Event description goes here.</string>
     <string name="create_events">Create Events</string>
     <string name="events">Events</string>
+    <string name="images">Images</string>
     <string name="users">Users</string>
     <string name="delete">Delete</string>
     <string name="manage_profiles">Manage Profiles</string>

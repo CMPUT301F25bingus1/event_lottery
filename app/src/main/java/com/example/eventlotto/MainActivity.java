@@ -29,7 +29,7 @@ import com.example.eventlotto.ui.LoginFragment;
 import com.example.eventlotto.ui.admin.Adm_HomeFragment;
 import com.example.eventlotto.ui.organizer.Org_HomeFragment;
 import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
-import com.example.eventlotto.ui.admin.Adm_EventsFragment;
+import com.example.eventlotto.ui.admin.Adm_ImagesFragment;
 import com.example.eventlotto.ui.admin.Adm_ProfilesFragment;
 import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
 import com.example.eventlotto.ui.entrant.Ent_MyEventsFragment;
@@ -147,8 +147,8 @@ public class MainActivity extends AppCompatActivity {
 
             if (role.equals("admin")) {
                 if (id == R.id.nav_home) fragment = new Adm_HomeFragment();
-                else if (id == R.id.nav_admin_events)
-                    fragment = new Adm_EventsFragment();
+                else if (id == R.id.nav_admin_images)
+                    fragment = new Adm_ImagesFragment();
                 else if (id == R.id.nav_admin_profiles)
                     fragment = new Adm_ProfilesFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
