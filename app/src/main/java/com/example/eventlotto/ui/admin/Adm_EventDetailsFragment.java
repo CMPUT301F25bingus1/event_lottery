@@ -11,13 +11,16 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.bumptech.glide.Glide;
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
+
+import java.text.DateFormat;
 
 public class Adm_EventDetailsFragment extends DialogFragment {
 
@@ -25,7 +28,7 @@ public class Adm_EventDetailsFragment extends DialogFragment {
     private FirestoreService firestoreService;
 
     private ImageView eventImage;
-    private TextView eventTitle, eventDescription, statusText;
+    private TextView eventTitle, eventDescription, signupDates, eventDates;
     private Button deleteButton;
 
     public static Adm_EventDetailsFragment newInstance(String eventId) {
@@ -47,7 +50,8 @@ public class Adm_EventDetailsFragment extends DialogFragment {
         eventImage = view.findViewById(R.id.eventImage);
         eventTitle = view.findViewById(R.id.eventTitle);
         eventDescription = view.findViewById(R.id.eventDescription);
-        statusText = view.findViewById(R.id.statusText);
+        signupDates = view.findViewById(R.id.signupDates);
+        eventDates = view.findViewById(R.id.eventDates);
         deleteButton = view.findViewById(R.id.btnDeleteEvent);
 
         eventId = getArguments() != null ? getArguments().getString("eventId") : null;
@@ -57,11 +61,25 @@ public class Adm_EventDetailsFragment extends DialogFragment {
             fetchEventData(eventId);
         }
 
-        deleteButton.setOnClickListener(v -> {
-            if (eventId != null) deleteEvent(eventId);
-        });
+        // Set click listener with confirmation dialog
+        deleteButton.setOnClickListener(v -> showDeleteConfirmationDialog());
 
         return view;
+    }
+
+    /**
+     * Shows a confirmation popup before deleting the event.
+     */
+    private void showDeleteConfirmationDialog() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Delete Event")
+                .setMessage("Are you sure you want to delete this event?")
+                .setCancelable(true)
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()) // Cancel on left
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    if (eventId != null) deleteEvent(eventId); // Yes on right
+                })
+                .show();
     }
 
     private void fetchEventData(String eventId) {
@@ -80,9 +98,25 @@ public class Adm_EventDetailsFragment extends DialogFragment {
     }
 
     private void populateEvent(DocumentSnapshot doc) {
-        eventTitle.setText(doc.getString("eventTitle") != null ? doc.getString("eventTitle") : "No Title");
-        eventDescription.setText(doc.getString("description") != null ? doc.getString("description") : "No Description");
-        statusText.setText("Admin view: " + (doc.getString("status") != null ? doc.getString("status") : "N/A"));
+
+        eventTitle.setText(doc.getString("eventTitle"));
+        eventDescription.setText(doc.getString("description"));
+
+        Timestamp regOpen = doc.getTimestamp("registrationOpensAt");
+        Timestamp regClose = doc.getTimestamp("registrationClosesAt");
+        signupDates.setText("Sign-up: " + formatTimestampRange(regOpen, regClose));
+
+        Timestamp eventStart = doc.getTimestamp("eventStartAt");
+        Timestamp eventEnd = doc.getTimestamp("eventEndAt");
+        eventDates.setText("Event: " + formatTimestampRange(eventStart, eventEnd));
+
+        TextView locationText = getView().findViewById(R.id.location);
+        if (locationText != null) {
+            com.google.firebase.firestore.GeoPoint location = doc.getGeoPoint("location");
+            locationText.setText(location != null
+                    ? "Location: " + location.getLatitude() + ", " + location.getLongitude()
+                    : "Location: N/A");
+        }
 
         String imageUrl = doc.getString("imageUrl");
         if (imageUrl != null && !imageUrl.isEmpty()) {
@@ -107,5 +141,23 @@ public class Adm_EventDetailsFragment extends DialogFragment {
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Failed to delete event: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                 );
+    }
+
+    private String formatTimestampRange(Timestamp start, Timestamp end) {
+        if (start == null || end == null) return "N/A";
+        DateFormat df = DateFormat.getDateInstance();
+        return df.format(start.toDate()) + " - " + df.format(end.toDate());
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (getDialog() != null && getDialog().getWindow() != null) {
+            getDialog().getWindow().setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            getDialog().getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
     }
 }
