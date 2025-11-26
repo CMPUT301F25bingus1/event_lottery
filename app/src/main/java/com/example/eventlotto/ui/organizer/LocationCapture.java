@@ -3,22 +3,22 @@ package com.example.eventlotto.ui.organizer;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.os.Looper;
+import android.util.Log;
 
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
-import com.google.android.gms.tasks.CancellationToken;
-import com.google.android.gms.tasks.OnTokenCanceledListener;
 import com.google.firebase.firestore.GeoPoint;
 
-/**
- * Helper class for capturing user location when they join event waitlists
- */
 public class LocationCapture {
-
+    private static final String TAG = "LocationCapture";
     private final Context context;
     private final FusedLocationProviderClient fusedLocationClient;
 
@@ -34,69 +34,110 @@ public class LocationCapture {
 
     /**
      * Check if location permission is granted
+     * CRITICAL: This must check Android's actual permission status
      */
     public boolean hasLocationPermission() {
-        return ActivityCompat.checkSelfPermission(context,
+        return ContextCompat.checkSelfPermission(context,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(context,
+                || ContextCompat.checkSelfPermission(context,
                 Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
-     * Get current location and return as GeoPoint
+     * Get the current location
+     * This will only work if permission has been granted
      */
-    @SuppressWarnings("MissingPermission")
     public void getCurrentLocation(LocationCallback callback) {
+        // Check permission first
         if (!hasLocationPermission()) {
             callback.onLocationFailed("Location permission not granted");
             return;
         }
 
-        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, new CancellationToken() {
-            @NonNull
-            @Override
-            public CancellationToken onCanceledRequested(@NonNull OnTokenCanceledListener onTokenCanceledListener) {
-                return this;
-            }
-
-            @Override
-            public boolean isCancellationRequested() {
-                return false;
-            }
-        }).addOnSuccessListener(location -> {
-            if (location != null) {
-                GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
-                callback.onLocationReceived(geoPoint);
-            } else {
-                // Try last known location as fallback
-                getLastKnownLocation(callback);
-            }
-        }).addOnFailureListener(e -> {
-            callback.onLocationFailed("Failed to get location: " + e.getMessage());
-        });
+        try {
+            // Try to get last known location first (faster)
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(location -> {
+                        if (location != null) {
+                            // Use last known location
+                            GeoPoint geoPoint = new GeoPoint(
+                                    location.getLatitude(),
+                                    location.getLongitude()
+                            );
+                            callback.onLocationReceived(geoPoint);
+                        } else {
+                            // Last location is null, request current location
+                            requestCurrentLocation(callback);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to get last location", e);
+                        // Try requesting current location
+                        requestCurrentLocation(callback);
+                    });
+        } catch (SecurityException e) {
+            Log.e(TAG, "Security exception getting location", e);
+            callback.onLocationFailed("Security exception: " + e.getMessage());
+        }
     }
 
     /**
-     * Fallback method to get last known location
+     * Request current location update
      */
-    @SuppressWarnings("MissingPermission")
-    private void getLastKnownLocation(LocationCallback callback) {
+    private void requestCurrentLocation(LocationCallback callback) {
         if (!hasLocationPermission()) {
             callback.onLocationFailed("Location permission not granted");
             return;
         }
 
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(location -> {
-                    if (location != null) {
-                        GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
-                        callback.onLocationReceived(geoPoint);
-                    } else {
-                        callback.onLocationFailed("Unable to determine location");
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    callback.onLocationFailed("Failed to get last location: " + e.getMessage());
-                });
+        try {
+            LocationRequest locationRequest = new LocationRequest.Builder(
+                    Priority.PRIORITY_HIGH_ACCURACY,
+                    10000) // 10 seconds
+                    .setMinUpdateIntervalMillis(5000) // 5 seconds
+                    .setMaxUpdates(1) // Only need one update
+                    .build();
+
+            com.google.android.gms.location.LocationCallback locationCallback =
+                    new com.google.android.gms.location.LocationCallback() {
+                        @Override
+                        public void onLocationResult(LocationResult locationResult) {
+                            if (locationResult == null) {
+                                callback.onLocationFailed("Location result is null");
+                                return;
+                            }
+
+                            Location location = locationResult.getLastLocation();
+                            if (location != null) {
+                                GeoPoint geoPoint = new GeoPoint(
+                                        location.getLatitude(),
+                                        location.getLongitude()
+                                );
+                                callback.onLocationReceived(geoPoint);
+                            } else {
+                                callback.onLocationFailed("Could not get current location");
+                            }
+
+                            // Remove updates after receiving location
+                            fusedLocationClient.removeLocationUpdates(this);
+                        }
+                    };
+
+            fusedLocationClient.requestLocationUpdates(
+                    locationRequest,
+                    locationCallback,
+                    Looper.getMainLooper()
+            );
+
+            // Timeout after 15 seconds
+            new android.os.Handler(Looper.getMainLooper()).postDelayed(() -> {
+                fusedLocationClient.removeLocationUpdates(locationCallback);
+                callback.onLocationFailed("Location request timed out");
+            }, 15000);
+
+        } catch (SecurityException e) {
+            Log.e(TAG, "Security exception requesting location", e);
+            callback.onLocationFailed("Security exception: " + e.getMessage());
+        }
     }
 }

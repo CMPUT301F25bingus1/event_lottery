@@ -10,6 +10,7 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -76,7 +77,7 @@ public class GenerateQRFragment extends DialogFragment {
     }
 
     /**
-     * Saves the generated QR code to the device’s gallery.
+     * Saves the generated QR code to the device's gallery.
      */
     private void saveQRCodeToGallery(Bitmap bitmap) {
         if (bitmap == null) {

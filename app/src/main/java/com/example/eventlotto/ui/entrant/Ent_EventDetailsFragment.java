@@ -1,6 +1,7 @@
 package com.example.eventlotto.ui.entrant;
 
 import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -87,11 +88,10 @@ public class Ent_EventDetailsFragment extends DialogFragment {
                         captureLocationAndJoin();
                     } else if (!isGranted && waitingForLocationPermission) {
                         waitingForLocationPermission = false;
-                        // Permission denied - give user choice
+                        // Permission denied - join without location
                         Toast.makeText(getContext(),
-                                "Location permission denied. Join without location?",
+                                "Location permission denied. Joining without location.",
                                 Toast.LENGTH_LONG).show();
-                        // Join without location as fallback
                         String deviceId = Settings.Secure.getString(
                                 requireContext().getContentResolver(),
                                 Settings.Secure.ANDROID_ID
@@ -242,7 +242,10 @@ public class Ent_EventDetailsFragment extends DialogFragment {
         }
     }
 
-    /** Joins the current device to the event's waitlist in Firestore. */
+    /**
+     * FIXED: Joins the current device to the event's waitlist in Firestore.
+     * Now properly checks permission using ContextCompat.
+     */
     private void joinWaitlist() {
         String deviceId = Settings.Secure.getString(
                 requireContext().getContentResolver(),
@@ -257,14 +260,13 @@ public class Ent_EventDetailsFragment extends DialogFragment {
                     Boolean geoConsent = eventDoc.getBoolean("geoConsent");
 
                     if (geoConsent != null && geoConsent) {
-                        // Event requires location - check permission
-                        LocationCapture locationCapture = new LocationCapture(requireContext());
-
-                        if (locationCapture.hasLocationPermission()) {
+                        // Event requires location - check permission using ContextCompat
+                        if (ContextCompat.checkSelfPermission(requireContext(),
+                                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                             // Has permission - get location and join
                             captureLocationAndJoin();
                         } else {
-                            // Request permission
+                            // Request permission - this will show the system dialog
                             waitingForLocationPermission = true;
                             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
                         }
@@ -310,24 +312,59 @@ public class Ent_EventDetailsFragment extends DialogFragment {
     }
 
     /**
-     * Adds user to waitlist with optional location data
+     * FIXED: Adds user to waitlist with optional location data.
+     * Now properly checks waitlist capacity by counting only "waiting" users.
      */
     private void addToWaitlistWithLocation(String deviceId, GeoPoint location) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference eventRef = db.collection("events").document(eventId);
 
+        // First check if waitlist is full by counting actual "waiting" users
+        eventRef.get().addOnSuccessListener(eventDoc -> {
+            Long maxEntrants = eventDoc.getLong("maxEntrants");
+
+            if (maxEntrants != null && maxEntrants > 0) {
+                // Check actual waiting count
+                eventRef.collection("status")
+                        .whereEqualTo("status", "waiting")
+                        .get()
+                        .addOnSuccessListener(querySnapshot -> {
+                            int currentWaiting = querySnapshot.size();
+
+                            if (currentWaiting >= maxEntrants) {
+                                Toast.makeText(getContext(),
+                                        "This event's waitlist is full.",
+                                        Toast.LENGTH_LONG).show();
+                                return;
+                            }
+
+                            // Waitlist has space - proceed
+                            performAddToWaitlist(deviceId, location, eventRef);
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(getContext(),
+                                    "Failed to check waitlist: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        });
+            } else {
+                // No limit - proceed directly
+                performAddToWaitlist(deviceId, location, eventRef);
+            }
+        }).addOnFailureListener(e -> {
+            Toast.makeText(getContext(),
+                    "Failed to load event: " + e.getMessage(),
+                    Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    /**
+     * Actually adds the user to the waitlist after capacity check passes
+     */
+    private void performAddToWaitlist(String deviceId, GeoPoint location, DocumentReference eventRef) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
         db.runTransaction(transaction -> {
             DocumentSnapshot snapshot = transaction.get(eventRef);
-
-            Long entrantsApplied = snapshot.getLong("entrantsApplied");
-            Long maxEntrants = snapshot.getLong("maxEntrants");
-
-            if (entrantsApplied == null) entrantsApplied = 0L;
-
-            // Check if event is full
-            if (maxEntrants != null && entrantsApplied >= maxEntrants) {
-                throw new IllegalStateException("This event is full.");
-            }
 
             // Add user to status subcollection
             DocumentReference userStatusRef = eventRef
@@ -345,7 +382,9 @@ public class Ent_EventDetailsFragment extends DialogFragment {
 
             transaction.set(userStatusRef, statusData);
 
-            // Increment entrantsApplied
+            // Update legacy counter
+            Long entrantsApplied = snapshot.getLong("entrantsApplied");
+            if (entrantsApplied == null) entrantsApplied = 0L;
             transaction.update(eventRef, "entrantsApplied", entrantsApplied + 1);
 
             return null;
@@ -360,7 +399,6 @@ public class Ent_EventDetailsFragment extends DialogFragment {
 
             firestoreService.saveNotification(n)
                     .addOnSuccessListener(v -> {
-                        // Optional: small toast
                         Toast.makeText(requireContext(), "Auto-subscribed to notifications", Toast.LENGTH_SHORT).show();
                     })
                     .addOnFailureListener(ex -> {
@@ -371,11 +409,7 @@ public class Ent_EventDetailsFragment extends DialogFragment {
             showJoinedUI(eventId, deviceId);
             loadWaitingCount(eventId);
         }).addOnFailureListener(e -> {
-            if (e instanceof IllegalStateException) {
-                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+            Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -462,7 +496,8 @@ public class Ent_EventDetailsFragment extends DialogFragment {
     }
 
     /**
-     * Removes the device from the event's waitlist.
+     * FIXED: Removes the device from the event's waitlist.
+     * Now only decrements counter if user is actually in "waiting" status.
      *
      * @param eventId  The event ID.
      * @param deviceId The current device ID.
@@ -472,25 +507,40 @@ public class Ent_EventDetailsFragment extends DialogFragment {
         DocumentReference eventRef = db.collection("events").document(eventId);
         DocumentReference userStatusRef = eventRef.collection("status").document(deviceId);
 
-        db.runTransaction(transaction -> {
-            DocumentSnapshot eventSnap = transaction.get(eventRef);
-            Long entrantsApplied = eventSnap.getLong("entrantsApplied");
-            if (entrantsApplied == null || entrantsApplied <= 0) entrantsApplied = 0L;
+        // Check status first to ensure user is actually "waiting"
+        userStatusRef.get().addOnSuccessListener(doc -> {
+            if (!doc.exists()) {
+                Toast.makeText(getContext(), "You are not on the waitlist", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            // Remove user's status document
-            transaction.delete(userStatusRef);
+            String status = doc.getString("status");
+            if (!"waiting".equals(status)) {
+                Toast.makeText(getContext(), "You are not on the waitlist", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            // Decrement entrantsApplied safely
-            transaction.update(eventRef, "entrantsApplied", Math.max(entrantsApplied - 1, 0));
+            // User is waiting - proceed with removal
+            db.runTransaction(transaction -> {
+                DocumentSnapshot eventSnap = transaction.get(eventRef);
+                Long entrantsApplied = eventSnap.getLong("entrantsApplied");
+                if (entrantsApplied == null || entrantsApplied <= 0) entrantsApplied = 0L;
 
-            return null;
-        }).addOnSuccessListener(unused -> {
-            Toast.makeText(getContext(), "Successfully left the waitlist", Toast.LENGTH_SHORT).show();
-            if (statusText != null) statusText.setVisibility(View.GONE);
-            showNotJoinedUI();
-            loadWaitingCount(eventId);
-        }).addOnFailureListener(e ->
-                Toast.makeText(getContext(), "Failed to leave waitlist: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                // Remove user's status document
+                transaction.delete(userStatusRef);
+
+                // Decrement entrantsApplied safely
+                transaction.update(eventRef, "entrantsApplied", Math.max(entrantsApplied - 1, 0));
+
+                return null;
+            }).addOnSuccessListener(unused -> {
+                Toast.makeText(getContext(), "Successfully left the waitlist", Toast.LENGTH_SHORT).show();
+                if (statusText != null) statusText.setVisibility(View.GONE);
+                showNotJoinedUI();
+                loadWaitingCount(eventId);
+            }).addOnFailureListener(e ->
+                    Toast.makeText(getContext(), "Failed to leave waitlist: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        });
     }
 
     /**
@@ -546,6 +596,7 @@ public class Ent_EventDetailsFragment extends DialogFragment {
                     }
                 });
     }
+
     private void loadWaitingCount(String eventId) {
         if (waitlistCount == null) return;
         FirebaseFirestore.getInstance()

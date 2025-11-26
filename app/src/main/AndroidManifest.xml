@@ -2,16 +2,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Existing permissions -->
+    <!-- Notification permission -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Camera permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-permission android:name="android.permission.MediaStore.createWriteReques" />
 
-    <!-- NEW: Location permissions for map -->
+    <!-- Location permissions for map and geolocation features -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Internet permission (required for Maps and Firebase) -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Access network state (helpful for Maps) -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -23,7 +29,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EventLotto">
 
-        <!-- NEW: Google Maps API Key -->
+        <!-- Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCnmjpaSef9PdJ1oEBZRcwMqTtn7tT5sHQ" />
