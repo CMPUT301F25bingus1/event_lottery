@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class Adm_ProfilesFragment extends Fragment {
+public class AdmProfilesFragment extends Fragment {
 
     private final List<User> users = new ArrayList<>();
     private final Set<String> selectedUserIds = new HashSet<>();

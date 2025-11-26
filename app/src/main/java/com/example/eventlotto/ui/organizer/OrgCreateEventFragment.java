@@ -39,7 +39,7 @@ import java.util.Map;
 /**
  * Fragment for organizers to create new events.
  */
-public class Org_CreateEventFragment extends Fragment {
+public class OrgCreateEventFragment extends Fragment {
 
     /** Input field for the event title. */
     private EditText titleField;

@@ -25,7 +25,7 @@ import com.google.firebase.storage.StorageReference;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Adm_ImagesFragment extends Fragment {
+public class AdmImagesFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private EventImageAdapter adapter;

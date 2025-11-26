@@ -20,7 +20,7 @@ import com.example.eventlotto.ui.CreateProfileFragment;
  * their user profile. From here, users can navigate to the profile creation screen.
  * </p>
  */
-public class Ent_WelcomeFragment extends Fragment {
+public class EntWelcomeFragment extends Fragment {
 
     /**
      * Called to create and return the view hierarchy associated with this fragment.

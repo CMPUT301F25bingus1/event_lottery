@@ -3,7 +3,7 @@ package com.example.eventlotto;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
+import com.example.eventlotto.ui.entrant.EntHomeFragment;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +22,7 @@ public class MainActivityTest {
     @Test
     public void testLoadFragment_CallsMethodOnce() {
         MainActivity mockActivity = mock(MainActivity.class);
-        Ent_HomeFragment fragment = mock(Ent_HomeFragment.class);
+        EntHomeFragment fragment = mock(EntHomeFragment.class);
 
 
         doNothing().when(mockActivity).loadFragment(any());

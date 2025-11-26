@@ -32,7 +32,7 @@ import java.util.Set;
  * Users can view all events or only the ones they are following,
  * subscribe/unsubscribe to notifications, and view event details.
  */
-public class Ent_NotificationsFragment extends Fragment {
+public class EntNotificationsFragment extends Fragment {
 
     private final List<FollowedEvent> allEvents = new ArrayList<>();
     private NotificationsAdapter adapter;
@@ -71,7 +71,7 @@ public class Ent_NotificationsFragment extends Fragment {
 
             @Override
             public void onEventClick(FollowedEvent event) {
-                Ent_EventDetailsFragment fragment = Ent_EventDetailsFragment.newInstance(event.getId());
+                EntEventDetailsFragment fragment = EntEventDetailsFragment.newInstance(event.getId());
                 fragment.show(getParentFragmentManager(), "event_details");
             }
         });

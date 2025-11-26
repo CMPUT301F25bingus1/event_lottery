@@ -6,20 +6,18 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.example.eventlotto.R;
-import com.example.eventlotto.functions.scan.GenerateQRFragment;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 
 // Class developed in conjunction with OpenAI, ChatGPT, "How to implement QR code reader in Android Studio"
-public class Ent_ScanFragment extends Fragment implements BarcodeCallback {
+public class EntScanFragment extends Fragment implements BarcodeCallback {
 
     private DecoratedBarcodeView barcodeView;
     private boolean scanned = false;
@@ -65,7 +63,7 @@ public class Ent_ScanFragment extends Fragment implements BarcodeCallback {
      * Handles the result of a scanned QR code.
      * <p>
      * If a valid QR code is detected and hasn’t been processed yet,
-     * this method opens the {@link Ent_EventDetailsFragment} to display the event information
+     * this method opens the {@link EntEventDetailsFragment} to display the event information
      *
      * @param result The scanned BarcodeResult result object
      */
@@ -75,7 +73,7 @@ public class Ent_ScanFragment extends Fragment implements BarcodeCallback {
             scanned = true;
             String eventId = result.getText();
 
-            Ent_EventDetailsFragment dialog = Ent_EventDetailsFragment.newInstance(eventId);
+            EntEventDetailsFragment dialog = EntEventDetailsFragment.newInstance(eventId);
             dialog.show(getParentFragmentManager(), "event_details_dialog");
         }
     }

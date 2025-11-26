@@ -26,7 +26,7 @@ import com.example.eventlotto.model.User;
  * them with a unique device ID, and saves the information to Firestore.
  * After successful profile creation, the user is redirected to the entrant home screen.
  */
-public class Ent_CreateProfileFragment extends Fragment {
+public class EntCreateProfileFragment extends Fragment {
 
     /** Input field for user's name. */
     private EditText inputName;
@@ -88,7 +88,7 @@ public class Ent_CreateProfileFragment extends Fragment {
 
     /**
      * Validates input fields and creates a new user profile in Firestore.
-     * If successful, the method navigates the user to the {@link Ent_HomeFragment}
+     * If successful, the method navigates the user to the {@link EntHomeFragment}
      * and initializes the bottom navigation for the entrant role.
      * Otherwise, an error message is displayed.
      */
@@ -113,7 +113,7 @@ public class Ent_CreateProfileFragment extends Fragment {
 
                 // Navigate to home fragment
                 requireActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new Ent_HomeFragment())
+                        .replace(R.id.fragment_container, new EntHomeFragment())
                         .commit();
 
                 // Initialize bottom navigation for entrant role

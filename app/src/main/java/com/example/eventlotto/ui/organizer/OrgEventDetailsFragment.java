@@ -1,7 +1,6 @@
 package com.example.eventlotto.ui.organizer;
 
 import android.os.Bundle;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,7 +28,7 @@ import com.google.firebase.firestore.WriteBatch;
 
 import java.text.DateFormat;
 
-public class Org_EventDetailsFragment extends DialogFragment {
+public class OrgEventDetailsFragment extends DialogFragment {
 
     private String eventId;
     private FirestoreService firestoreService;
@@ -46,8 +45,8 @@ public class Org_EventDetailsFragment extends DialogFragment {
     private LinearLayout acceptDeclineLayout;
     private Button acceptButton, declineButton;
 
-    public static Org_EventDetailsFragment newInstance(String eventId) {
-        Org_EventDetailsFragment fragment = new Org_EventDetailsFragment();
+    public static OrgEventDetailsFragment newInstance(String eventId) {
+        OrgEventDetailsFragment fragment = new OrgEventDetailsFragment();
         Bundle args = new Bundle();
         args.putString("eventId", eventId);
         fragment.setArguments(args);
@@ -87,14 +86,14 @@ public class Org_EventDetailsFragment extends DialogFragment {
         viewEntrantsButton.setOnClickListener(v -> {
             if (eventId != null) {
                 String title = eventTitle.getText().toString();
-                Org_EntrantsListFragment fragment = Org_EntrantsListFragment.newInstance(eventId, title);
+                OrgEntrantsListFragment fragment = OrgEntrantsListFragment.newInstance(eventId, title);
                 fragment.show(getParentFragmentManager(), "entrantsList");
             }
         });
 
         Button notifyEntrantsButton = view.findViewById(R.id.notifyEntrantsButton);
         notifyEntrantsButton.setOnClickListener(v -> {
-            Org_NotifyEntrantsDialog dialog = Org_NotifyEntrantsDialog.newInstance(eventId);
+            OrgNotifyEntrantsDialog dialog = OrgNotifyEntrantsDialog.newInstance(eventId);
             dialog.show(getParentFragmentManager(), "notify_dialog");
         });
 

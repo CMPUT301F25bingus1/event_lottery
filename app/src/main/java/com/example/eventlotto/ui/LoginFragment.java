@@ -19,7 +19,7 @@ import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.MainActivity;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
-import com.example.eventlotto.ui.entrant.Ent_WelcomeFragment;
+import com.example.eventlotto.ui.entrant.EntWelcomeFragment;
 
 /**
  * Fragment for managing a user's profile in the EventLotto app.
@@ -169,7 +169,7 @@ public class LoginFragment extends Fragment {
 
                     requireActivity().getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.fragment_container, new Ent_WelcomeFragment())
+                            .replace(R.id.fragment_container, new EntWelcomeFragment())
                             .commit();
                 });
 

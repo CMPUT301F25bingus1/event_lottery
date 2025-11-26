@@ -5,7 +5,6 @@ import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,7 +17,6 @@ import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
 import com.example.eventlotto.functions.events.EventAdapter;
 import com.example.eventlotto.model.Event;
-import com.example.eventlotto.model.EventStatus;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -30,7 +28,7 @@ import java.util.List;
  * Fragment displaying the My Events screen with a list of events, separated into Current Events
  * (events which haven't ended yet) and History (events which have now ended)
  */
-public class Ent_MyEventsFragment extends Fragment {
+public class EntMyEventsFragment extends Fragment {
 
     private RecyclerView pendingRecyclerView;
     private EventAdapter pendingAdapter;
@@ -60,7 +58,7 @@ public class Ent_MyEventsFragment extends Fragment {
         pendingEvents = new ArrayList<>();
         pendingAdapter = new EventAdapter(pendingEvents, event -> {
             // Show the EventDetailsFragment with accept/decline options
-            Ent_EventDetailsFragment fragment = Ent_EventDetailsFragment.newInstance(event.getEid());
+            EntEventDetailsFragment fragment = EntEventDetailsFragment.newInstance(event.getEid());
             fragment.show(getParentFragmentManager(), "event_details");
         });
         pendingRecyclerView.setAdapter(pendingAdapter);
