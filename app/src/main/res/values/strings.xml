@@ -70,6 +70,6 @@
     <string name="noparti">Number of Participants <font color="#D32F2F">*</font></string>
     <string name="reg_period">Registration Period <font color="#D32F2F">*</font></string>
     <string name="event_desc">Event Description <font color="#D32F2F">*</font></string>
-    <string name="event_location">Event Location <font color="#D32F2F">*</font></string>
+    <string name="event_location">Event Location (GeoPoint) <font color="#D32F2F">*</font></string>
     <string name="enable_geoconsent">Enable Geolocation? <font color="#D32F2F">*</font></string>
 </resources>
