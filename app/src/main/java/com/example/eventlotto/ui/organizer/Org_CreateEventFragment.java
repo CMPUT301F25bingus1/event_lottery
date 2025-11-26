@@ -226,7 +226,7 @@ public class Org_CreateEventFragment extends Fragment {
         eventData.put("description", desc);
         if (!TextUtils.isEmpty(eventUrl)) eventData.put("eventURL", eventUrl);
         eventData.put("capacity", capacity);
-        eventData.put("location", location);
+        eventData.put("location", new GeoPoint(lat, lon));
         eventData.put("geoLocation", new GeoPoint(lat, lon));
         eventData.put("createdAt", now);
         eventData.put("eventStartAt", eventStart);
@@ -286,6 +286,7 @@ public class Org_CreateEventFragment extends Fragment {
         Calendar calendar = Calendar.getInstance();
         TimePickerDialog dialog = new TimePickerDialog(
                 getContext(),
+                R.style.CustomDatePicker,
                 (view, hourOfDay, minute) -> target.setText(
                         String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute)),
                 calendar.get(Calendar.HOUR_OF_DAY),
