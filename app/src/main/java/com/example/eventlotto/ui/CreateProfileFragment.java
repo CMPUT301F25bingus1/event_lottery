@@ -18,7 +18,7 @@ import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.MainActivity;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
-import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
+import com.example.eventlotto.ui.entrant.EntHomeFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 /**
@@ -116,7 +116,7 @@ public class CreateProfileFragment extends Fragment {
 
                 // Navigate to entrant home screen
                 requireActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new Ent_HomeFragment())
+                        .replace(R.id.fragment_container, new EntHomeFragment())
                         .commit();
                 ((MainActivity) requireActivity()).initBottomNavForRole("entrant");
 

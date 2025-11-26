@@ -26,16 +26,16 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.eventlotto.ui.LoginFragment;
-import com.example.eventlotto.ui.admin.Adm_HomeFragment;
-import com.example.eventlotto.ui.organizer.Org_HomeFragment;
-import com.example.eventlotto.ui.organizer.Org_CreateEventFragment;
-import com.example.eventlotto.ui.admin.Adm_ImagesFragment;
-import com.example.eventlotto.ui.admin.Adm_ProfilesFragment;
-import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
-import com.example.eventlotto.ui.entrant.Ent_MyEventsFragment;
-import com.example.eventlotto.ui.entrant.Ent_NotificationsFragment;
-import com.example.eventlotto.ui.entrant.Ent_ScanFragment;
-import com.example.eventlotto.ui.entrant.Ent_WelcomeFragment;
+import com.example.eventlotto.ui.admin.AdmHomeFragment;
+import com.example.eventlotto.ui.organizer.OrgHomeFragment;
+import com.example.eventlotto.ui.organizer.OrgCreateEventFragment;
+import com.example.eventlotto.ui.admin.AdmImagesFragment;
+import com.example.eventlotto.ui.admin.AdmProfilesFragment;
+import com.example.eventlotto.ui.entrant.EntHomeFragment;
+import com.example.eventlotto.ui.entrant.EntMyEventsFragment;
+import com.example.eventlotto.ui.entrant.EntNotificationsFragment;
+import com.example.eventlotto.ui.entrant.EntScanFragment;
+import com.example.eventlotto.ui.entrant.EntWelcomeFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -103,18 +103,18 @@ public class MainActivity extends AppCompatActivity {
                             setupBottomNavMenu(bottomNavigationView, role);
                             assert role != null;
                             if (role.equals("organizer")) {
-                                loadFragment(new Org_HomeFragment());
+                                loadFragment(new OrgHomeFragment());
                             } else {
-                                loadFragment(new Ent_HomeFragment());
+                                loadFragment(new EntHomeFragment());
                             }
                             showBottomNavigation();
                         } else {
-                            loadFragment(new Ent_WelcomeFragment());
+                            loadFragment(new EntWelcomeFragment());
                             hideBottomNavigation();
                         }
                     })
                     .addOnFailureListener(e -> {
-                        loadFragment(new Ent_WelcomeFragment());
+                        loadFragment(new EntWelcomeFragment());
                         hideBottomNavigation();
                     });
         }
@@ -146,23 +146,23 @@ public class MainActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (role.equals("admin")) {
-                if (id == R.id.nav_home) fragment = new Adm_HomeFragment();
+                if (id == R.id.nav_home) fragment = new AdmHomeFragment();
                 else if (id == R.id.nav_admin_images)
-                    fragment = new Adm_ImagesFragment();
+                    fragment = new AdmImagesFragment();
                 else if (id == R.id.nav_admin_profiles)
-                    fragment = new Adm_ProfilesFragment();
+                    fragment = new AdmProfilesFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
             } else if ("organizer".equals(role)) {
-                if (id == R.id.nav_home) fragment = new Org_HomeFragment();
-                else if (id == R.id.nav_create_event) fragment = new Org_CreateEventFragment();
-                else if (id == R.id.nav_notifications) fragment = new Ent_NotificationsFragment();
+                if (id == R.id.nav_home) fragment = new OrgHomeFragment();
+                else if (id == R.id.nav_create_event) fragment = new OrgCreateEventFragment();
+                else if (id == R.id.nav_notifications) fragment = new EntNotificationsFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
             } else {
                 // entrant
-                if (id == R.id.nav_home) fragment = new Ent_HomeFragment();
-                else if (id == R.id.nav_scan) fragment = new Ent_ScanFragment();
-                else if (id == R.id.nav_notifications) fragment = new Ent_NotificationsFragment();
-                else if (id == R.id.nav_my_events) fragment = new Ent_MyEventsFragment();
+                if (id == R.id.nav_home) fragment = new EntHomeFragment();
+                else if (id == R.id.nav_scan) fragment = new EntScanFragment();
+                else if (id == R.id.nav_notifications) fragment = new EntNotificationsFragment();
+                else if (id == R.id.nav_my_events) fragment = new EntMyEventsFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();
             }
 
