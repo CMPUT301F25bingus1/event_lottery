@@ -23,13 +23,13 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Org_NotifyEntrantsDialog extends DialogFragment {
+public class OrgNotifyEntrantsDialog extends DialogFragment {
 
     private static final String ARG_EVENT_ID = "eventId";
     private String eventId;
 
-    public static Org_NotifyEntrantsDialog newInstance(String eventId) {
-        Org_NotifyEntrantsDialog d = new Org_NotifyEntrantsDialog();
+    public static OrgNotifyEntrantsDialog newInstance(String eventId) {
+        OrgNotifyEntrantsDialog d = new OrgNotifyEntrantsDialog();
         Bundle b = new Bundle();
         b.putString(ARG_EVENT_ID, eventId);
         d.setArguments(b);

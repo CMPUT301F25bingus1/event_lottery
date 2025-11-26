@@ -16,14 +16,14 @@ import java.util.List;
 
 public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.ImageViewHolder> {
 
-    private final List<Adm_ImagesFragment.EventImageItem> images;
+    private final List<AdmImagesFragment.EventImageItem> images;
     private final OnImageClickListener listener;
 
     public interface OnImageClickListener {
-        void onImageClick(Adm_ImagesFragment.EventImageItem item);
+        void onImageClick(AdmImagesFragment.EventImageItem item);
     }
 
-    public EventImageAdapter(List<Adm_ImagesFragment.EventImageItem> images,
+    public EventImageAdapter(List<AdmImagesFragment.EventImageItem> images,
                              OnImageClickListener listener) {
         this.images = images;
         this.listener = listener;
@@ -39,7 +39,7 @@ public class EventImageAdapter extends RecyclerView.Adapter<EventImageAdapter.Im
 
     @Override
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
-        Adm_ImagesFragment.EventImageItem item = images.get(position);
+        AdmImagesFragment.EventImageItem item = images.get(position);
 
         Glide.with(holder.itemView.getContext())
                 .load(item.getImageUrl())

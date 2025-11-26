@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class Adm_HomeFragment extends Fragment {
+public class AdmHomeFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private EventAdapter adapter;
@@ -51,8 +51,8 @@ public class Adm_HomeFragment extends Fragment {
         fullEventList = new ArrayList<>();
 
         adapter = new EventAdapter(eventList, event -> {
-            Adm_EventDetailsFragment fragment =
-                    Adm_EventDetailsFragment.newInstance(event.getEid());
+            AdmEventDetailsFragment fragment =
+                    AdmEventDetailsFragment.newInstance(event.getEid());
             fragment.show(getParentFragmentManager(), "admin_event_details");
         });
 

@@ -10,7 +10,7 @@ import androidx.fragment.app.testing.FragmentScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
-import com.example.eventlotto.ui.entrant.Ent_EventDetailsFragment;
+import com.example.eventlotto.ui.entrant.EntEventDetailsFragment;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -50,10 +50,10 @@ public class HomeUITest {
 
     @Test
     public void testEventDetailsFragmentDisplaysUIElements() {
-        FragmentScenario<Ent_EventDetailsFragment> scenario =
+        FragmentScenario<EntEventDetailsFragment> scenario =
                 FragmentScenario.launchInContainer(
-                        Ent_EventDetailsFragment.class,
-                        Ent_EventDetailsFragment.newInstance(MOCK_EVENT_ID).getArguments(),
+                        EntEventDetailsFragment.class,
+                        EntEventDetailsFragment.newInstance(MOCK_EVENT_ID).getArguments(),
                         R.style.Theme_EventLotto
                 );
 
@@ -67,10 +67,10 @@ public class HomeUITest {
 
     @Test
     public void testJoinWaitlistButtonClick() {
-        FragmentScenario<Ent_EventDetailsFragment> scenario =
+        FragmentScenario<EntEventDetailsFragment> scenario =
                 FragmentScenario.launchInContainer(
-                        Ent_EventDetailsFragment.class,
-                        Ent_EventDetailsFragment.newInstance(MOCK_EVENT_ID).getArguments(),
+                        EntEventDetailsFragment.class,
+                        EntEventDetailsFragment.newInstance(MOCK_EVENT_ID).getArguments(),
                         R.style.Theme_EventLotto
                 );
 

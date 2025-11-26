@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import androidx.annotation.NonNull;
@@ -27,7 +26,7 @@ import java.util.List;
  * Filter popup for HomeFragment.
  * Keeps your previous UI but updated for the new Home fragment.
  */
-public class Ent_FilterFragment extends DialogFragment {
+public class EntFilterFragment extends DialogFragment {
 
     private MaterialButtonToggleGroup daysToggleGroup;
     private List<String> selectedDays = new ArrayList<>();

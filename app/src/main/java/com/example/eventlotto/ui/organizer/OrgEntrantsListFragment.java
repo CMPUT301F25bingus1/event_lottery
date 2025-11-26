@@ -22,7 +22,6 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.eventlotto.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -41,7 +40,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Org_EntrantsListFragment extends DialogFragment implements OnMapReadyCallback {
+public class OrgEntrantsListFragment extends DialogFragment implements OnMapReadyCallback {
 
     private static final String ARG_EVENT_ID = "eventId";
     private static final String ARG_EVENT_TITLE = "eventTitle";
@@ -67,8 +66,8 @@ public class Org_EntrantsListFragment extends DialogFragment implements OnMapRea
     // View state
     private boolean isListView = true;
 
-    public static Org_EntrantsListFragment newInstance(String eventId, String eventTitle) {
-        Org_EntrantsListFragment fragment = new Org_EntrantsListFragment();
+    public static OrgEntrantsListFragment newInstance(String eventId, String eventTitle) {
+        OrgEntrantsListFragment fragment = new OrgEntrantsListFragment();
         Bundle args = new Bundle();
         args.putString(ARG_EVENT_ID, eventId);
         args.putString(ARG_EVENT_TITLE, eventTitle);

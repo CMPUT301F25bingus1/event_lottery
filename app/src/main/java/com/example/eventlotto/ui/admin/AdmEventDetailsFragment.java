@@ -22,7 +22,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.text.DateFormat;
 
-public class Adm_EventDetailsFragment extends DialogFragment {
+public class AdmEventDetailsFragment extends DialogFragment {
 
     private String eventId;
     private FirestoreService firestoreService;
@@ -31,8 +31,8 @@ public class Adm_EventDetailsFragment extends DialogFragment {
     private TextView eventTitle, eventDescription, signupDates, eventDates;
     private Button deleteButton;
 
-    public static Adm_EventDetailsFragment newInstance(String eventId) {
-        Adm_EventDetailsFragment fragment = new Adm_EventDetailsFragment();
+    public static AdmEventDetailsFragment newInstance(String eventId) {
+        AdmEventDetailsFragment fragment = new AdmEventDetailsFragment();
         Bundle args = new Bundle();
         args.putString("eventId", eventId);
         fragment.setArguments(args);

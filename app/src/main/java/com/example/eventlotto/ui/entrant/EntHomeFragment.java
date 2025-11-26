@@ -1,7 +1,6 @@
-package com.example.eventlotto.ui.organizer;
+package com.example.eventlotto.ui.entrant;
 
 import android.os.Bundle;
-import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -22,14 +21,7 @@ import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
 import com.example.eventlotto.functions.events.EventAdapter;
 import com.example.eventlotto.model.Event;
-import com.example.eventlotto.ui.organizer.Org_EventDetailsFragment;
-import com.example.eventlotto.ui.entrant.Ent_FilterFragment;
-import com.example.eventlotto.model.User;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Source;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -48,47 +40,32 @@ import java.util.Locale;
  *   <li>Open event details.</li>
  *   <li>Filter events by date ranges or days of the week.</li>
  *   <li>Search events by title or description.</li>
+ *   <li>Access help popup explaining the app's process.</li>
  * </ul>
  */
-public class Org_HomeFragment extends Fragment {
+public class EntHomeFragment extends Fragment {
 
-    /**
-     * RecyclerView displaying the list of events.
-     */
+    /** RecyclerView displaying the list of events. */
     private RecyclerView recyclerView;
 
-    /**
-     * Adapter for binding {@link Event} data to RecyclerView items.
-     */
+    /** Adapter for binding {@link Event} data to RecyclerView items. */
     private EventAdapter adapter;
 
-    /**
-     * The currently displayed list of events (after filters/search).
-     */
+    /** The currently displayed list of events (after filters/search). */
     private List<Event> eventList;
 
-    /**
-     * The complete list of all fetched events.
-     */
+    /** The complete list of all fetched events. */
     private List<Event> fullEventList;
 
-    /**
-     * Firestore service instance for event data retrieval.
-     */
+    /** Firestore service instance for event data retrieval. */
     private FirestoreService firestoreService;
-    /**
-     * Device ID string to identify the id of the device.
-     */
-
-    private String deviceId;
-
 
     /**
      * Called to initialize the fragment's UI.
      * Inflates the layout, sets up RecyclerView, search, and filter logic.
      *
-     * @param inflater           LayoutInflater to inflate views.
-     * @param container          The parent view for this fragment.
+     * @param inflater  LayoutInflater to inflate views.
+     * @param container The parent view for this fragment.
      * @param savedInstanceState Previous instance state (if any).
      * @return The inflated fragment view.
      */
@@ -104,22 +81,14 @@ public class Org_HomeFragment extends Fragment {
         fullEventList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-
         // Initialize the adapter and define event click behavior
         adapter = new EventAdapter(eventList, event -> {
-            Org_EventDetailsFragment fragment = Org_EventDetailsFragment.newInstance(event.getEid());
-            fragment.show(getParentFragmentManager(), "org_event_details");
+            EntEventDetailsFragment fragment = EntEventDetailsFragment.newInstance(event.getEid());
+            fragment.show(getParentFragmentManager(), "event_details");
         });
-
         recyclerView.setAdapter(adapter);
 
-        firestoreService = new FirestoreService();
-        deviceId = Settings.Secure.getString(
-                requireContext().getContentResolver(),
-                Settings.Secure.ANDROID_ID
-        );
-
-        initializeUserThenLoadEvents();
+        fetchEvents();
 
         ImageButton filterButton = view.findViewById(R.id.filter_button);
         EditText searchEditText = view.findViewById(R.id.search_edit_text);
@@ -127,7 +96,7 @@ public class Org_HomeFragment extends Fragment {
 
         if (filterButton != null) {
             filterButton.setOnClickListener(v -> {
-                Ent_FilterFragment entFilterFragment = new Ent_FilterFragment();
+                EntFilterFragment entFilterFragment = new EntFilterFragment();
                 entFilterFragment.setOnFilterAppliedListener(
                         (eventDateFrom, eventDateTo, registrationFrom, registrationTo, selectedDays) ->
                                 applyEventFilters(eventDateFrom, eventDateTo, registrationFrom, registrationTo, selectedDays)
@@ -139,13 +108,8 @@ public class Org_HomeFragment extends Fragment {
         //Live search functionality
         if (searchEditText != null) {
             searchEditText.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                }
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void afterTextChanged(Editable s) {}
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -154,86 +118,65 @@ public class Org_HomeFragment extends Fragment {
             });
         }
 
+        // --- Help Popup Functionality ---
+        View popup = view.findViewById(R.id.selection_popup);
+        View gotItButton = view.findViewById(R.id.btn_got_it);
+        View helpRow = view.findViewById(R.id.help_row);
+
+        if (helpRow != null) {
+            helpRow.setOnClickListener(v -> {
+                if (popup != null) popup.setVisibility(View.VISIBLE);
+            });
+        }
+
+        if (gotItButton != null) {
+            gotItButton.setOnClickListener(v -> {
+                if (popup != null) popup.setVisibility(View.GONE);
+            });
+        }
+
         return view;
     }
 
-    private void initializeUserThenLoadEvents() {
-
-        String deviceId = Settings.Secure.getString(
-                requireContext().getContentResolver(),
-                Settings.Secure.ANDROID_ID
-        );
-
-        firestoreService.getUser(deviceId)
-                .addOnSuccessListener(snapshot -> {
-
-                    // If user doesn't exist, create it here just like profile does
-                    if (!snapshot.exists()) {
-                        User newUser = new User(deviceId, "Default Name", "", "");
-
-                        firestoreService.updateUserProfile(newUser, success -> {
-                            fetchEvents();   // load events AFTER user created
-                        });
-
-                    } else {
-                        fetchEvents();       // load events normally
-                    }
-
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Failed to initialize user", Toast.LENGTH_SHORT).show();
-                    fetchEvents();  // worst case: still try
-                });
-    }
-
-
     /**
      * Fetches all events from Firestore and populates the {@link #fullEventList} and {@link #eventList}.
+     * Only includes events where registration is currently open or will open in the future.
      * <p>
      * If successful, updates the RecyclerView adapter with the new data.
      * If unsuccessful, displays an error message to the user.
      */
     private void fetchEvents() {
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        // Get Device ID
-        String deviceId = Settings.Secure.getString(
-                requireContext().getContentResolver(),
-                Settings.Secure.ANDROID_ID
-        );
-
-        // Create a reference to this user
-        DocumentReference myRef = db.collection("users").document(deviceId);
-
-        // Server-side filtering — the correct way!
-        db.collection("events")
-                .whereEqualTo("organizerId", myRef)
-                .get(Source.SERVER)     // FORCE fresh fetch (fixes your bug)
+        firestoreService.events()
+                .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-
                     eventList.clear();
                     fullEventList.clear();
+
+                    Date currentDate = new Date();
 
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
                         Event event = doc.toObject(Event.class);
                         if (event != null) {
                             event.setEid(doc.getId());
-                            eventList.add(event);
-                            fullEventList.add(event);
+
+                            // Only add events where registration hasn't closed yet
+                            Date regCloses = event.getRegistrationClosesAt() != null
+                                    ? event.getRegistrationClosesAt().toDate()
+                                    : null;
+
+                            // Include event if registration close date is null or in the future
+                            if (regCloses == null || regCloses.after(currentDate)) {
+                                eventList.add(event);
+                                fullEventList.add(event);
+                            }
                         }
                     }
 
                     adapter.notifyDataSetChanged();
-
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(getContext(),
-                                "Error fetching events: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show()
-                );
+                .addOnFailureListener(e -> Toast.makeText(getContext(),
+                        "Error fetching events: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
-
 
     /**
      * Filters events in real-time based on user search input.
@@ -266,11 +209,11 @@ public class Org_HomeFragment extends Fragment {
      * Applies filters to the event list based on selected criteria such as date ranges
      * and specific days of the week.
      *
-     * @param eventDateFrom    Start date of the event date range.
-     * @param eventDateTo      End date of the event date range.
+     * @param eventDateFrom   Start date of the event date range.
+     * @param eventDateTo     End date of the event date range.
      * @param registrationFrom Start date of registration date range.
      * @param registrationTo   End date of registration date range.
-     * @param selectedDays     List of selected days of the week.
+     * @param selectedDays    List of selected days of the week.
      */
     private void applyEventFilters(String eventDateFrom, String eventDateTo,
                                    String registrationFrom, String registrationTo,
@@ -291,18 +234,14 @@ public class Org_HomeFragment extends Fragment {
             Date eventEnd = e.getEventEndAt() != null ? e.getEventEndAt().toDate() : null;
 
             // --- Event date range ---
-            if (eventFromDate != null && (eventEnd == null || eventEnd.before(eventFromDate)))
-                matches = false;
-            if (eventToDate != null && (eventStart == null || eventStart.after(eventToDate)))
-                matches = false;
+            if (eventFromDate != null && (eventEnd == null || eventEnd.before(eventFromDate))) matches = false;
+            if (eventToDate != null && (eventStart == null || eventStart.after(eventToDate))) matches = false;
 
             // --- Registration date range ---
             Date regStart = e.getRegistrationOpensAt() != null ? e.getRegistrationOpensAt().toDate() : null;
             Date regEnd = e.getRegistrationClosesAt() != null ? e.getRegistrationClosesAt().toDate() : null;
-            if (regFromDate != null && (regEnd == null || regEnd.before(regFromDate)))
-                matches = false;
-            if (regToDate != null && (regStart == null || regStart.after(regToDate)))
-                matches = false;
+            if (regFromDate != null && (regEnd == null || regEnd.before(regFromDate))) matches = false;
+            if (regToDate != null && (regStart == null || regStart.after(regToDate))) matches = false;
 
             // --- Days-of-week filter ---
             if (selectedDays != null && !selectedDays.isEmpty() && eventStart != null) {
@@ -312,27 +251,13 @@ public class Org_HomeFragment extends Fragment {
 
                 String dayLetter = "";
                 switch (dayOfWeek) {
-                    case Calendar.MONDAY:
-                        dayLetter = "M";
-                        break;
-                    case Calendar.TUESDAY:
-                        dayLetter = "T";
-                        break;
-                    case Calendar.WEDNESDAY:
-                        dayLetter = "W";
-                        break;
-                    case Calendar.THURSDAY:
-                        dayLetter = "T";
-                        break;
-                    case Calendar.FRIDAY:
-                        dayLetter = "F";
-                        break;
-                    case Calendar.SATURDAY:
-                        dayLetter = "S";
-                        break;
-                    case Calendar.SUNDAY:
-                        dayLetter = "S";
-                        break;
+                    case Calendar.MONDAY: dayLetter = "M"; break;
+                    case Calendar.TUESDAY: dayLetter = "T"; break;
+                    case Calendar.WEDNESDAY: dayLetter = "W"; break;
+                    case Calendar.THURSDAY: dayLetter = "T"; break;
+                    case Calendar.FRIDAY: dayLetter = "F"; break;
+                    case Calendar.SATURDAY: dayLetter = "S"; break;
+                    case Calendar.SUNDAY: dayLetter = "S"; break;
                 }
 
                 if (!selectedDays.contains(dayLetter)) matches = false;

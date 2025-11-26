@@ -38,7 +38,7 @@ import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Ent_EventDetailsFragment extends DialogFragment {
+public class EntEventDetailsFragment extends DialogFragment {
 
     /** The ID of the event to display. */
     private String eventId;
@@ -66,8 +66,8 @@ public class Ent_EventDetailsFragment extends DialogFragment {
     /** Flag to track if we're waiting for permission */
     private boolean waitingForLocationPermission = false;
 
-    public static Ent_EventDetailsFragment newInstance(String eventId) {
-        Ent_EventDetailsFragment fragment = new Ent_EventDetailsFragment();
+    public static EntEventDetailsFragment newInstance(String eventId) {
+        EntEventDetailsFragment fragment = new EntEventDetailsFragment();
         Bundle args = new Bundle();
         args.putString("eventId", eventId);
         fragment.setArguments(args);

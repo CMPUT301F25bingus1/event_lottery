@@ -15,14 +15,14 @@ import androidx.fragment.app.Fragment;
 import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.MainActivity;
 import com.example.eventlotto.R;
-import com.example.eventlotto.ui.entrant.Ent_HomeFragment;
+import com.example.eventlotto.ui.entrant.EntHomeFragment;
 
 /**
  * Fragment responsible for determining whether a user already has a profile
  * or needs to create one.
  * <p>
  * This fragment checks Firestore for a user record associated with the device ID.
- * If the user exists, it navigates to the entrant home screen ({@link Ent_HomeFragment}).
+ * If the user exists, it navigates to the entrant home screen ({@link EntHomeFragment}).
  * If the user does not exist, it shows a button to create a new profile.
  * </p>
  */
@@ -71,7 +71,7 @@ public class EntryFragment extends Fragment {
             if (snapshot.exists()) {
                 requireActivity().getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.fragment_container, new Ent_HomeFragment())
+                        .replace(R.id.fragment_container, new EntHomeFragment())
                         .commit();
 
                 // Initialize bottom navigation for entrant
