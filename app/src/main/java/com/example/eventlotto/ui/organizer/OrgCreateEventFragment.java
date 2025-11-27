@@ -36,68 +36,32 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * Fragment for organizers to create new events.
- */
 public class OrgCreateEventFragment extends Fragment {
 
-    /** Input field for the event title. */
     private EditText titleField;
-
-    /** Input field for the event description. */
     private EditText descField;
-
-    /** Input field for an optional event URL (poster or info page). */
     private EditText urlField;
-
-    /** Input field for the event capacity. */
     private EditText capacityField;
-
-    /** Input field for the event location. */
     private EditText locationField;
-
-    /** Input field for the event latitude. */
-    private EditText latField;
-
-    /** Input field for the event longitude. */
-    private EditText lonField;
-
-    /** Input field for event start date. */
+    private EditText maxEntrantsField;
+    private EditText posterUrlField;
     private EditText inputEventStart;
-
-    /** Input field for event end date. */
     private EditText inputEventEnd;
-
-    /** Input field for registration open date. */
+    private EditText inputTimeStart;
+    private EditText inputTimeEnd;
     private EditText inputRegOpen;
-
-    /** Input field for registration close date. */
     private EditText inputRegClose;
 
-    /** Input field for maximum entrants allowed (optional). */
-    private EditText maxEntrantsField;
-
-    /** Input field for optional event poster URL. */
-    private EditText posterUrlField;
-
-    /** Input field for event start time. */
-    private EditText inputTimeStart;
-
-    /** Input field for event end time. */
-    private EditText inputTimeEnd;
-
-    /** Toggle indicating organizer consent for geolocation. */
-    private SwitchCompat geoConsentSwitch;
-
-    /** Button to trigger event creation. */
-    private Button createBtn;
-    private FirebaseFirestore db;
-
-    // Info text toggle
-    private ImageView geoInfoButton;
-    private TextView geoInfoText;
     private MaterialButtonToggleGroup daysToggleGroup;
     private final List<String> selectedDays = new ArrayList<>();
+
+    private SwitchCompat geoConsentSwitch;
+    private Button createBtn;
+
+    private FirebaseFirestore db;
+
+    private ImageView geoInfoButton;
+    private TextView geoInfoText;
 
     @Nullable
     @Override
@@ -107,14 +71,11 @@ public class OrgCreateEventFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_create_events, container, false);
 
-        // Initialize fields
         titleField = view.findViewById(R.id.input_event_title);
         descField = view.findViewById(R.id.input_description);
         urlField = view.findViewById(R.id.input_event_url);
         capacityField = view.findViewById(R.id.input_capacity);
         locationField = view.findViewById(R.id.input_location);
-        latField = view.findViewById(R.id.input_latitude);
-        lonField = view.findViewById(R.id.input_longitude);
         geoConsentSwitch = view.findViewById(R.id.check_geo_consent);
         createBtn = view.findViewById(R.id.btn_create_event);
         maxEntrantsField = view.findViewById(R.id.input_max_entrants);
@@ -132,7 +93,6 @@ public class OrgCreateEventFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance();
 
-        // Toggle info text visibility
         geoInfoButton.setOnClickListener(v -> {
             if (geoInfoText.getVisibility() == View.GONE) {
                 geoInfoText.setVisibility(View.VISIBLE);
@@ -141,20 +101,16 @@ public class OrgCreateEventFragment extends Fragment {
             }
         });
 
-        // Date pickers
         inputEventStart.setOnClickListener(v -> showDatePicker(inputEventStart));
         inputEventEnd.setOnClickListener(v -> showDatePicker(inputEventEnd));
         inputRegOpen.setOnClickListener(v -> showDatePicker(inputRegOpen));
         inputRegClose.setOnClickListener(v -> showDatePicker(inputRegClose));
 
-        // Time pickers
         inputTimeStart.setOnClickListener(v -> showTimePicker(inputTimeStart));
         inputTimeEnd.setOnClickListener(v -> showTimePicker(inputTimeEnd));
 
-        // Days of week toggle
         setupDaySelection();
 
-        // Create button
         createBtn.setOnClickListener(v -> createEvent());
 
         return view;
@@ -177,7 +133,6 @@ public class OrgCreateEventFragment extends Fragment {
             }
         });
 
-        // Initialize buttons
         for (int i = 0; i < daysToggleGroup.getChildCount(); i++) {
             View child = daysToggleGroup.getChildAt(i);
             if (child instanceof MaterialButton) {
@@ -189,8 +144,10 @@ public class OrgCreateEventFragment extends Fragment {
     }
 
     private void createEvent() {
-        String deviceId = Settings.Secure.getString(requireContext().getContentResolver(),
-                Settings.Secure.ANDROID_ID);
+        String deviceId = Settings.Secure.getString(
+                requireContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID
+        );
         DocumentReference organizerRef = db.collection("users").document(deviceId);
 
         String title = titleField.getText().toString().trim();
@@ -198,20 +155,32 @@ public class OrgCreateEventFragment extends Fragment {
         String eventUrl = urlField.getText().toString().trim();
         String capStr = capacityField.getText().toString().trim();
         String location = locationField.getText().toString().trim();
-        String latStr = latField.getText().toString().trim();
-        String lonStr = lonField.getText().toString().trim();
         String maxEntrantsStr = maxEntrantsField.getText().toString().trim();
         String posterUrl = posterUrlField.getText().toString().trim();
 
-        // Validation
         if (TextUtils.isEmpty(title)) { showToast("Event name is required"); return; }
         if (TextUtils.isEmpty(capStr)) { showToast("Number of participants is required"); return; }
         if (TextUtils.isEmpty(desc)) { showToast("Event description is required"); return; }
-        if (TextUtils.isEmpty(location)) { showToast("Event location is required"); return; }
+        if (TextUtils.isEmpty(location)) { showToast("Event location coordinates are required"); return; }
 
         int capacity = Integer.parseInt(capStr);
-        double lat = TextUtils.isEmpty(latStr) ? 0.0 : Double.parseDouble(latStr);
-        double lon = TextUtils.isEmpty(lonStr) ? 0.0 : Double.parseDouble(lonStr);
+
+        double lat;
+        double lon;
+
+        if (!location.contains(",")) {
+            showToast("Format: xxx.xxxx, xxx.xxxx");
+            return;
+        }
+
+        String[] parts = location.split(",", 2);
+        try {
+            lat = Double.parseDouble(parts[0].trim());
+            lon = Double.parseDouble(parts[1].trim());
+        } catch (Exception e) {
+            showToast("Invalid coordinates. Format: xxx.xxxx, xxx.xxxx");
+            return;
+        }
         int maxEntrants = TextUtils.isEmpty(maxEntrantsStr) ? 0 : Integer.parseInt(maxEntrantsStr);
 
         Timestamp now = Timestamp.now();
@@ -226,8 +195,10 @@ public class OrgCreateEventFragment extends Fragment {
         eventData.put("description", desc);
         if (!TextUtils.isEmpty(eventUrl)) eventData.put("eventURL", eventUrl);
         eventData.put("capacity", capacity);
-        eventData.put("location", new GeoPoint(lat, lon));
-        eventData.put("geoLocation", new GeoPoint(lat, lon));
+
+        eventData.put("location", new GeoPoint(lat, lon)); // changed
+        eventData.put("geoLocation", new GeoPoint(lat, lon)); // added
+
         eventData.put("createdAt", now);
         eventData.put("eventStartAt", eventStart);
         eventData.put("eventEndAt", eventEnd);
@@ -259,11 +230,19 @@ public class OrgCreateEventFragment extends Fragment {
 
     private Timestamp parseDateToTimestamp(String dateStr, Timestamp fallback) {
         if (TextUtils.isEmpty(dateStr)) return fallback;
+
         try {
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            return new Timestamp(sdf.parse(dateStr));
-        } catch (Exception e) {
-            e.printStackTrace();
+            String[] parts = dateStr.split("/");
+            if (parts.length != 3) return fallback;
+
+            int year = Integer.parseInt(parts[2]);
+            int month = Integer.parseInt(parts[0]) - 1;
+            int day = Integer.parseInt(parts[1]);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(year, month, day, 0, 0, 0);
+            return new Timestamp(calendar.getTime());
+        } catch (NumberFormatException e) {
             return fallback;
         }
     }
@@ -271,10 +250,10 @@ public class OrgCreateEventFragment extends Fragment {
     private void showDatePicker(EditText target) {
         Calendar calendar = Calendar.getInstance();
         DatePickerDialog dialog = new DatePickerDialog(
-                getContext(),
+                requireContext(),
                 R.style.CustomDatePicker,
                 (view, year, month, dayOfMonth) -> target.setText(
-                        String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth)),
+                        String.format(Locale.getDefault(), "%02d/%02d/%04d", month + 1, dayOfMonth, year)),
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)
@@ -285,7 +264,7 @@ public class OrgCreateEventFragment extends Fragment {
     private void showTimePicker(EditText target) {
         Calendar calendar = Calendar.getInstance();
         TimePickerDialog dialog = new TimePickerDialog(
-                getContext(),
+                requireContext(),
                 R.style.CustomDatePicker,
                 (view, hourOfDay, minute) -> target.setText(
                         String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute)),

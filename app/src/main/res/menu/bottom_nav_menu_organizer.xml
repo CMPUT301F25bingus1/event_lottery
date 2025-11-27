@@ -12,11 +12,6 @@
         android:title="Create Event" />
 
     <item
-        android:id="@+id/nav_notifications"
-        android:icon="@drawable/notification"
-        android:title="Notifications" />
-
-    <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/user"
         android:title="Profile" />
