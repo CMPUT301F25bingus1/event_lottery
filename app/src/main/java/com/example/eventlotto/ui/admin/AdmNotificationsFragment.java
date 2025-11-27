@@ -24,16 +24,46 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment providing an administrative view of all notifications sent by organizers.
+ * <p>
+ * This screen retrieves every document within the top-level {@code notifications} collection
+ * and renders each entry in chronological order with newest being first. Each document corresponds
+ * to a notification sent to an entrant regarding a specific event. This fragment is visible
+ * only to admin's.
+ * </p>
+ *
+ * Implements: Getting all of notification from Firestore,
+ * Displaying them with the user, event name, time stamp, and notification content
+ */
 public class AdmNotificationsFragment extends Fragment {
 
+    /** RecyclerView displaying notification log entries. */
     private RecyclerView recyclerView;
+
+    /** Progress bar shown while data is loaded from Firestore. */
     private ProgressBar progressBar;
+
+    /** Text displayed if no notifications are available. */
     private TextView emptyView;
 
-    private final List<DocumentSnapshot> docs = new ArrayList<>(); // added
-    private FirebaseFirestore db; // added
-    private NotificationsAdapter adapter; // added
+    /** Full snapshot list of notification documents returned from Firestore. */
+    private final List<DocumentSnapshot> docs = new ArrayList<>();
 
+    /** Firestore instance for database access. */
+    private FirebaseFirestore db;
+
+    /** Adapter providing rendering logic for notification cards. */
+    private NotificationsAdapter adapter;
+
+    /**
+     * Inflates the fragment layout and initializes UI components.
+     *
+     * @param inflater Layout inflater for XML conversion.
+     * @param container Optional parent container.
+     * @param savedInstanceState Previous state bundle (unused here).
+     * @return The fully constructed Fragment view hierarchy.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -46,10 +76,10 @@ public class AdmNotificationsFragment extends Fragment {
         progressBar = root.findViewById(R.id.progress_notifications);
         emptyView = root.findViewById(R.id.empty_notifications);
 
-        db = FirebaseFirestore.getInstance(); // added
+        db = FirebaseFirestore.getInstance();
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new NotificationsAdapter(docs); // added
+        adapter = new NotificationsAdapter(docs);
         recyclerView.setAdapter(adapter);
 
         fetchNotifications();
@@ -57,6 +87,14 @@ public class AdmNotificationsFragment extends Fragment {
         return root;
     }
 
+    /**
+     * Fetches all documents within the Firestore {@code notifications} collection.
+     * <p>
+     * Documents are ordered by their {@code createdAt} timestamp in descending order,
+     * ensuring the newest notifications appear first. Once documents are loaded, the UI is
+     * updated to reflect the results.
+     * </p>
+     */
     private void fetchNotifications() {
         progressBar.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
@@ -91,10 +129,23 @@ public class AdmNotificationsFragment extends Fragment {
                 });
     }
 
+    /**
+     * RecyclerView adapter responsible for creating and binding notification card views.
+     * <p>
+     * This adapter reads directly from Firestore document snapshots rather than using
+     * a model class, ensuring compatibility with any future schema changes.
+     * </p>
+     */
     private static class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdapter.VH> {
 
+        /** Data set of Firestore document snapshots representing notifications. */
         private final List<DocumentSnapshot> items;
 
+        /**
+         * Constructs a new adapter for the provided dataset.
+         *
+         * @param items Notification documents to render.
+         */
         NotificationsAdapter(List<DocumentSnapshot> items) {
             this.items = items != null ? items : new ArrayList<>();
         }
@@ -133,14 +184,31 @@ public class AdmNotificationsFragment extends Fragment {
             return items.size();
         }
 
+        /**
+         * Ensures a non-null {@code String} value is returned.
+         *
+         * @param s Source string value.
+         * @return The original string, or an empty string if null.
+         */
         private static String safeString(String s) {
             return s == null ? "" : s;
         }
 
+        /**
+         * ViewHolder representing a single notification entry.
+         */
         static class VH extends RecyclerView.ViewHolder {
+
+            /** Notification message text. */
             final TextView txtMessage;
+
+            /** Event identifier associated with this notification. */
             final TextView txtEventId;
+
+            /** ID of the entrant who received the notification. */
             final TextView txtUserId;
+
+            /** Timestamp describing when the notification was created. */
             final TextView txtCreatedAt;
 
             VH(@NonNull View itemView) {
