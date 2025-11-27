@@ -31,6 +31,7 @@ import com.example.eventlotto.ui.organizer.OrgHomeFragment;
 import com.example.eventlotto.ui.organizer.OrgCreateEventFragment;
 import com.example.eventlotto.ui.admin.AdmImagesFragment;
 import com.example.eventlotto.ui.admin.AdmProfilesFragment;
+import com.example.eventlotto.ui.admin.AdmNotificationsFragment;
 import com.example.eventlotto.ui.entrant.EntHomeFragment;
 import com.example.eventlotto.ui.entrant.EntMyEventsFragment;
 import com.example.eventlotto.ui.entrant.EntNotificationsFragment;
@@ -48,6 +49,7 @@ import java.util.Set;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+
 /**
  * Main activity for EventLotto.
  * <p>
@@ -99,15 +101,19 @@ public class MainActivity extends AppCompatActivity {
                     .addOnSuccessListener(snapshot -> {
                         if (snapshot != null && snapshot.exists()) {
                             String role = snapshot.getString("role") != null
-                                    ? snapshot.getString("role") : "entrant";
+                                    ? snapshot.getString("role") : "entrant"; // changed
                             setupBottomNavMenu(bottomNavigationView, role);
-                            assert role != null;
-                            if (role.equals("organizer")) {
+
+                            if ("organizer".equals(role)) {
                                 loadFragment(new OrgHomeFragment());
+                            } else if ("admin".equals(role)) {
+                                loadFragment(new AdmHomeFragment());
                             } else {
                                 loadFragment(new EntHomeFragment());
                             }
+
                             showBottomNavigation();
+
                         } else {
                             loadFragment(new EntWelcomeFragment());
                             hideBottomNavigation();
@@ -149,6 +155,8 @@ public class MainActivity extends AppCompatActivity {
                 if (id == R.id.nav_home) fragment = new AdmHomeFragment();
                 else if (id == R.id.nav_admin_images)
                     fragment = new AdmImagesFragment();
+                else if (id == R.id.nav_admin_notifications)
+                    fragment = new AdmNotificationsFragment();
                 else if (id == R.id.nav_admin_profiles)
                     fragment = new AdmProfilesFragment();
                 else if (id == R.id.nav_profile) fragment = new LoginFragment();

@@ -12,6 +12,12 @@
         android:title="@string/images" />
 
     <item
+        android:id="@+id/nav_admin_notifications"
+        android:icon="@drawable/notification"
+        android:title="Notifications" />
+
+
+    <item
         android:id="@+id/nav_admin_profiles"
         android:icon="@drawable/guillotine"
         android:title="@string/users" />
