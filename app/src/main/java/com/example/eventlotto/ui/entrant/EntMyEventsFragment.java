@@ -130,7 +130,13 @@ public class EntMyEventsFragment extends Fragment {
                                                 // Remove from list first to avoid duplicates
                                                 pendingEvents.removeIf(e -> e.getEid().equals(event.getEid()));
 
-                                                if ("waiting".equalsIgnoreCase(status) || "selected".equalsIgnoreCase(status) || "signed_up".equalsIgnoreCase(status) || "cancelled".equalsIgnoreCase(status)) {
+                                                if ("waiting".equalsIgnoreCase(status)
+                                                        || "selected".equalsIgnoreCase(status)
+                                                        || "signed_up".equalsIgnoreCase(status)
+                                                        || "cancelled".equalsIgnoreCase(status)
+                                                        || "accepted".equalsIgnoreCase(status)
+                                                        || "not_chosen".equalsIgnoreCase(status)
+                                                        || "not chosen".equalsIgnoreCase(status)) {
                                                     // True if the event has not ended/happened yet, false if the event has ended
                                                     boolean isCurrentEvent = event.getEventEndAt().compareTo(Timestamp.now()) >= 0;
 

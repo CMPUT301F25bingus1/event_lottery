@@ -3,6 +3,7 @@ package com.example.eventlotto.model;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.GeoPoint;
+import java.util.List;
 
 /**
  * Represents an event in the application.
@@ -61,6 +62,8 @@ public class Event {
 
     /** The unique Firestore document ID (Event ID) for this event. */
     private String eid;
+
+    private List<String> daysOfWeek;
 
     /**
      * Empty constructor required for Firestore automatic deserialization.
@@ -122,4 +125,6 @@ public class Event {
 
     /** Sets the event URL. @param eventURL Link associated with this event. */
     public void setEventURL(String eventURL) { this.eventURL = eventURL; }
+
+    public List<String> getDaysOfWeek() { return daysOfWeek; }
 }

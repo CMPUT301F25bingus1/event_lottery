@@ -155,6 +155,7 @@
                     android:id="@+id/input_event_url"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autofillHints="Enter Image URL"
                     android:hint="Event URL (image or webpage)"
                     android:inputType="textUri"
                     android:textColor="@android:color/black"
@@ -207,37 +208,37 @@
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/day_mon"
-                        android:text="M"
+                        android:text="Mon"
                         style="@style/DayToggleStyle" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/day_tue"
-                        android:text="T"
+                        android:text="Tue"
                         style="@style/DayToggleStyle" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/day_wed"
-                        android:text="W"
+                        android:text="Wed"
                         style="@style/DayToggleStyle" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/day_thu"
-                        android:text="T"
+                        android:text="Thu"
                         style="@style/DayToggleStyle" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/day_fri"
-                        android:text="F"
+                        android:text="Fri"
                         style="@style/DayToggleStyle" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/day_sat"
-                        android:text="S"
+                        android:text="Sat"
                         style="@style/DayToggleStyle" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/day_sun"
-                        android:text="S"
+                        android:text="Sun"
                         style="@style/DayToggleStyle" />
                 </com.google.android.material.button.MaterialButtonToggleGroup>
 
@@ -310,25 +311,7 @@
                     android:textColor="@android:color/black"
                     android:textColorHint="#BDBDBD"
                     android:layout_marginBottom="12dp" />
-                <!-- Poster Upload -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Poster Upload (Optional)"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/black"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="4dp" />
 
-                <EditText
-                    android:id="@+id/input_poster_url"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Enter poster URL"
-                    android:inputType="textUri"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="#BDBDBD"
-                    android:layout_marginBottom="12dp" />
                 <!-- Event Description -->
                 <TextView
                     android:layout_width="wrap_content"
@@ -412,9 +395,9 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@android:drawable/ic_dialog_info"
-                        android:tint="#757575"
                         android:layout_marginStart="8dp"
-                        android:contentDescription="Info" />
+                        android:contentDescription="Info"
+                        app:tint="#757575" />
                 </LinearLayout>
 
                 <TextView

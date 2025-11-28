@@ -301,6 +301,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
                 bg = R.drawable.bg_status_selected; label = "Selected"; break;
             case "signed up":
             case "signed_up":
+            case "accepted":
                 bg = R.drawable.bg_status_signed_up; label = "Signed Up"; break;
             case "cancelled":
             case "canceled":

@@ -44,7 +44,6 @@ public class OrgCreateEventFragment extends Fragment {
     private EditText capacityField;
     private EditText locationField;
     private EditText maxEntrantsField;
-    private EditText posterUrlField;
     private EditText inputEventStart;
     private EditText inputEventEnd;
     private EditText inputTimeStart;
@@ -79,7 +78,6 @@ public class OrgCreateEventFragment extends Fragment {
         geoConsentSwitch = view.findViewById(R.id.check_geo_consent);
         createBtn = view.findViewById(R.id.btn_create_event);
         maxEntrantsField = view.findViewById(R.id.input_max_entrants);
-        posterUrlField = view.findViewById(R.id.input_poster_url);
         inputEventStart = view.findViewById(R.id.input_event_start);
         inputEventEnd = view.findViewById(R.id.input_event_end);
         inputTimeStart = view.findViewById(R.id.input_time_start);
@@ -156,7 +154,6 @@ public class OrgCreateEventFragment extends Fragment {
         String capStr = capacityField.getText().toString().trim();
         String location = locationField.getText().toString().trim();
         String maxEntrantsStr = maxEntrantsField.getText().toString().trim();
-        String posterUrl = posterUrlField.getText().toString().trim();
 
         if (TextUtils.isEmpty(title)) { showToast("Event name is required"); return; }
         if (TextUtils.isEmpty(capStr)) { showToast("Number of participants is required"); return; }
@@ -208,8 +205,6 @@ public class OrgCreateEventFragment extends Fragment {
         eventData.put("entrantsApplied", 0);
         eventData.put("maxEntrants", maxEntrants);
         eventData.put("daysOfWeek", new ArrayList<>(selectedDays));
-
-        if (!TextUtils.isEmpty(posterUrl)) eventData.put("posterUrl", posterUrl);
 
         String timeStart = inputTimeStart.getText().toString();
         String timeEnd = inputTimeEnd.getText().toString();

@@ -226,6 +226,15 @@ public class EntHomeFragment extends Fragment {
         Date regToDate = parseDate(registrationTo, sdf);
 
         List<Event> filtered = new ArrayList<>();
+        List<String> normalizedSelected = new ArrayList<>();
+        if (selectedDays != null) {
+            for (String d : selectedDays) {
+                if (d != null && !d.trim().isEmpty()) {
+                    String norm = d.trim().substring(0, Math.min(3, d.trim().length())).toUpperCase(Locale.US);
+                    normalizedSelected.add(norm);
+                }
+            }
+        }
 
         for (Event e : fullEventList) {
             boolean matches = true;
@@ -244,23 +253,39 @@ public class EntHomeFragment extends Fragment {
             if (regToDate != null && (regStart == null || regStart.after(regToDate))) matches = false;
 
             // --- Days-of-week filter ---
-            if (selectedDays != null && !selectedDays.isEmpty() && eventStart != null) {
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(eventStart);
-                int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+            if (!normalizedSelected.isEmpty()) {
+                boolean dayMatch = false;
 
-                String dayLetter = "";
-                switch (dayOfWeek) {
-                    case Calendar.MONDAY: dayLetter = "M"; break;
-                    case Calendar.TUESDAY: dayLetter = "T"; break;
-                    case Calendar.WEDNESDAY: dayLetter = "W"; break;
-                    case Calendar.THURSDAY: dayLetter = "T"; break;
-                    case Calendar.FRIDAY: dayLetter = "F"; break;
-                    case Calendar.SATURDAY: dayLetter = "S"; break;
-                    case Calendar.SUNDAY: dayLetter = "S"; break;
+                List<String> eventDays = e.getDaysOfWeek();
+                if (eventDays != null && !eventDays.isEmpty()) {
+                    for (String d : eventDays) {
+                        if (d == null) continue;
+                        String norm = d.trim().substring(0, Math.min(3, d.trim().length())).toUpperCase(Locale.US);
+                        if (normalizedSelected.contains(norm)) {
+                            dayMatch = true;
+                            break;
+                        }
+                    }
+                } else if (eventStart != null) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(eventStart);
+                    int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+
+                    String norm = "";
+                    switch (dayOfWeek) {
+                        case Calendar.MONDAY: norm = "MON"; break;
+                        case Calendar.TUESDAY: norm = "TUE"; break;
+                        case Calendar.WEDNESDAY: norm = "WED"; break;
+                        case Calendar.THURSDAY: norm = "THU"; break;
+                        case Calendar.FRIDAY: norm = "FRI"; break;
+                        case Calendar.SATURDAY: norm = "SAT"; break;
+                        case Calendar.SUNDAY: norm = "SUN"; break;
+                    }
+
+                    dayMatch = normalizedSelected.contains(norm);
                 }
 
-                if (!selectedDays.contains(dayLetter)) matches = false;
+                if (!dayMatch) matches = false;
             }
 
             if (matches) filtered.add(e);

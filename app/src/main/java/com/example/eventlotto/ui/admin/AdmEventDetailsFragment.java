@@ -118,12 +118,14 @@ public class AdmEventDetailsFragment extends DialogFragment {
                     : "Location: N/A");
         }
 
-        String imageUrl = doc.getString("imageUrl");
-        if (imageUrl != null && !imageUrl.isEmpty()) {
+        
+        String imageUrl = doc.getString("eventURL");
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
             Glide.with(requireContext())
-                    .load(imageUrl)
+                    .load(imageUrl.trim())
                     .placeholder(R.mipmap.ic_launcher)
                     .error(R.mipmap.ic_launcher)
+                    .fitCenter()
                     .into(eventImage);
         } else {
             eventImage.setImageResource(R.mipmap.ic_launcher);

@@ -18,7 +18,8 @@
             android:id="@+id/eventImage"
             android:layout_width="match_parent"
             android:layout_height="250dp"
-            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
             android:contentDescription="@string/event_image"
             android:src="@mipmap/ic_launcher" />
 

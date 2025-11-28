@@ -84,37 +84,37 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/day_mon"
-                android:text="M"
+                android:text="Mon"
                 style="@style/DayToggleStyle" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/day_tue"
-                android:text="T"
+                android:text="Tue"
                 style="@style/DayToggleStyle" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/day_wed"
-                android:text="W"
+                android:text="Wed"
                 style="@style/DayToggleStyle" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/day_thu"
-                android:text="T"
+                android:text="Thu"
                 style="@style/DayToggleStyle" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/day_fri"
-                android:text="F"
+                android:text="Fri"
                 style="@style/DayToggleStyle" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/day_sat"
-                android:text="S"
+                android:text="Sat"
                 style="@style/DayToggleStyle" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/day_sun"
-                android:text="S"
+                android:text="Sun"
                 style="@style/DayToggleStyle" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 

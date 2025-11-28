@@ -2,25 +2,56 @@ package com.example.eventlotto.ui.entrant;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+
 import com.example.eventlotto.R;
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.MultiFormatReader;
+import com.google.zxing.NotFoundException;
+import com.google.zxing.Result;
+import com.google.zxing.RGBLuminanceSource;
+import com.google.zxing.common.HybridBinarizer;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
+
+import java.io.InputStream;
 
 // Class developed in conjunction with OpenAI, ChatGPT, "How to implement QR code reader in Android Studio"
 public class EntScanFragment extends Fragment implements BarcodeCallback {
 
     private DecoratedBarcodeView barcodeView;
     private boolean scanned = false;
+    private ActivityResultLauncher<String> imagePickerLauncher;
+    private final MultiFormatReader multiFormatReader = new MultiFormatReader();
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+                    if (uri != null) {
+                        decodeQrFromImage(uri);
+                    }
+                }
+        );
+    }
 
     /**
      * Creates and returns the view for the ScanFragment.
@@ -39,6 +70,8 @@ public class EntScanFragment extends Fragment implements BarcodeCallback {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_scan, container, false);
         barcodeView = view.findViewById(R.id.barcode_scanner);
+        Button uploadQrButton = view.findViewById(R.id.upload_qr_button);
+        uploadQrButton.setOnClickListener(v -> imagePickerLauncher.launch("image/*"));
 
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startScanner();
@@ -62,20 +95,14 @@ public class EntScanFragment extends Fragment implements BarcodeCallback {
     /**
      * Handles the result of a scanned QR code.
      * <p>
-     * If a valid QR code is detected and hasn’t been processed yet,
+     * If a valid QR code is detected and hasn't been processed yet,
      * this method opens the {@link EntEventDetailsFragment} to display the event information
      *
      * @param result The scanned BarcodeResult result object
      */
     @Override
     public void barcodeResult(BarcodeResult result) {
-        if (!scanned && result.getText() != null) {
-            scanned = true;
-            String eventId = result.getText();
-
-            EntEventDetailsFragment dialog = EntEventDetailsFragment.newInstance(eventId);
-            dialog.show(getParentFragmentManager(), "event_details_dialog");
-        }
+        handleEventId(result.getText());
     }
 
     /**
@@ -140,5 +167,52 @@ public class EntScanFragment extends Fragment implements BarcodeCallback {
                 grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             startScanner();
         }
+    }
+
+    private void decodeQrFromImage(@NonNull Uri imageUri) {
+        try (InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri)) {
+            if (inputStream == null) {
+                Toast.makeText(getContext(), "Unable to read image", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            if (bitmap == null) {
+                Toast.makeText(getContext(), "Unable to load image", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            int[] pixels = new int[width * height];
+            bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+
+            RGBLuminanceSource source = new RGBLuminanceSource(width, height, pixels);
+            BinaryBitmap binaryBitmap = new BinaryBitmap(new HybridBinarizer(source));
+            multiFormatReader.reset();
+            Result result = multiFormatReader.decode(binaryBitmap);
+            handleEventId(result.getText());
+        } catch (NotFoundException e) {
+            Toast.makeText(getContext(), "No QR code found in image", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "Error reading QR image", Toast.LENGTH_SHORT).show();
+        } finally {
+            multiFormatReader.reset();
+        }
+    }
+
+    private void handleEventId(@Nullable String eventId) {
+        if (eventId == null || eventId.trim().isEmpty()) {
+            Toast.makeText(getContext(), "QR code did not contain an event id", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (scanned) {
+            return;
+        }
+
+        scanned = true;
+        EntEventDetailsFragment dialog = EntEventDetailsFragment.newInstance(eventId);
+        dialog.show(getParentFragmentManager(), "event_details_dialog");
     }
 }

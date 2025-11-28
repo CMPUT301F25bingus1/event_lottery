@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,19 +20,17 @@ import com.example.eventlotto.R;
 import com.example.eventlotto.model.User;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class AdmProfilesFragment extends Fragment {
 
     private final List<User> users = new ArrayList<>();
-    private final Set<String> selectedUserIds = new HashSet<>();
 
     private UsersAdapter adapter;
     private FirestoreService firestoreService;
-    private Button btnOrganizers, btnUsers, btnDelete;
+    private Button btnOrganizers, btnUsers;
     private String currentFilter = "organizer"; // Default to organizers
 
     @Nullable
@@ -50,30 +47,13 @@ public class AdmProfilesFragment extends Fragment {
 
         btnOrganizers = root.findViewById(R.id.btn_organizers);
         btnUsers = root.findViewById(R.id.btn_users);
-        btnDelete = root.findViewById(R.id.btn_delete);
-        Button btnCancel = root.findViewById(R.id.btn_cancel);
 
-        adapter = new UsersAdapter(users, selectedUserIds);
+        adapter = new UsersAdapter(users, this::showUserDetails);
         recyclerView.setAdapter(adapter);
 
         // Tab switching
         btnOrganizers.setOnClickListener(v -> switchTab("organizer"));
         btnUsers.setOnClickListener(v -> switchTab("entrant"));
-
-        // Delete button
-        btnDelete.setOnClickListener(v -> {
-            if (selectedUserIds.isEmpty()) {
-                Toast.makeText(getContext(), "No users selected", Toast.LENGTH_SHORT).show();
-            } else {
-                showDeleteConfirmationDialog();
-            }
-        });
-
-        // Cancel button - clear selections
-        btnCancel.setOnClickListener(v -> {
-            selectedUserIds.clear();
-            adapter.notifyDataSetChanged();
-        });
 
         loadUsers();
 
@@ -82,7 +62,6 @@ public class AdmProfilesFragment extends Fragment {
 
     private void switchTab(String role) {
         currentFilter = role;
-        selectedUserIds.clear();
 
         // Update tab UI
         if (role.equals("organizer")) {
@@ -119,40 +98,92 @@ public class AdmProfilesFragment extends Fragment {
                 );
     }
 
-    private void showDeleteConfirmationDialog() {
+    private void showUserDetails(User user) {
+        View dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_admin_user_details, null, false);
+
+        TextView name = dialogView.findViewById(R.id.detail_name);
+        TextView role = dialogView.findViewById(R.id.detail_role);
+        TextView email = dialogView.findViewById(R.id.detail_email);
+        TextView phone = dialogView.findViewById(R.id.detail_phone);
+        TextView device = dialogView.findViewById(R.id.detail_device);
+        TextView avatar = dialogView.findViewById(R.id.detail_avatar);
+        TextView created = dialogView.findViewById(R.id.detail_created);
+
+        String displayName = user.getFullName() != null && !user.getFullName().isEmpty()
+                ? user.getFullName()
+                : (user.getEmail() != null ? user.getEmail() : "Unknown");
+        name.setText(displayName);
+
+        String prettyRole = user.getRole() != null && !user.getRole().isEmpty()
+                ? user.getRole().substring(0, 1).toUpperCase() + user.getRole().substring(1).toLowerCase()
+                : "User";
+        role.setText(prettyRole);
+
+        String emailVal = user.getEmail() != null && !user.getEmail().isEmpty()
+                ? user.getEmail() : "No email on file";
+        String phoneVal = user.getPhone() != null && !user.getPhone().isEmpty()
+                ? user.getPhone() : "No phone on file";
+        email.setText("Email: " + emailVal);
+        phone.setText("Phone: " + phoneVal);
+        device.setText("Device ID: " + (user.getDeviceId() != null && !user.getDeviceId().isEmpty()
+                ? user.getDeviceId() : user.getUid()));
+
+        String createdVal = "Unknown";
+        if (user.getCreatedAt() != null) {
+            createdVal = DateFormat.getDateTimeInstance(
+                    DateFormat.MEDIUM,
+                    DateFormat.SHORT
+            ).format(user.getCreatedAt().toDate());
+        }
+        if (created != null) {
+            created.setText("Created: " + createdVal);
+        }
+
+        if (avatar != null) {
+            String initial = displayName != null && !displayName.trim().isEmpty()
+                    ? displayName.trim().substring(0, 1).toUpperCase()
+                    : "?";
+            avatar.setText(initial);
+        }
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        dialogView.findViewById(R.id.btn_close_user).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.btn_delete_user).setOnClickListener(v -> {
+            dialog.dismiss();
+            confirmDelete(user);
+        });
+
+        dialog.show();
+    }
+
+    private void confirmDelete(User user) {
         new AlertDialog.Builder(requireContext())
-                .setTitle("Delete Selected?")
-                .setMessage("Are you sure you want to delete selected user/organizers?")
-                .setCancelable(true)
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                .setPositiveButton("Yes", (dialog, which) -> deleteSelectedUsers())
+                .setTitle("Delete user?")
+                .setMessage("Remove " + (user.getFullName() != null ? user.getFullName() : "this user") + " permanently?")
+                .setPositiveButton("Delete", (d, which) -> deleteUser(user))
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 
-    private void deleteSelectedUsers() {
-        int totalToDelete = selectedUserIds.size();
-        int[] deleteCount = {0};
-
-        for (String uid : new ArrayList<>(selectedUserIds)) {
-            firestoreService.deleteUser(uid, success -> {
-                deleteCount[0]++;
-                if (deleteCount[0] == totalToDelete) {
-                    Toast.makeText(getContext(), "Deleted " + totalToDelete + " user(s)", Toast.LENGTH_SHORT).show();
-                    selectedUserIds.clear();
-                    loadUsers();
-                }
-            });
-        }
+    private void deleteUser(User user) {
+        firestoreService.deleteUser(user.getUid(), success -> {
+            Toast.makeText(getContext(), "User deleted", Toast.LENGTH_SHORT).show();
+            loadUsers();
+        });
     }
 
     private static class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.VH> {
 
         private final List<User> items;
-        private final Set<String> selectedIds;
+        private final OnUserClick listener;
 
-        UsersAdapter(List<User> items, Set<String> selectedIds) {
+        UsersAdapter(List<User> items, OnUserClick listener) {
             this.items = items;
-            this.selectedIds = selectedIds;
+            this.listener = listener;
         }
 
         @NonNull
@@ -165,7 +196,7 @@ public class AdmProfilesFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull VH holder, int position) {
-            holder.bind(items.get(position), selectedIds);
+            holder.bind(items.get(position), listener);
         }
 
         @Override
@@ -175,41 +206,48 @@ public class AdmProfilesFragment extends Fragment {
 
         static class VH extends RecyclerView.ViewHolder {
             TextView name;
-            CheckBox checkbox;
+            TextView subtitle;
+            TextView roleChip;
+            TextView avatarInitial;
 
             VH(@NonNull View itemView) {
                 super(itemView);
                 name = itemView.findViewById(R.id.text_user_name);
-                checkbox = itemView.findViewById(R.id.checkbox_select_user);
+                subtitle = itemView.findViewById(R.id.text_user_subtitle);
+                roleChip = itemView.findViewById(R.id.text_user_role_chip);
+                avatarInitial = itemView.findViewById(R.id.avatar_initial);
             }
 
-            void bind(User user, Set<String> selectedIds) {
+            void bind(User user, OnUserClick listener) {
                 String displayName = user.getFullName() != null ? user.getFullName() :
                         (user.getEmail() != null ? user.getEmail() : user.getUid());
                 name.setText(displayName);
 
-                boolean isSelected = selectedIds.contains(user.getUid());
-                checkbox.setChecked(isSelected);
+                String secondary = user.getEmail();
+                if (secondary == null || secondary.trim().isEmpty()) secondary = user.getPhone();
+                if (secondary == null || secondary.trim().isEmpty()) secondary = user.getUid();
+                if (subtitle != null) subtitle.setText(secondary);
 
-                // Toggle selection on click
-                itemView.setOnClickListener(v -> {
-                    if (selectedIds.contains(user.getUid())) {
-                        selectedIds.remove(user.getUid());
-                        checkbox.setChecked(false);
-                    } else {
-                        selectedIds.add(user.getUid());
-                        checkbox.setChecked(true);
-                    }
-                });
+                if (roleChip != null) {
+                    String role = user.getRole() != null ? user.getRole() : "user";
+                    String prettyRole = role.isEmpty() ? "User"
+                            : role.substring(0, 1).toUpperCase() + role.substring(1).toLowerCase();
+                    roleChip.setText(prettyRole);
+                }
 
-                checkbox.setOnClickListener(v -> {
-                    if (checkbox.isChecked()) {
-                        selectedIds.add(user.getUid());
-                    } else {
-                        selectedIds.remove(user.getUid());
-                    }
-                });
+                if (avatarInitial != null) {
+                    String initial = displayName != null && !displayName.trim().isEmpty()
+                            ? displayName.trim().substring(0, 1).toUpperCase()
+                            : "?";
+                    avatarInitial.setText(initial);
+                }
+
+                itemView.setOnClickListener(v -> listener.onClick(user));
             }
         }
+    }
+
+    private interface OnUserClick {
+        void onClick(User user);
     }
 }

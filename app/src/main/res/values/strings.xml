@@ -62,6 +62,7 @@
     <string name="manage_events">Manage Events</string>
     <string name="tab_current">Current Events</string>
     <string name="tab_history">History</string>
+    <string name="upload_qr_image">Upload QR Image</string>
 
     <string name="event_name">Event Name <font color="#D32F2F">* (Required)</font></string>
     <string name="event_period">Event Period <font color="#D32F2F">*</font></string>
