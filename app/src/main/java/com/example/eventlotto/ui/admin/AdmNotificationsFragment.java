@@ -22,7 +22,9 @@ import com.google.firebase.firestore.Query;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Fragment providing an administrative view of all notifications sent by organizers.
@@ -77,6 +79,7 @@ public class AdmNotificationsFragment extends Fragment {
         emptyView = root.findViewById(R.id.empty_notifications);
 
         db = FirebaseFirestore.getInstance();
+
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new NotificationsAdapter(docs);
@@ -150,6 +153,10 @@ public class AdmNotificationsFragment extends Fragment {
             this.items = items != null ? items : new ArrayList<>();
         }
 
+        private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+        private final Map<String, String> eventNameCache = new HashMap<>();
+        private final Map<String, String> userNameCache = new HashMap<>();
+
         @NonNull
         @Override
         public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -174,8 +181,18 @@ public class AdmNotificationsFragment extends Fragment {
             }
 
             holder.txtMessage.setText(message.isEmpty() ? "(no message)" : message);
-            holder.txtEventId.setText("Event: " + eid);
-            holder.txtUserId.setText("Entrant: " + uid);
+            holder.txtEventId.setText("Event: loading...");
+            db.collection("events").document(eid).get()
+                    .addOnSuccessListener(eventDoc -> {
+                        String title = eventDoc.getString("eventTitle");
+                        holder.txtEventId.setText("Event: " + title);
+                    });
+            holder.txtUserId.setText("Entrant: loading...");
+            db.collection("users").document(uid).get()
+                    .addOnSuccessListener(userDoc -> {
+                        String name = userDoc.getString("fullName");
+                        holder.txtUserId.setText("Entrant: " + name);
+                    });
             holder.txtCreatedAt.setText(createdText);
         }
 
