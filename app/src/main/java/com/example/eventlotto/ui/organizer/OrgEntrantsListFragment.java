@@ -375,7 +375,7 @@ public class OrgEntrantsListFragment extends DialogFragment implements OnMapRead
 
         db.collection("events")
                 .document(eventId)
-                .collection("entrants")
+                .collection("status")
                 .get()
                 .addOnSuccessListener(entrantsSnap -> {
 
