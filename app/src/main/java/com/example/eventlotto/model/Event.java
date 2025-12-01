@@ -7,11 +7,9 @@ import java.util.List;
 
 /**
  * Represents an event in the application.
- * <p>
  * This class serves as a data model mapped to the "events" collection in Firestore.
  * It contains data such as the event title, description, capacity,
  * time information (event window, registration window), and geolocation.
- * </p>
  */
 public class Event {
 
@@ -63,6 +61,7 @@ public class Event {
     /** The unique Firestore document ID (Event ID) for this event. */
     private String eid;
 
+    /** Days of the week when the event is scheduled (for recurring events). */
     private List<String> daysOfWeek;
 
     /**
@@ -120,11 +119,18 @@ public class Event {
     /** @return The event's unique ID. */
     public String getEid() { return eid; }
 
-    /** Sets the event ID. @param eid The Firestore document ID of the event. */
+    /**
+     * Sets the event ID.
+     * @param eid The Firestore document ID of the event.
+     */
     public void setEid(String eid) { this.eid = eid; }
 
-    /** Sets the event URL. @param eventURL Link associated with this event. */
+    /**
+     * Sets the event URL.
+     * @param eventURL Link associated with this event.
+     */
     public void setEventURL(String eventURL) { this.eventURL = eventURL; }
 
+    /** @return Days of the week the event is scheduled for, if applicable. */
     public List<String> getDaysOfWeek() { return daysOfWeek; }
 }

@@ -19,8 +19,6 @@ import com.example.eventlotto.FirestoreService;
 import com.example.eventlotto.R;
 import com.example.eventlotto.model.Event;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -145,13 +143,6 @@ public class AdmImagesFragment extends Fragment {
         if (imageUrl == null || !imageUrl.contains("firebasestorage.googleapis.com")) {
             return;
         }
-
-        try {
-            StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl);
-            storageRef.delete()
-                    .addOnSuccessListener(aVoid -> {})
-                    .addOnFailureListener(e -> {});
-        } catch (Exception e) {}
     }
 
     public static class EventImageItem {
