@@ -1,4 +1,5 @@
 Unit tests are good to run as-is, running the emulator is not required as the tests are local JVM unit tests.
+
 Main unit tests are: (76 tests)
 - EventModelTest
 - EventStatusModelTest
