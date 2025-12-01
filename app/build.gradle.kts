@@ -50,7 +50,7 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.recyclerview)
-    //implementation(files("C:/Users/gjftn/AppData/Local/Android/Sdk/platforms/android-36/android.jar"))
+    // implementation(files("C:/Users/gjftn/AppData/Local/Android/Sdk/platforms/android-36/android.jar"))
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
     implementation("com.google.firebase:firebase-analytics")

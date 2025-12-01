@@ -340,18 +340,5 @@ public class Event {
     public void setTags(List<String> tags) {
         this.tags = tags;
     }
-  
-   /* Sets the event ID.
-   * @param eid The Firestore document ID of the event.
-   */
-    public void setEid(String eid) { this.eid = eid; }
 
-    /**
-     * Sets the event URL.
-     * @param eventURL Link associated with this event.
-     */
-    public void setEventURL(String eventURL) { this.eventURL = eventURL; }
-
-    /** @return Days of the week the event is scheduled for, if applicable. */
-    public List<String> getDaysOfWeek() { return daysOfWeek; }
 }

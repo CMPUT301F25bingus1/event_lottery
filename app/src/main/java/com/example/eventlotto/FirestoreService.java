@@ -21,7 +21,7 @@ import java.util.function.Consumer;
  * Combined FirestoreService
  * Includes:
  *  - User profile CRUD (deviceId-based)
- *  - Event & Notification methods (team version)
+ *  - Event and Notification methods (team version)
  *  - Utility helpers
  */
 public class FirestoreService {
