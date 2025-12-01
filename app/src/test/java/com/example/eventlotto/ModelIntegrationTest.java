@@ -6,8 +6,6 @@ import com.example.eventlotto.model.Notification;
 import com.example.eventlotto.model.User;
 import com.google.firebase.Timestamp;
 
-import com.google.firebase.Timestamp;
-
 import org.junit.Before;
 import org.junit.Test;
 
