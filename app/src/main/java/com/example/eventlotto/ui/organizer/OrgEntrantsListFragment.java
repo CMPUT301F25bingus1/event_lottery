@@ -458,7 +458,6 @@ public class OrgEntrantsListFragment extends DialogFragment implements OnMapRead
                 .collection("status")
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
-                    entrantsList.clear();
                     entrantsList.addAll(querySnapshot.getDocuments());
                     adapter.notifyDataSetChanged();
 
