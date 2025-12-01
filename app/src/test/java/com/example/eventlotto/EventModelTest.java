@@ -10,15 +10,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for Event model class.
- * Tests cover event creation and management:
- * - US 02.01.01: Create event with title, description, and poster
- * - US 02.01.04: Set registration period
- * - US 02.02.02: Store event location
- * - US 02.02.03: Enable/disable geo-location requirement
- * - US 02.03.01: Limit entrants on waiting list
- * - US 02.04.01-02: Upload and update event poster
- * - US 03.01.01: Admin can remove events
+ * Unit tests for Event model class
+ * Tests cover event creation and management
  */
 public class EventModelTest {
 

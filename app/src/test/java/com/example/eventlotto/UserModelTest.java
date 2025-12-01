@@ -9,15 +9,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for User model class.
- * Tests cover user profile management and authentication:
- * - US 01.02.01: Provide personal information (name, email, phone)
- * - US 01.02.02: Update profile information
- * - US 01.02.04: Delete profile
- * - US 01.04.03: Opt out of notifications
- * - US 01.07.01: Device-based identification
- * - US 02.02.03: Geo-location consent
- * - US 03.02.01: Admin can remove profiles
+ * Unit tests for User model class
+ * Tests cover user profile management and authentication
  */
 public class UserModelTest {
 

@@ -8,15 +8,8 @@ import static org.junit.Assert.*;
 import com.example.eventlotto.model.EventStatus;
 
 /**
- * Unit tests for EventStatus model class.
- * Tests cover event participation status tracking:
- * - US 01.01.01: Join waiting list
- * - US 01.01.02: Leave waiting list
- * - US 01.05.02: Accept invitation (selected -> signed up)
- * - US 01.05.03: Decline invitation (selected -> cancelled)
- * - US 01.05.04: Track waiting list count
- * - US 02.05.03: Replacement applicant from waiting list
- * - US 02.06.01-05: View entrant lists (invited, enrolled, cancelled)
+ * Unit tests for EventStatus model class
+ * Tests cover event participation status tracking
  */
 public class EventStatusModelTest {
 
