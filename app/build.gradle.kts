@@ -7,6 +7,10 @@ android {
     namespace = "com.example.eventlotto"
     compileSdk = 36
 
+    testOptions {
+        animationsDisabled = true
+    }
+
     defaultConfig {
         applicationId = "com.example.eventlotto"
         minSdk = 24
