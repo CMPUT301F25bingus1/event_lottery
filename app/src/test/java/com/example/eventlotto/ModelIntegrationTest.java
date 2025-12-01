@@ -306,7 +306,6 @@ public class ModelIntegrationTest {
         rejectionNotif.setMessage("You were not selected");
         rejectionNotif.setCreatedAt(Timestamp.now());
 
-        // Both logged
         assertNotNull(selectionNotif.getNid());
         assertNotNull(rejectionNotif.getNid());
         assertEquals(eventId, selectionNotif.getEid());

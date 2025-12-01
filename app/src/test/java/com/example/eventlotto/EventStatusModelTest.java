@@ -45,11 +45,12 @@ public class EventStatusModelTest {
         testStatus.setEid("event_456");
         testStatus.setStatus("waiting");
         testStatus.setSid("status_001");
+        testStatus.setStatus(null);
 
         // In practice, this record would be deleted from Firestore
         // But we validate the data structure supports it
         assertEquals("status_001", testStatus.getSid());
-        assertEquals("waiting", testStatus.getStatus());
+        assertEquals(null, testStatus.getStatus());
     }
 
     /**
